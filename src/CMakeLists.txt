@@ -5,5 +5,10 @@ target_sources(common
         test.cpp
         dispatcher.cpp
         poll.cpp
+    	screenmanager.cpp
+    	mainscreen.cpp
+    	sidebar.cpp
+    	cmdline.cpp
+		modeline.cpp
 )
 
