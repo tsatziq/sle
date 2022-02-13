@@ -11,7 +11,6 @@ int main()
     dispatcher->sendEvent(TestEvent());
 
     dispatcher->dispatch();
-    dispatcher->sendEvent(TestEvent());
     // varmista etta jatkossakin valittaa eventit
 
     EXIT_SUCCESS;

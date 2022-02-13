@@ -1,6 +1,7 @@
 #ifndef SLE_DISPATCHER_H
 #define SLE_DISPATCHER_H
 
+#include "sle/poll.h"
 #include "sle/event.h"
 #include <memory>
 #include <typeinfo>
@@ -13,6 +14,8 @@ namespace sle
 class Dispatcher;
 using DispatcherPtr = std::shared_ptr<Dispatcher>;
 using DispatcherWPtr = std::weak_ptr<Dispatcher>;
+
+class PollFd;
 
 class Dispatcher
 {
@@ -38,6 +41,18 @@ public:
     virtual void dispatch() = 0;
 
     virtual void stopDispatching() = 0;
+
+    virtual void addReadPoll(
+        const PollFd::ProxyPtr& poller) = 0;
+    
+    virtual void addWritePoll(
+        const PollFd::ProxyPtr& poller) = 0;
+
+    virtual void removeReadPoll(
+        const PollFd::ProxyPtr& poller) = 0;
+
+    virtual void removeWritePoll(
+        const PollFd::ProxyPtr& poller) = 0;
 
     template<class EventDataType>
     SubscriptionId subscribe(

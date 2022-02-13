@@ -4,5 +4,6 @@ target_sources(common
     PRIVATE
         test.cpp
         dispatcher.cpp
+        poll.cpp
 )
 
