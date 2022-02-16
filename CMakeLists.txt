@@ -20,3 +20,5 @@ target_include_directories(common PUBLIC
 
 #target_link_libraries(common PUBLIC )
 target_link_libraries(sle PUBLIC common ${CURSES_LIBRARIES})
+target_compile_features(common PRIVATE cxx_std_17)
+target_compile_features(sle PRIVATE cxx_std_17)

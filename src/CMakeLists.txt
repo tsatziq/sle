@@ -10,5 +10,7 @@ target_sources(common
     	sidebar.cpp
     	cmdline.cpp
 		modeline.cpp
+        filehandler.cpp
+        buffer.cpp
 )
 

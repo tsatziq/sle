@@ -41,7 +41,7 @@ width_(maxSize.width),
 startPoint_(Coord(maxSize.height - MODELINE_HEIGHT, 0))
 {
 	screen_ = newwin(MODELINE_HEIGHT, width_, startPoint_.x, startPoint_.y);
-	paint({""});
+	paint({});
 	
 	wrefresh(screen_);
 }
