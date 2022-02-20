@@ -76,7 +76,8 @@ public:
 
 		fin.close();
 
-		parent_->buf_ = std::make_unique<Buffer>(dispatcher_, data);
+		parent_->buf_ = 
+            std::make_unique<Buffer>(dispatcher_, StrPacket({data}));
     }
 };
 

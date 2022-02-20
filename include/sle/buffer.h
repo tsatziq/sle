@@ -2,9 +2,8 @@
 #define SLE_BUFFER_H
 
 #include "sle/dispatcher.h"
+#include "sle/screen.h"
 #include <map>
-#include <vector>
-#include <string>
 #include <memory>
 
 namespace sle {
@@ -24,7 +23,7 @@ using BufferPtr = std::unique_ptr<Buffer>;
 
 class Buffer {
 public:
-    Buffer(const DispatcherPtr& dispatcher, std::vector<std::string> txt);
+    Buffer(const DispatcherPtr& dispatcher, const StrPacket& text);
 
     ~Buffer();
 
