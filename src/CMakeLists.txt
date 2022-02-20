@@ -12,5 +12,6 @@ target_sources(common
 		modeline.cpp
         filehandler.cpp
         buffer.cpp
+        linetype.cpp
 )
 
