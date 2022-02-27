@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <ncurses.h>
+#include "sle/linetype.h"
 
 namespace sle
 {
@@ -35,10 +36,6 @@ struct ScreenSize
     {};
 
     // Add operators for plus minus etc!
-};
-
-struct StrPacket {
-    std::vector<std::string> lines;
 };
 
 enum class ScreenId : unsigned;

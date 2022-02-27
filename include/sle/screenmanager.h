@@ -36,6 +36,12 @@ enum : int
 	MODELINE_HEIGHT = 1,
 };
 
+struct ScreenSizeChanged {
+    const ScreenSize size;
+};
+
+struct ScreensReady {};
+
 class ScreenManager;
 using ScreenManagerPtr = std::shared_ptr<ScreenManager>;
 

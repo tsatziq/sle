@@ -2,6 +2,8 @@
 #include "sle/eventaction.h"
 #include "sle/screenmanager.h"
 
+#include <iostream>
+
 namespace sle
 {
 
@@ -29,6 +31,8 @@ private:
 	
 	EventActionContainer actions_;
 	CursePtr screen_;
+    CursePtr border_;
+    CursePtr cmdLabel_;
 	int height_;
 };
 
@@ -37,12 +41,35 @@ SideBarImpl::SideBarImpl(
 	const ScreenSize& maxSize) :
 actions_(dispatcher)
 {
-	height_ = maxSize.height - MODELINE_HEIGHT;
-	screen_ = newwin(height_, SIDEBAR_WIDTH, 0, 0);
+	height_ = maxSize.height - MODELINE_HEIGHT - 1;
+	screen_ = newwin(height_, SIDEBAR_WIDTH - 1, 0, 0);
+    border_ = newwin(height_ + 1, 1, 0, SIDEBAR_WIDTH - 1);
+    cmdLabel_ = newwin(1, SIDEBAR_WIDTH - 1, height_, 0);
 	
-	wborder(screen_, ' ', '|', ' ', ' ', ' ', '|', ' ', '|');
-	//box(screen_, '|', ' ');
+    for (unsigned i = 0; i < height_ + 1; ++i) {
+        mvwaddch(border_, i, 0, '|');  
+    }
+
+    wprintw(cmdLabel_, "cmd>");
+
 	wrefresh(screen_);
+    wrefresh(cmdLabel_);
+    wrefresh(border_);
+
+    actions_.on<ScreenSizeChanged>([&](const ScreenSizeChanged& data)
+    {
+        height_ = data.size.height - MODELINE_HEIGHT - 1;
+       // resize/init screens? 
+    });
+
+    actions_.on<AddToSideBar>([&](const AddToSideBar& data)
+    {
+        for (std::string str : data.lines) {
+            str.append("\n");
+            wprintw(screen_, str.c_str());
+        }
+        wrefresh(screen_);
+    });
 }
 
 ScreenPtr SideBar::create(
@@ -55,6 +82,8 @@ ScreenPtr SideBar::create(
 SideBarImpl::~SideBarImpl()
 {
 	delwin(screen_);
+    delwin(border_);
+    delwin(cmdLabel_);
 }
 
 void SideBarImpl::paint(

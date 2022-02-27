@@ -65,7 +65,7 @@ MainScreenImpl::~MainScreenImpl()
 void MainScreenImpl::paint(
 	const StrPacket& text)
 {
-    for (std::string line : text.lines) {
+    for (std::string line : text) {
         wprintw(screen_, line.c_str());
     } 
 

@@ -56,7 +56,8 @@ prevId_(ScreenId(0))
 	initScr_ = initscr();
 	cbreak();
 	
-	getmaxyx(initScr_, maxHeight_, maxWidth_);
+    getmaxyx(initScr_, maxHeight_, maxWidth_);
+    dispatcher_->sendEvent(ScreenSizeChanged({ScreenSize(maxHeight_, maxWidth_)}));
 
 	ScreenPtr mainScr = MainScreen::create(
 	    dispatcher_,
@@ -78,7 +79,7 @@ prevId_(ScreenId(0))
 		ScreenSize(maxHeight_, maxWidth_));
     screens_.emplace(++prevId_, modeLine);
 
-    //refresh();
+    dispatcher_->sendEvent(ScreensReady());
 };
 
 ScreenManagerPtr ScreenManager::create(

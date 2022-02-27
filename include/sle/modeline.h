@@ -3,6 +3,7 @@
 
 #include "sle/screen.h"
 #include "sle/dispatcher.h"
+#include "sle/linetype.h"
 
 namespace sle
 {

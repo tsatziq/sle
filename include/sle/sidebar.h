@@ -3,9 +3,14 @@
 
 #include "sle/screen.h"
 #include "sle/dispatcher.h"
+#include "sle/linetype.h"
 
 namespace sle
 {
+
+struct AddToSideBar {
+    const StrPacket lines;
+};
 
 class SideBar :
     public ScreenBase

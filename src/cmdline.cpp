@@ -44,8 +44,6 @@ startPoint_(Coord(maxSize.height - CMDLINE_INIT_HEIGHT - MODELINE_HEIGHT,
 	width_ = maxSize.width - SIDEBAR_WIDTH;
 	screen_ = newwin(height_, width_, startPoint_.x, startPoint_.y);
 	
-	//wborder(screen_, ' ', '|', ' ', ' ', ' ', '|', ' ', '|');
-	//box(screen_, 0, 0);
 	wrefresh(screen_);
 }
 

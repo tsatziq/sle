@@ -12,9 +12,9 @@ int main()
     //Tester test = Tester(dispatcher);
     //dispatcher->sendEvent(TestEvent());
 
+    FileHandler fileHandler = FileHandler(dispatcher, "testtxt");
 	ScreenManagerPtr scrManager = ScreenManager::create(dispatcher);
-    FileHandler fileHandler(dispatcher, "testtxt");
-
+    
     dispatcher->dispatch();
     // varmista etta jatkossakin valittaa eventit
 
