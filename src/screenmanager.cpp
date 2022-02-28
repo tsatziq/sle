@@ -6,6 +6,8 @@
 #include "sle/modeline.h"
 #include <ncurses.h>
 
+#include "sle/buffer.h"
+
 namespace sle
 {
 
@@ -54,7 +56,11 @@ actions_(dispatcher),
 prevId_(ScreenId(0))
 {
 	initScr_ = initscr();
-	cbreak();
+	noecho();
+    cbreak();
+    curs_set(0);
+    //raw();
+	keypad(initScr_, true);
 	
     getmaxyx(initScr_, maxHeight_, maxWidth_);
     dispatcher_->sendEvent(ScreenSizeChanged({ScreenSize(maxHeight_, maxWidth_)}));
@@ -69,17 +75,31 @@ prevId_(ScreenId(0))
 		ScreenSize(maxHeight_, maxWidth_));
     screens_.emplace(++prevId_, sideBar);
 		
-	ScreenPtr cmdLine = CmdLine::create(
-		dispatcher_,
-		ScreenSize(maxHeight_, maxWidth_));
-    screens_.emplace(++prevId_, cmdLine);
-		
 	ScreenPtr modeLine = ModeLine::create(
 		dispatcher_,
 		ScreenSize(maxHeight_, maxWidth_));
     screens_.emplace(++prevId_, modeLine);
+    
+    ScreenPtr cmdLine = CmdLine::create(
+		dispatcher_,
+		ScreenSize(maxHeight_, maxWidth_));
+    screens_.emplace(++prevId_, cmdLine);
 
     dispatcher_->sendEvent(ScreensReady());
+    
+    /*
+    actions_.on<BufferReady>([&](const BufferReady&)
+    {
+        int k = getch();
+        dispatcher_->sendEvent(RefreshScreens());
+    });
+    */
+    
+    actions_.on<RefreshScreens>([&](const RefreshScreens&)
+    {
+        //refresh();
+    });
+    
 };
 
 ScreenManagerPtr ScreenManager::create(

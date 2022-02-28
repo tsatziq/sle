@@ -2,6 +2,7 @@
 #include "sle/dispatcher.h"
 #include "sle/screenmanager.h"
 #include "sle/filehandler.h"
+#include "sle/edit.h"
 #include <cstdlib>
 
 using namespace sle;
@@ -13,6 +14,7 @@ int main()
     //dispatcher->sendEvent(TestEvent());
 
     FileHandler fileHandler = FileHandler(dispatcher, "testtxt");
+    EditPtr editLoop = std::make_unique<Edit>(dispatcher);
 	ScreenManagerPtr scrManager = ScreenManager::create(dispatcher);
     
     dispatcher->dispatch();

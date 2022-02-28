@@ -7,7 +7,6 @@
 #include <atomic>
 #include <mutex>
 #include <type_traits>
-#include <iostream>
 
 namespace sle
 {

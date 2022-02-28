@@ -44,6 +44,11 @@ startPoint_(Coord(maxSize.height - MODELINE_HEIGHT, 0))
 	paint({});
 	
 	wrefresh(screen_);
+	
+	actions_.on<RefreshScreens>([&](const RefreshScreens&)
+    {
+        //wrefresh(screen_);
+    });
 }
 
 ScreenPtr ModeLine::create(

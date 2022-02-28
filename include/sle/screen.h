@@ -34,9 +34,9 @@ struct ScreenSize
     height(heightIn),
     width(widthIn)
     {};
-
-    // Add operators for plus minus etc!
 };
+
+struct RefreshScreens {};
 
 enum class ScreenId : unsigned;
 

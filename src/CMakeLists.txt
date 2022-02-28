@@ -13,5 +13,6 @@ target_sources(common
         filehandler.cpp
         buffer.cpp
         linetype.cpp
+        edit.cpp
 )
 

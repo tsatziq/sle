@@ -18,6 +18,8 @@ enum class BufferId : unsigned;
 // FileHandler should take care of not sending too much data at once,
 // it can construct with part and append afterwards if needed.
 
+struct BufferReady {};
+
 class Buffer;
 using BufferPtr = std::unique_ptr<Buffer>;
 

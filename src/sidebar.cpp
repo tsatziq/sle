@@ -70,6 +70,13 @@ actions_(dispatcher)
         }
         wrefresh(screen_);
     });
+    
+    actions_.on<RefreshScreens>([&](const RefreshScreens&)
+    {
+        //wrefresh(screen_);
+        //wrefresh(cmdLabel_);
+        //wrefresh(border_);
+    });
 }
 
 ScreenPtr SideBar::create(

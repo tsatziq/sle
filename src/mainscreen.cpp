@@ -41,7 +41,7 @@ actions_(dispatcher)
 	height_ = maxSize.height - CMDLINE_INIT_HEIGHT - MODELINE_HEIGHT;
 	width_ = maxSize.width - SIDEBAR_WIDTH;
 	screen_ = newwin(height_, width_, 0, SIDEBAR_WIDTH);
-	
+
     actions_.on<PaintMainScr>([&](const PaintMainScr& data)
     {
         paint(data.txt);

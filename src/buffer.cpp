@@ -72,6 +72,7 @@ void Buffer::Impl::addToScreen(const LineNum from)
     
     dispatcher_->sendEvent(PaintMainScr({text}));
     dispatcher_->sendEvent(AddToSideBar({linenums}));
+    dispatcher_->sendEvent(BufferReady());
 }
 
 }
