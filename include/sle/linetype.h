@@ -41,6 +41,7 @@ private:
     static std::map<unsigned, std::string> numeralMap_;
 };
 
+// This could maybe even go to Dispatcher..
 using StrPacket = std::vector<std::string>;
 
 } // namespace sle

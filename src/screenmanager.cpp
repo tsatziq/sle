@@ -28,6 +28,8 @@ public:
     void deleteScreen(
         const ScreenId screen) override;
 
+    ScreenPtr getScreenPtr(const ScreenId screen) const override;
+
 private:
     ScreenManagerImpl(
         const DispatcherPtr& dispatcher);
@@ -58,6 +60,7 @@ prevId_(ScreenId(0))
 	
     getmaxyx(initScr_, maxHeight_, maxWidth_);
     dispatcher_->sendEvent(ScreenSizeChanged({ScreenSize(maxHeight_, maxWidth_)}));
+
 
 	ScreenPtr mainScr = MainScreen::create(
 	    dispatcher_,
@@ -103,5 +106,10 @@ void ScreenManagerImpl::deleteScreen(
 	const ScreenId screen)
 {}
 
+ScreenPtr ScreenManagerImpl::getScreenPtr(const ScreenId screen) const
+{
+    // For now just return mainscreen, make ScreenId enum later
+    return screens_.at(screen);
+}
 
 } // namespace sle

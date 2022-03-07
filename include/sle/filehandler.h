@@ -1,41 +1,31 @@
 #ifndef SLE_FILEHANDLER_H
 #define SLE_FILEHANDLER_H
 
-#include "sle/dispatcher.h"
+//#include "sle/dispatcher.h"
+#include "sle/linetype.h"
 #include <memory>
 #include <vector>
 #include <string>
 
 namespace sle {
-// TAMA EI EHKA TOIMIKAA FSMna, laita mielummi etta
-// objektin luominen jo avaa ja tekee bufferin.
-
-/// Copy file contents to buffer.
-// TODO: Add functionality later to open in same or new buffer
-struct OpenFile {
-    std::string path;
-};
-
-/// Update the file with buffer contents and save it.
-struct SaveFile {
-    std::string path;
-};
 
 class FileHandler;
-using FileHandlerPtr = std::shared_ptr<FileHandler>;
+using FileHandlerPtr = std::unique_ptr<FileHandler>;
 
-class FileHandler
-{
+class FileHandler {
 public:
-    FileHandler(
-        const DispatcherPtr& dispatcher,
-        std::string path);
+    static FileHandlerPtr create(std::string path);
+    
+    virtual ~FileHandler() = default;
+    
+    virtual StrPacket getContents() = 0;
+    
+    virtual void saveFile() = 0;
+    
+    virtual void changePath(std::string path) = 0;
 
-    ~FileHandler();
-
-private:
-    class Impl;
-    std::unique_ptr<Impl> impl_;
+protected:
+    FileHandler() = default;
 };
 
 // Later maybe multiple filehandles if opening many files

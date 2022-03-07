@@ -1,19 +1,20 @@
-#include "sle/test.h"
 #include "sle/dispatcher.h"
 #include "sle/screenmanager.h"
-#include "sle/filehandler.h"
 #include <cstdlib>
+
+#include "sle/buffer.h"
+#include "sle/screen.h"
+#include <memory>
 
 using namespace sle;
 
 int main()
 {
     DispatcherPtr dispatcher = Dispatcher::createDefault();
-    //Tester test = Tester(dispatcher);
-    //dispatcher->sendEvent(TestEvent());
 
-    FileHandler fileHandler = FileHandler(dispatcher, "testtxt");
 	ScreenManagerPtr scrManager = ScreenManager::create(dispatcher);
+    ScreenPtr mainScr = scrManager->getScreenPtr(ScreenId(1));
+    BufferPtr buffer = std::make_shared<Buffer>(dispatcher, "testtxt", mainScr);
     
     dispatcher->dispatch();
     // varmista etta jatkossakin valittaa eventit
