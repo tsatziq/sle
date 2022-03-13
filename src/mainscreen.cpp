@@ -22,6 +22,14 @@ public:
 	
 	void paint(
         const StrPacket& text) override;
+
+    void paint(const char c) override;
+
+    char getChar() const override;
+
+    std::string getLine() const override;
+
+    CursePtr getCurse() const override;
         
 private:
 	MainScreenImpl(
@@ -70,6 +78,24 @@ void MainScreenImpl::paint(
     } 
 
     wrefresh(screen_);
+}
+
+void MainScreenImpl::paint(const char c)
+{}
+
+char MainScreenImpl::getChar() const
+{
+    return 'x';
+}
+
+std::string MainScreenImpl::getLine() const
+{
+    return "";
+}
+
+CursePtr MainScreenImpl::getCurse() const
+{
+    return screen_;
 }
 	
 }

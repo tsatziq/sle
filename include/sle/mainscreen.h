@@ -24,17 +24,17 @@ public:
 
     virtual void paint(
         const StrPacket& text) = 0;
+
+    virtual void paint(const char c) = 0;
+
+    virtual char getChar() const = 0;
+
+    virtual std::string getLine() const = 0;
+
+    virtual CursePtr getCurse() const = 0;
 };
-// FUNCTIONS:
-// -show text that fits in screen
-// -scrolling, next/prev page
-//     -except these too are handled by others and then tehy just say PAINT
-// 		-toisaalta kylla taa vois teha scrollin jos haluu, mut emt. ehk parempi ettei
-// -remember height,width,number of lines, modes etc.
-// possibly folding, wrapping, search, even completion?
-// 
-// NII enta jos oliski aina et koko muuttuu. lahtee eventti jos on uus max size,
-// ja sit eri ikkunat ite muutas kokoaan? no mieti.. alus ainaki saa luua ittensa
+// ok remove all this coe duplication, put these functions
+// and CursePtr ONLY to ScreenBase
 
 } // namespace sle
 

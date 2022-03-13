@@ -20,6 +20,14 @@ public:
 
     virtual void paint(
         const StrPacket& text) = 0;
+
+    virtual void paint(const char c) = 0;
+
+    virtual char getChar() const = 0;
+
+    virtual std::string getLine() const = 0;
+
+    virtual CursePtr getCurse() const = 0;
 };
 
 } // namespace sle

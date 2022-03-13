@@ -1,7 +1,10 @@
-#include "sle/test.h"
 #include "sle/dispatcher.h"
+#include "sle/screen.h"
 #include "sle/screenmanager.h"
 #include "sle/filehandler.h"
+#include "sle/buffermanager.h"
+#include "sle/buffer.h"
+#include "sle/normalmode.h"
 #include <cstdlib>
 
 using namespace sle;
@@ -9,14 +12,22 @@ using namespace sle;
 int main()
 {
     DispatcherPtr dispatcher = Dispatcher::createDefault();
-    //Tester test = Tester(dispatcher);
-    //dispatcher->sendEvent(TestEvent());
 
-    FileHandler fileHandler = FileHandler(dispatcher, "testtxt");
+    BufferManagerPtr bufManager = BufferManager::create(dispatcher);
 	ScreenManagerPtr scrManager = ScreenManager::create(dispatcher);
+
+    BufferId buf = bufManager->addBuffer();
+    //BufferId id = BufferId(1);
+    //BufferPtr buf = std::make_shared<Buffer>(dispatcher, id);
+    ScreenPtr main = scrManager->getScreen(ScreenId::main);
+
+    NormalMode nmode = NormalMode(dispatcher, main); 
+
+    //dispatcher->sendEvent(ReadFile({buf, "testtxt"}));
+    //dispatcher->sendEvent(ShowBuffer({buf, main}));
+    //dispatcher->sendEvent(StartNormalMode());
     
     dispatcher->dispatch();
-    // varmista etta jatkossakin valittaa eventit
 
-    EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

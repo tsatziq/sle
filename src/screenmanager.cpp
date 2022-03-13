@@ -28,6 +28,8 @@ public:
     void deleteScreen(
         const ScreenId screen) override;
 
+    ScreenPtr getScreen(const ScreenId id) const override;
+
 private:
     ScreenManagerImpl(
         const DispatcherPtr& dispatcher);
@@ -41,17 +43,11 @@ private:
 	CursePtr initScr_;
 };
 
-ScreenId operator++(ScreenId& screen)
-{
-    screen = static_cast<ScreenId>(static_cast<unsigned>(screen) + 1);
-    return screen;
-}
-
 ScreenManagerImpl::ScreenManagerImpl(
     const DispatcherPtr& dispatcher) :
 dispatcher_(dispatcher),
 actions_(dispatcher),
-prevId_(ScreenId(0))
+prevId_(ScreenId::modeline)
 {
 	initScr_ = initscr();
 	cbreak();
@@ -62,22 +58,22 @@ prevId_(ScreenId(0))
 	ScreenPtr mainScr = MainScreen::create(
 	    dispatcher_,
 	    ScreenSize(maxHeight_, maxWidth_));
-    screens_.emplace(++prevId_, mainScr);
+    screens_.emplace(ScreenId::main, mainScr);
 
 	ScreenPtr sideBar = SideBar::create(
 		dispatcher_,
 		ScreenSize(maxHeight_, maxWidth_));
-    screens_.emplace(++prevId_, sideBar);
+    screens_.emplace(ScreenId::sidebar, sideBar);
 		
 	ScreenPtr cmdLine = CmdLine::create(
 		dispatcher_,
 		ScreenSize(maxHeight_, maxWidth_));
-    screens_.emplace(++prevId_, cmdLine);
+    screens_.emplace(ScreenId::cmdline, cmdLine);
 		
 	ScreenPtr modeLine = ModeLine::create(
 		dispatcher_,
 		ScreenSize(maxHeight_, maxWidth_));
-    screens_.emplace(++prevId_, modeLine);
+    screens_.emplace(ScreenId::modeline, modeLine);
 
     dispatcher_->sendEvent(ScreensReady());
 };
@@ -102,6 +98,18 @@ ScreenId ScreenManagerImpl::addScreen(
 void ScreenManagerImpl::deleteScreen(
 	const ScreenId screen)
 {}
+
+ScreenPtr ScreenManagerImpl::getScreen(const ScreenId id) const
+{
+    try {
+        return screens_.at(id);
+    }
+    catch (const std::out_of_range& e) {
+        // Make a cmdLine event or a fault maybe that
+        // displays messaged for couple of seconds and clears it
+        return nullptr;
+    }
+}
 
 
 } // namespace sle

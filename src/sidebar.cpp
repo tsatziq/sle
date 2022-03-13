@@ -24,6 +24,14 @@ public:
 	void paint(
         const StrPacket& text) override;
 
+    void paint(const char c) override;
+
+    char getChar() const override;
+
+    std::string getLine() const override;
+
+    CursePtr getCurse() const override;
+
 private:
 	SideBarImpl(
 		const DispatcherPtr& dispatcher,
@@ -89,5 +97,23 @@ SideBarImpl::~SideBarImpl()
 void SideBarImpl::paint(
 	const StrPacket& text)
 {}
+
+void SideBarImpl::paint(const char c)
+{}
+
+char SideBarImpl::getChar() const
+{
+    return 'x';
+}
+
+std::string SideBarImpl::getLine() const
+{
+    return "";
+}
+
+CursePtr SideBarImpl::getCurse() const
+{
+    return screen_;
+}
 
 }

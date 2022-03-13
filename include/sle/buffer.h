@@ -10,20 +10,32 @@ namespace sle {
 
 enum class BufferId : unsigned;
 
-// MUTTA PERKELE IHAN SAMA ALOTA PERUSVERSIOSTA ELI:
-// Filehandlerilla on YKS file ja YKS bufferi.
-// sillo destructor aina clearaa sisallon jne, kutsu .reset(new Buffer)
-// myohemmin tee vaik FileManager-Filehandler-Buffer
+inline BufferId operator++(BufferId& id)
+{
+    return static_cast<BufferId>(static_cast<unsigned>(id) + 1);
+}
 
-// FileHandler should take care of not sending too much data at once,
-// it can construct with part and append afterwards if needed.
+struct ReadFile {
+    const BufferId id;
+    const std::string path;
+};
+
+struct SaveFile {
+    const BufferId id;
+    const std::string path;
+};
+
+struct ShowBuffer {
+    const BufferId id;
+    const ScreenPtr screen;
+};
 
 class Buffer;
-using BufferPtr = std::unique_ptr<Buffer>;
+using BufferPtr = std::shared_ptr<Buffer>;
 
 class Buffer {
 public:
-    Buffer(const DispatcherPtr& dispatcher, const StrPacket& text);
+    Buffer(const DispatcherPtr& dispatcher, BufferId id);
 
     ~Buffer();
 

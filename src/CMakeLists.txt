@@ -13,5 +13,7 @@ target_sources(common
         filehandler.cpp
         buffer.cpp
         linetype.cpp
+        normalmode.cpp
+        buffermanager.cpp
 )
 

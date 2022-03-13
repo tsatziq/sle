@@ -22,6 +22,14 @@ public:
 	void paint(
         const StrPacket& text) override;
 
+    void paint(const char c) override;
+
+    char getChar() const override;
+
+    std::string getLine() const override;
+
+    CursePtr getCurse() const override;
+
 private:
 	CmdLineImpl(
 		const DispatcherPtr& dispatcher,
@@ -62,5 +70,23 @@ CmdLineImpl::~CmdLineImpl()
 void CmdLineImpl::paint(
 	const StrPacket& text)
 {}
+
+void CmdLineImpl::paint(const char c)
+{}
+
+char CmdLineImpl::getChar() const
+{
+    return 'x';
+}
+
+std::string CmdLineImpl::getLine() const
+{
+    return "";
+}
+
+CursePtr CmdLineImpl::getCurse() const
+{
+    return screen_;
+}
 
 }

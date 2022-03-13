@@ -38,7 +38,17 @@ struct ScreenSize
     // Add operators for plus minus etc!
 };
 
-enum class ScreenId : unsigned;
+enum class ScreenId : unsigned {
+    main = 1,
+    sidebar = 2,
+    cmdline = 3,
+    modeline = 4
+};
+
+inline ScreenId operator++(ScreenId& id)
+{
+    return static_cast<ScreenId>(static_cast<unsigned>(id) + 1);
+}
 
 using CursePtr = WINDOW*;
 
@@ -49,6 +59,14 @@ public:
 
     virtual void paint(
         const StrPacket& text) = 0;
+
+    virtual void paint(const char c) = 0;
+
+    virtual char getChar() const = 0;
+
+    virtual std::string getLine() const = 0;
+
+    virtual CursePtr getCurse() const = 0;
 
 protected:
     ScreenBase() = default;
