@@ -1,33 +1,19 @@
-#include "sle/dispatcher.h"
-#include "sle/screen.h"
-#include "sle/screenmanager.h"
-#include "sle/filehandler.h"
-#include "sle/buffermanager.h"
-#include "sle/buffer.h"
-#include "sle/normalmode.h"
+#include "sle/context.h"
+#include "sle/modeloop.h"
 #include <cstdlib>
 
 using namespace sle;
 
-int main()
+int main(int argc, char** argv)
 {
-    DispatcherPtr dispatcher = Dispatcher::createDefault();
+    ContextPtr context = std::make_shared<Context>(); 
 
-    BufferManagerPtr bufManager = BufferManager::create(dispatcher);
-	ScreenManagerPtr scrManager = ScreenManager::create(dispatcher);
+    std::string file = "";
+    if (argc > 1)
+        file = argv[1];
 
-    BufferId buf = bufManager->addBuffer();
-    //BufferId id = BufferId(1);
-    //BufferPtr buf = std::make_shared<Buffer>(dispatcher, id);
-    ScreenPtr main = scrManager->getScreen(ScreenId::main);
-
-    NormalMode nmode = NormalMode(dispatcher, main); 
-
-    //dispatcher->sendEvent(ReadFile({buf, "testtxt"}));
-    //dispatcher->sendEvent(ShowBuffer({buf, main}));
-    //dispatcher->sendEvent(StartNormalMode());
-    
-    dispatcher->dispatch();
+    ModeLoopPtr modeLoop{ModeLoop::create(context, file)};
+    modeLoop->start();
 
     return EXIT_SUCCESS;
 }

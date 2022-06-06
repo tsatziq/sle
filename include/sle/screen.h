@@ -5,81 +5,54 @@
 #include <vector>
 #include <memory>
 #include <ncurses.h>
-#include "sle/linetype.h"
+#include "sle/types.h"
 
-namespace sle
-{
-
-struct Coord
-{
-    int x;
-    int y;
-
-    Coord(
-        const int xIn,
-        const int yIn) :
-    x(xIn),
-    y(yIn)
-    {};
-};
-
-struct ScreenSize
-{
-    int height;
-    int width;
-
-    ScreenSize(
-        int heightIn,
-        int widthIn) :
-    height(heightIn),
-    width(widthIn)
-    {};
-
-    // Add operators for plus minus etc!
-};
+namespace sle {
 
 enum class ScreenId : unsigned {
-    main = 1,
-    sidebar = 2,
-    cmdline = 3,
-    modeline = 4
+    main,
+    side,
+    mode,
+    cmd,
 };
 
-inline ScreenId operator++(ScreenId& id)
-{
+inline ScreenId operator++(ScreenId& id) {
     return static_cast<ScreenId>(static_cast<unsigned>(id) + 1);
 }
 
-using CursePtr = WINDOW*;
+class Screen;
+using ScreenPtr = std::unique_ptr<Screen>;
 
-class ScreenBase
+class Screen
 {
 public:
-    virtual ~ScreenBase() = default;
+    static ScreenPtr create(int height, int width, const Coord& start);
 
-    virtual void paint(
-        const StrPacket& text) = 0;
+    virtual ~Screen() = default;
+
+    virtual void paint(const Text& txt) = 0;
 
     virtual void paint(const char c) = 0;
 
-    virtual char getChar() const = 0;
+    virtual int getChar() const = 0;
 
     virtual std::string getLine() const = 0;
 
     virtual CursePtr getCurse() const = 0;
 
+    virtual int getHeight() const = 0;
+
+    virtual int getWidth() const = 0;
+
 protected:
-    ScreenBase() = default;
+    Screen() = default;
 
 private:
-    ScreenBase(const ScreenBase&) = delete;
+    Screen(const Screen&) = delete;
 
-    ScreenBase& operator=(const ScreenBase&) = delete;
+    Screen& operator=(const Screen&) = delete;
 };
 
-using ScreenPtr = std::shared_ptr<ScreenBase>;
-
 } // namespace sle
-
 
 #endif // SLE_SCREEN_H

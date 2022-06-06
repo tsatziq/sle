@@ -1,18 +1,18 @@
 #ifndef SLE_BUFFERMANAGER_H
 #define SLE_BUFFERMANAGER_H
 
-#include "sle/dispatcher.h"
 #include "sle/buffer.h"
 #include <memory>
 
 namespace sle {
 
 class BufferManager;
-using BufferManagerPtr = std::shared_ptr<BufferManager>;
+using BufferManagerPtr = std::unique_ptr<BufferManager>;
 
-class BufferManager {
+class BufferManager
+{
 public:
-    static BufferManagerPtr create(const DispatcherPtr& dispatcher); 
+    static BufferManagerPtr create(); 
 
     virtual ~BufferManager() = default;
 
@@ -20,7 +20,7 @@ public:
 
     virtual void deleteBuffer(BufferId id) = 0;
 
-    virtual BufferPtr getBuffer(BufferId id) const = 0;
+    virtual Buffer* getBuffer(BufferId id) const = 0;
 
 protected:
     BufferManager() = default;

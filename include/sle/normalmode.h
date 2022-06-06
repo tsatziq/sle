@@ -6,10 +6,8 @@
 
 namespace sle {
 
-struct StartNormalMode 
-{};
-
-class NormalMode {
+class NormalMode
+{
 public:
     NormalMode(const DispatcherPtr& dispatcher, const ScreenPtr& scr);
 

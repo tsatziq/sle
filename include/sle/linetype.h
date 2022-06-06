@@ -41,8 +41,6 @@ private:
     static std::map<unsigned, std::string> numeralMap_;
 };
 
-using StrPacket = std::vector<std::string>;
-
 } // namespace sle
 
 #endif // SLE_LINETYPE_H

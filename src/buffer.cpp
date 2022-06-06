@@ -1,87 +1,155 @@
 #include "sle/buffer.h"
-#include "sle/eventaction.h"
-#include "sle/filehandler.h"
 #include "sle/linetype.h"
+#include "sle/screen.h"
 #include "sle/screenmanager.h"
+#include "sle/types.h"
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <string>
 
 namespace sle {
 
-class Buffer::Impl {
+class BufferImpl : public Buffer
+{
 public:
-    Impl(const DispatcherPtr& dispatcher, BufferId id);
+    static std::unique_ptr<BufferImpl> create()
+    {
+        return std::unique_ptr<BufferImpl>(new BufferImpl());
+    }
 
+    ~BufferImpl();
+
+    void readFile(const std::string& path) override;
+
+    void saveFile(const std::string& path) override;
+
+    void show(Screen* scr) const override;
+
+    int getSize() const override;
+
+    void clear() override;
+
+    void addLines(const Text& strs) override;
+
+    void addChar(const char c) override;
+
+    void eraseChar(const int num) override;
+
+    // move cursor to own class
+    void moveCursor(const int col, const int lines);
+
+    void setX(const int value);
+
+    Coord getCursor() const override;
 private:
-    void addToScreen(const LineNum from);
+    BufferImpl();
 
-    const DispatcherPtr dispatcher_;
-    const BufferId id_;
-    EventActionContainer actions_;
-    const FileHandlerPtr fileHandler_;
-  
-    std::map<LineNum, std::string> lines_;
-    LineNum topVisibleLine_;
-    LineNum screenHeight_;
+    std::vector<std::string> lines_{""};
+    Coord cursor_{0, 0};
+    int topVisibleLine_;
     bool modified_;
 };
 
-Buffer::Buffer(const DispatcherPtr& dispatcher, BufferId id)
-    : impl_(new Impl(dispatcher, id))
-{}
-
-Buffer::~Buffer()
-{}
-
-Buffer::Impl::Impl(const DispatcherPtr& dispatcher, BufferId id)
-    : dispatcher_(dispatcher)
-    , id_(id)
-    , actions_(dispatcher)
-    , fileHandler_(FileHandler::create())
-    , topVisibleLine_(LineNum(1))
-    , screenHeight_(LineNum(0))
+BufferImpl::BufferImpl()
+    : topVisibleLine_(1)
     , modified_(false)
+{}
+
+BufferPtr Buffer::create()
 {
-    actions_.on<ScreenSizeChanged>([&](const ScreenSizeChanged& data)
-    {
-        screenHeight_ = LineNum(data.size.height);
-    });
-
-/*
-    actions_.on<ReadFile>([&](const ReadFile& data)
-    {
-        if (data.id != id_)
-            return;
-
-        StrPacket text = fileHandler_->getContents(data.path);
-
-		LineNum n = LineNum(1);
-
-		for (std::string line : text) {
-			lines_.insert({n, line});
-			++n;
-		}
-	});
-*/
+    return BufferImpl::create();
 }
 
-void Buffer::Impl::addToScreen(const LineNum from)
+BufferImpl::~BufferImpl()
+{}
+
+void BufferImpl::readFile(const std::string& path)
 {
-/*
-    StrPacket text;
-    StrPacket linenums;
+    if (path.empty())
+        return;
 
-    for (auto pair : lines_) {
-        if (pair.first < screenHeight_)
-            text.push_back(pair.second);
+    std::ifstream file(path); 
+    std::string line;
+
+    if (file.is_open()) {
+        while (file) {
+            std::getline(file, line);
+            lines_.push_back(line);
+        }
+    }            
+}
+
+void BufferImpl::saveFile(const std::string& path)
+{}
+
+void BufferImpl::show(Screen* scr) const
+{
+    scr->paint(lines_);
+}
+
+int BufferImpl::getSize() const
+{
+    return lines_.size();
+}
+
+void BufferImpl::clear()
+{
+    lines_.clear();
+}
+
+void BufferImpl::addLines(const Text& strs)
+{
+    for (const std::string& str : strs)
+        lines_.push_back(str);
+}
+
+void BufferImpl::addChar(const char c)
+{
+    //lines_.front() += c;
+
+    lines_.at(cursor_.y).insert(cursor_.x, 1, c);
+    if (c == '\n')
+        lines_.push_back("");
+}
+
+void BufferImpl::eraseChar(const int num)
+{
+    if (cursor_.x + num < 0) {
+        // if first line, do nothing
+        if (cursor_.y == 0)
+            return;
+
+        cursor_.x = lines_.at(cursor_.y - 1).size() - 1;
+        lines_.at(cursor_.y - 1).erase(cursor_.x, 1);
+
+        // if erased line is not empty, join to previous line
+        if (lines_.at(cursor_.y) != "\n" && !lines_.at(cursor_.y).empty())
+            lines_.at(cursor_.y - 1) += lines_.at(cursor_.y);
+
+        lines_.erase(lines_.begin() + cursor_.y);
+
+        cursor_.y -= 1;
+    } else {
+        cursor_.x += num;
+        lines_.at(cursor_.y).erase(cursor_.x, num);
     }
+}
 
-    LineNum size(static_cast<int>(text.size()));
+void BufferImpl::moveCursor(const int col, const int lines)
+{
+    cursor_.x += col;    
+    cursor_.y += lines;
+}
 
-    for (LineNum n = LineNum(1); n < (size + 1); ++n)
-		linenums.push_back(n.toStr());
-    
-    dispatcher_->sendEvent(PaintMainScr({text}));
-    dispatcher_->sendEvent(AddToSideBar({linenums}));
-*/
+void BufferImpl::setX(const int value)
+{
+    cursor_.x = value;
+}
+
+Coord BufferImpl::getCursor() const
+{
+    return cursor_;
 }
 
 }

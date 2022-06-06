@@ -3,15 +3,12 @@
 
 namespace sle {
 
-class BufferManagerImpl :
-    public BufferManager
+class BufferManagerImpl : public BufferManager
 {
 public:
-    static std::shared_ptr<BufferManagerImpl> create(
-        const DispatcherPtr& dispatcher)
+    static std::unique_ptr<BufferManagerImpl> create()
     {
-        return std::shared_ptr<BufferManagerImpl>(new BufferManagerImpl(
-            dispatcher));
+        return std::unique_ptr<BufferManagerImpl>(new BufferManagerImpl());
     };
 
     ~BufferManagerImpl();
@@ -20,24 +17,22 @@ public:
 
     void deleteBuffer(BufferId id) override;
 
-    BufferPtr getBuffer(BufferId id) const override;
+    Buffer* getBuffer(BufferId id) const override;
 
 private:
-    BufferManagerImpl(const DispatcherPtr& dispatcher);
+    BufferManagerImpl();
 
-    const DispatcherPtr dispatcher_;
     BufferId prevId_;
     std::map<BufferId, BufferPtr> bufs_;
-    BufferPtr bufp_;
 };
 
-BufferManagerImpl::BufferManagerImpl(const DispatcherPtr& dispatcher)
+BufferManagerImpl::BufferManagerImpl()
     : prevId_(BufferId(0))
 {}
 
-BufferManagerPtr BufferManager::create(const DispatcherPtr& dispatcher)
+BufferManagerPtr BufferManager::create()
 {
-    return BufferManagerImpl::create(dispatcher);
+    return BufferManagerImpl::create();
 }
 
 BufferManagerImpl::~BufferManagerImpl()
@@ -45,20 +40,16 @@ BufferManagerImpl::~BufferManagerImpl()
 
 BufferId BufferManagerImpl::addBuffer()
 {
-    BufferId id = ++prevId_;
-    //BufferPtr buf = std::make_shared<Buffer>(dispatcher_, id);
-    //bufs_.insert({id, std::move(buf)});
-    bufs_.insert({id, std::make_shared<Buffer>(dispatcher_, id)});
-    //bufp_ = std::make_shared<Buffer>(dispatcher_, id);
-    return id;
+    bufs_.emplace(++prevId_, Buffer::create());
+    return BufferId(prevId_);
 }
 
 void BufferManagerImpl::deleteBuffer(BufferId id)
 {}
 
-BufferPtr BufferManagerImpl::getBuffer(BufferId id) const
+Buffer* BufferManagerImpl::getBuffer(BufferId id) const
 {
-    return nullptr;
+    return bufs_.at(id).get(); 
 }
 
 }
