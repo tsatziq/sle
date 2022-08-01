@@ -45,6 +45,8 @@ public:
     // Move cursor functionality to its own class
     virtual void moveCursor(const int col, const int lines) = 0;
 
+    virtual void backWord(const unsigned num) = 0;
+
     virtual void setX(const int value) = 0;
 
     virtual Coord getCursor() const = 0;

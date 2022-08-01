@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cctype>
 
 namespace sle {
 
@@ -39,11 +40,17 @@ public:
     // move cursor to own class
     void moveCursor(const int col, const int lines);
 
+    void backWord(const unsigned num);
+
     void setX(const int value);
 
     Coord getCursor() const override;
 private:
     BufferImpl();
+
+    bool isBasic(const char c);
+
+    bool isSymbol(const char c); 
 
     std::vector<std::string> lines_{""};
     Coord cursor_{0, 0};
@@ -142,6 +149,26 @@ void BufferImpl::moveCursor(const int col, const int lines)
     cursor_.y += lines;
 }
 
+void BufferImpl::backWord(const unsigned num)
+{
+    std::string line = lines_.at(cursor_.y);
+    std::string::iterator lit = line.begin() + cursor_.x;
+
+    if (isBasic(*(lit - 1))) {
+        do {
+            lit--;
+            if (!isBasic(*(lit - 1))) {
+                cursor_.x = lit - line.begin(); 
+                break;
+            } else if (lit == line.begin()) {
+                cursor_.x = 0;
+                break;
+            }
+        }
+        while (lit != line.begin());
+    }
+}
+
 void BufferImpl::setX(const int value)
 {
     cursor_.x = value;
@@ -150,6 +177,16 @@ void BufferImpl::setX(const int value)
 Coord BufferImpl::getCursor() const
 {
     return cursor_;
+}
+
+bool BufferImpl::isBasic(const char c)
+{
+    return std::isalnum(c) || c == '_';
+}
+
+bool BufferImpl::isSymbol(const char c)
+{
+    return std::ispunct(c) && c != '_';
 }
 
 }

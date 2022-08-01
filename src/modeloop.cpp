@@ -115,11 +115,15 @@ void ModeLoopImpl::initLineNums()
 void ModeLoopImpl::normalLoopRun()
 {
     Screen* scr = c_->scrManager->getScreen(ScreenId::main);
+    Buffer* buf = c_->bufManager->getBuffer(currentBuf_);
 
     bool quit = false;
 
     while (char c = scr->getChar()) {
         switch (c) {
+            case 'b':
+                buf->backWord(1);
+                break;
             case 'I':
             case 'i':
                 mode_ = Mode::insert;
@@ -129,6 +133,9 @@ void ModeLoopImpl::normalLoopRun()
             case 'q':
                 mode_ = Mode::quit;
                 quit = true;
+            case 'w':
+                //buf->fwdWord(1);
+                break;
             default:
                 break;
         }
