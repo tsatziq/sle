@@ -26,8 +26,6 @@ public:
 
     virtual void start() = 0;
 
-    virtual void initLineNums() = 0;
-
     virtual void normalLoopRun() = 0;
 
     virtual void insertLoopRun() = 0;

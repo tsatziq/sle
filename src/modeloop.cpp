@@ -1,6 +1,7 @@
 #include "sle/modeloop.h"
 #include "sle/screen.h"
 #include "sle/screenmanager.h"
+#include <memory>
 #include <ncurses.h>
 
 namespace sle {
@@ -18,8 +19,6 @@ public:
 
     void start() override;
 
-    void initLineNums() override;
-
     void normalLoopRun() override;
 
     void insertLoopRun() override;
@@ -31,16 +30,12 @@ private:
 
     ContextPtr c_;
     std::string file_;
-    BufferId currentBuf_;
-    BufferId lineNumBuf_;
     Mode mode_ = Mode::normal;
 };
 
 ModeLoopImpl::ModeLoopImpl(ContextPtr context, const std::string& file)
     : c_(context)
     , file_(file)
-    , currentBuf_(context->bufManager->addBuffer())
-    , lineNumBuf_(context->bufManager->addBuffer())
 {}
 
 ModeLoopPtr ModeLoop::create(ContextPtr context, const std::string& file)
@@ -53,10 +48,9 @@ ModeLoopImpl::~ModeLoopImpl()
 
 void ModeLoopImpl::start()
 {
-    Buffer* buf = c_->bufManager->getBuffer(currentBuf_);
-    buf->readFile(file_);
+    c_->buffer->readFile(file_);
 
-    initLineNums();
+    c_->sideBar->refresh();
 
     while (mode_ != Mode::quit) {
         switch (mode_) {
@@ -73,49 +67,13 @@ void ModeLoopImpl::start()
                 break;
         }
     }
-    
-}
 
-void ModeLoopImpl::initLineNums()
-{
-    Buffer* buf = c_->bufManager->getBuffer(currentBuf_);
-    Buffer* lnNums = c_->bufManager->getBuffer(lineNumBuf_);
-    CursePtr mainScr = c_->scrManager->getScreen(ScreenId::main)->getCurse();
-
-    int size = buf->getSize();
-    if (size == 0)
-        size = 1;
-
-    std::vector<std::string> lineNums;
-    std::string line;
-
-    for (int i = 1; i <= size; i++) {
-        line = "   " + std::to_string(i) + "\n"; 
-        lineNums.push_back(line);
-    }
-
-    Screen* side = c_->scrManager->getScreen(ScreenId::side);
-    int h = side->getHeight();
-    h -= lineNums.size();
-    
-    for (int i = 1; i <= h; i++) {
-        line = "~\n";
-        lineNums.push_back(line);
-    }
-
-    lnNums->clear();
-    lnNums->addLines(lineNums);
-    lnNums->show(side);
-
-    Coord cursor = buf->getCursor();
-    wmove(mainScr, cursor.y, cursor.x);
-    refresh();
 }
 
 void ModeLoopImpl::normalLoopRun()
 {
-    Screen* scr = c_->scrManager->getScreen(ScreenId::main);
-    Buffer* buf = c_->bufManager->getBuffer(currentBuf_);
+    Screen* scr = c_->screens->getScreen(ScreenId::main);
+    Buffer* buf = c_->buffer.get();
 
     bool quit = false;
 
@@ -141,14 +99,14 @@ void ModeLoopImpl::normalLoopRun()
         }
 
         if (quit)
-            break;    
+            break;
     }
 }
 
 void ModeLoopImpl::insertLoopRun()
 {
-    Screen* scr = c_->scrManager->getScreen(ScreenId::main);
-    Buffer* buf = c_->bufManager->getBuffer(currentBuf_);
+    Screen* scr = c_->screens->getScreen(ScreenId::main);
+    Buffer* buf = c_->buffer.get();
 
     bool quit = false;
 
@@ -186,7 +144,7 @@ void ModeLoopImpl::insertLoopRun()
             break;
 
         if (buf->getSize() != numLines)
-            initLineNums();
+            c_->sideBar->refresh();
     }
 }
 

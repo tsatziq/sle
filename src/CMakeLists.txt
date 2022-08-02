@@ -3,9 +3,10 @@
 target_sources(common
     PRIVATE
         screen.cpp
-    	screenmanager.cpp
+        screenmanager.cpp
         buffer.cpp
         modeloop.cpp
         buffermanager.cpp
+        sidebar.cpp
 )
 

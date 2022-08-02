@@ -29,6 +29,8 @@ public:
 
     int getSize() const override;
 
+    const Text& getData() const override;
+
     void clear() override;
 
     void addLines(const Text& strs) override;
@@ -38,11 +40,11 @@ public:
     void eraseChar(const int num) override;
 
     // move cursor to own class
-    void moveCursor(const int col, const int lines);
+    void moveCursor(const int col, const int lines) override;
 
-    void backWord(const unsigned num);
+    void backWord(const unsigned num) override;
 
-    void setX(const int value);
+    void setX(const int value) override;
 
     Coord getCursor() const override;
 private:
@@ -50,7 +52,7 @@ private:
 
     bool isBasic(const char c);
 
-    bool isSymbol(const char c); 
+    bool isSymbol(const char c);
 
     std::vector<std::string> lines_{""};
     Coord cursor_{0, 0};
@@ -76,7 +78,7 @@ void BufferImpl::readFile(const std::string& path)
     if (path.empty())
         return;
 
-    std::ifstream file(path); 
+    std::ifstream file(path);
     std::string line;
 
     if (file.is_open()) {
@@ -84,7 +86,7 @@ void BufferImpl::readFile(const std::string& path)
             std::getline(file, line);
             lines_.push_back(line);
         }
-    }            
+    }
 }
 
 void BufferImpl::saveFile(const std::string& path)
@@ -98,6 +100,11 @@ void BufferImpl::show(Screen* scr) const
 int BufferImpl::getSize() const
 {
     return lines_.size();
+}
+
+const Text& BufferImpl::getData() const
+{
+    return lines_;
 }
 
 void BufferImpl::clear()
@@ -145,7 +152,7 @@ void BufferImpl::eraseChar(const int num)
 
 void BufferImpl::moveCursor(const int col, const int lines)
 {
-    cursor_.x += col;    
+    cursor_.x += col;
     cursor_.y += lines;
 }
 
@@ -158,7 +165,7 @@ void BufferImpl::backWord(const unsigned num)
         do {
             lit--;
             if (!isBasic(*(lit - 1))) {
-                cursor_.x = lit - line.begin(); 
+                cursor_.x = lit - line.begin();
                 break;
             } else if (lit == line.begin()) {
                 cursor_.x = 0;

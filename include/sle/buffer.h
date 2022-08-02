@@ -34,6 +34,8 @@ public:
 
     virtual int getSize() const = 0;
 
+    virtual const Text& getData() const = 0;
+
     virtual void clear() = 0;
 
     virtual void addLines(const Text& strs) = 0;

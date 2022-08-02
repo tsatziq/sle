@@ -26,22 +26,22 @@ private:
 
     ScreenId prevId_;
     std::map<ScreenId, ScreenPtr> screens_;
-    
+
     int maxWidth_, maxHeight_;
-	CursePtr initScr_;
+    CursePtr initScr_;
 
     static constexpr int sidebarWidth{8};
     static constexpr int cmdHeight{1};
     static constexpr int modelineHeight{1};
 };
 
-ScreenManagerImpl::ScreenManagerImpl() 
+ScreenManagerImpl::ScreenManagerImpl()
     : prevId_(ScreenId::mode)
 {
-	initScr_ = initscr();
+    initScr_ = initscr();
     noecho();
-	cbreak();
-	
+    cbreak();
+
     getmaxyx(initScr_, maxHeight_, maxWidth_);
 
     // Create the basic screen structure.
@@ -76,16 +76,17 @@ ScreenManagerImpl::ScreenManagerImpl()
 
 ScreenManagerPtr ScreenManager::create()
 {
-	return ScreenManagerImpl::create();
+    return ScreenManagerImpl::create();
 }
 
 ScreenManagerImpl::~ScreenManagerImpl()
 {
-	endwin(); }
+    endwin();
+}
 
 ScreenId ScreenManagerImpl::addScreen(const Coord& startPoint)
 {
-	return ScreenId(0);
+    return ScreenId(0);
 }
 
 void ScreenManagerImpl::deleteScreen(const ScreenId screen)
@@ -97,9 +98,9 @@ Screen* ScreenManagerImpl::getScreen(const ScreenId id) const
 
     if (screens_.count(id))
         scr = screens_.at(id).get();
-    
-	// Make a cmdLine event or a fault maybe that
-	// displays messaged for couple of seconds and clears it
+
+    // Make a cmdLine event or a fault maybe that
+    // displays messaged for couple of seconds and clears it
 
     return scr;
 }

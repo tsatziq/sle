@@ -2,7 +2,9 @@
 #define SLE_CONTEXT_H
 
 #include "sle/screenmanager.h"
-#include "sle/buffermanager.h"
+#include "sle/buffer.h"
+#include "sle/cursor.h"
+#include "sle/sidebar.h"
 #include <memory>
 
 namespace sle {
@@ -14,12 +16,21 @@ class Context
 {
 public:
     Context()
-        : scrManager(ScreenManager::create())
-        , bufManager(BufferManager::create())
+        : screens(ScreenManager::create())
+        , buffer(Buffer::create())
+        , sideBuf(Buffer::create())
+        , sideBar(SideBar::create(
+            screens->getScreen(ScreenId::side),
+            screens->getScreen(ScreenId::main),
+            buffer.get()))
+        , cursor(Cursor::create(screens, buffer->getData()))
     {}
 
-    ScreenManagerPtr scrManager;
-    BufferManagerPtr bufManager;
+    ScreenManagerPtr screens;
+    BufferPtr buffer;
+    BufferPtr sideBuf; // remove after SideBar is working
+    SideBarPtr sideBar;
+    CursorPtr cursor;
 };
 
 } // namespace sle
