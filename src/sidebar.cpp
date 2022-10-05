@@ -9,11 +9,9 @@ namespace sle {
 class SideBarImpl : public SideBar
 {
 public:
-    static std::unique_ptr<SideBarImpl> create(
-        Screen* side, Screen* main, Buffer* buf)
+    static std::unique_ptr<SideBarImpl> create(const Context* context)
     {
-        return std::unique_ptr<SideBarImpl>(
-            new SideBarImpl(side, main, buf));
+        return std::unique_ptr<SideBarImpl>(new SideBarImpl(context));
     }
 
     ~SideBarImpl();
@@ -21,20 +19,19 @@ public:
     void refresh() override;
 
 private:
-    SideBarImpl(Screen* side, Screen* main, Buffer* buf);
+    SideBarImpl(const Context* context);
 
-    Screen* sideScr_;
-    Screen* mainScr_;
-    Buffer* buf_;
+    const Context* c_ = nullptr;
+    Screen* scr_ = nullptr;
 };
 
-SideBarImpl::SideBarImpl(Screen* side, Screen* main, Buffer* buf)
-    : sideScr_(side), mainScr_(main), buf_(buf)
+SideBarImpl::SideBarImpl(const Context* context)
+    : c_(context), scr_(c_->screens->getScreen(ScreenId::side))
 {}
 
-SideBarPtr SideBar::create(Screen* side, Screen* main, Buffer* buf)
+SideBarPtr SideBar::create(const Context* context)
 {
-    return SideBarImpl::create(side, main, buf);
+    return SideBarImpl::create(context);
 }
 
 SideBarImpl::~SideBarImpl()
@@ -42,6 +39,7 @@ SideBarImpl::~SideBarImpl()
 
 void SideBarImpl::refresh()
 {
+/*
     int size = buf_->getSize();
     if (size == 0)
         size = 1;
@@ -66,6 +64,7 @@ void SideBarImpl::refresh()
 
     Coord cursor = buf_->getCursor();
     wmove(mainScr_->getCurse(), cursor.y, cursor.x);
+    */
 }
 
 }

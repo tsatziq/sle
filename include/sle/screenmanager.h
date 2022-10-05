@@ -1,17 +1,22 @@
 #ifndef SLE_SCREENMANAGER_H
 #define SLE_SCREENMANAGER_H
 
+#include "sle/screenmanager.h"
 #include "sle/screen.h"
 #include <memory>
 
 namespace sle {
+
+class Context;
+class Buffer;
+class SideBar;
 
 class ScreenManager;
 using ScreenManagerPtr = std::unique_ptr<ScreenManager>;
 
 class ScreenManager {
 public:
-    static ScreenManagerPtr create();
+    static ScreenManagerPtr create(const Context* context);
 
     virtual ~ScreenManager() = default;
 

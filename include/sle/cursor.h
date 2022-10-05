@@ -13,19 +13,11 @@ using CursorPtr = std::unique_ptr<Cursor>;
 class Cursor
 {
 public:
-    static CursorPtr create(const ScreenManager* scrs, const Text& txt);
+    static CursorPtr create(const ScreenManager* scrs);
 
     virtual ~Cursor() = default;
 
-    virtual void move(const Coord to, bool setX, bool setY) = 0;
-
-    virtual void up(const unsigned count) = 0;
-
-    virtual void down(const unsigned count) = 0;
-
-    virtual void back(const unsigned count) = 0;
-
-    virtual void forward(const unsigned count) = 0;
+    virtual void move(const Coord to) = 0;
 
     virtual Coord coord() const = 0;
 

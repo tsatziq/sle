@@ -1,0 +1,21 @@
+BUFFER:
+-Responsible: Edit and delete text.
+-Holds: Text
+-Notes: May share const pointer to text, others can view it.
+
+CURSOR:
+-Responsible: Move the cursor inside and between windows.
+-Holds: Cursor position (and later other cursor info)
+-Notes: Moving by XY coord or directions. Maybe also funtions to move to bounds (start/end of line/buf).
+Should there be on for cli and one for buffer? Or can we go on with only one for the buffer?
+-IN: Const pointer to text. Position to move the cursor (and window?).
+-OUT: Function call to display the cursor in ncurses. Current coord.
+
+FINDER:
+-Responsible: Find positions in the text.
+-Holds: Nothing.
+-Notes: Compare to cursor movements. These require more searching through the structure.
+-IN: Const pointer to text. Optional position (get from cursor if not given).
+-OUT: Coord of the match. (Unset if not found).
+
+next change cursor to be like above and implement moving up and down by lines.

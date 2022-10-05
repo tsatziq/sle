@@ -1,19 +1,26 @@
 #include "sle/context.h"
-#include "sle/modeloop.h"
+#include "sle/screenmanager.h"
+#include "sle/buffer.h"
+#include "sle/sidebar.h"
+//#include "sle/modeloop.h"
 #include <cstdlib>
 
 using namespace sle;
 
 int main(int argc, char** argv)
 {
-    ContextPtr context = std::make_shared<Context>(); 
-
     std::string file = "";
     if (argc > 1)
         file = argv[1];
+    
+    Context context{}; 
 
-    ModeLoopPtr modeLoop{ModeLoop::create(context, file)};
-    modeLoop->start();
+    context.screens = ScreenManager::create(&context);
+    context.buffer = Buffer::create(&context);
+    context.sideBar = SideBar::create(&context);
+
+    //ModeLoopPtr modeLoop{ModeLoop::create(context, file)};
+    //modeLoop->start();
 
     return EXIT_SUCCESS;
 }

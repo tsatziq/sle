@@ -9,72 +9,40 @@ class CursorImpl : public Cursor
 {
 public:
     static std::unique_ptr<CursorImpl> create(
-        const ScreenManager* scrs, const Text& txt)
+        const ScreenManager* scrs)
     {
-        return std::unique_ptr<CursorImpl>(new CursorImpl(scrs, txt));
+        return std::unique_ptr<CursorImpl>(new CursorImpl(scrs));
     }
 
     ~CursorImpl();
 
-    void move(const Coord to, bool setX, bool setY) override;
-
-    void up(const unsigned count) override;
-
-    void down(const unsigned count) override;
-
-    void back(const unsigned count) override;
-
-    void forward(const unsigned count) override;
+    void move(const Coord to) override;
 
     Coord coord() const override;
 
 private:
-    CursorImpl(const ScreenManager* scrs, const Text& txt);
+    CursorImpl(const ScreenManager* scrs);
 
     const ScreenManager* scrs_;
-    const Text::const_iterator txt_;
-    Coord point_{0, 0};
+    Coord point_{0, 0, true, true};
 };
 
-CursorImpl::CursorImpl(const ScreenManager* scrs, const Text& txt)
-    : scrs_(scrs), txt_(txt.begin())
+CursorImpl::CursorImpl(const ScreenManager* scrs)
+    : scrs_(scrs)
 {}
 
-CursorPtr Cursor::create(const ScreenManager* scrs, const Text& txt)
+CursorPtr Cursor::create(const ScreenManager* scrs)
 {
-    return CursorImpl::create(scrs, txt);
+    return CursorImpl::create(scrs);
 }
 
 CursorImpl::~CursorImpl()
 {}
 
-void CursorImpl::move(const Coord to, bool setX, bool setY)
+void CursorImpl::move(const Coord to)
 {
-    if (setX)
-        point_.x = to.x;
-    if (setY)
-        point_.y = to.y;
-}
-
-void CursorImpl::up(const unsigned count)
-{
-    if (point_.y != 0)
-        point_.y -= count;
-}
-
-void CursorImpl::down(const unsigned count)
-{
-    point_.y += count;
-}
-
-void CursorImpl::back(const unsigned count)
-{
-    point_.x -= count;
-}
-
-void CursorImpl::forward(const unsigned count)
-{
-    point_.x += count;
+    point_ = to;
+    // call the curse function
 }
 
 Coord CursorImpl::coord() const

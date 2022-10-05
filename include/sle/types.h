@@ -10,6 +10,8 @@ namespace sle {
 struct Coord {
     int x;
     int y;
+    bool xSet;
+    bool ySet;
 };
  
 using CursePtr = WINDOW*;

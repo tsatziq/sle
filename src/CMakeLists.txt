@@ -5,9 +5,9 @@ target_sources(common
         screen.cpp
         screenmanager.cpp
         buffer.cpp
-        modeloop.cpp
-        buffermanager.cpp
+        #modeloop.cpp
+        #buffermanager.cpp
         sidebar.cpp
-        cursor.cpp
+        #cursor.cpp
 )
 

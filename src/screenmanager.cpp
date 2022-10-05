@@ -1,4 +1,5 @@
 #include "sle/screenmanager.h"
+#include "sle/context.h"
 #include "sle/screen.h"
 #include <map>
 #include <ncurses.h>
@@ -8,9 +9,9 @@ namespace sle {
 class ScreenManagerImpl : public ScreenManager
 {
 public:
-    static std::unique_ptr<ScreenManagerImpl> create()
+    static std::unique_ptr<ScreenManagerImpl> create(const Context* context)
     {
-        return std::unique_ptr<ScreenManagerImpl>(new ScreenManagerImpl());
+        return std::unique_ptr<ScreenManagerImpl>(new ScreenManagerImpl(context));
     }
 
     ~ScreenManagerImpl();
@@ -22,8 +23,9 @@ public:
     Screen* getScreen(const ScreenId id) const override;
 
 private:
-    ScreenManagerImpl();
+    ScreenManagerImpl(const Context* context);
 
+    const Context* c_;
     ScreenId prevId_;
     std::map<ScreenId, ScreenPtr> screens_;
 
@@ -35,8 +37,8 @@ private:
     static constexpr int modelineHeight{1};
 };
 
-ScreenManagerImpl::ScreenManagerImpl()
-    : prevId_(ScreenId::mode)
+ScreenManagerImpl::ScreenManagerImpl(const Context* context)
+    : c_(context), prevId_(ScreenId::mode)
 {
     initScr_ = initscr();
     noecho();
@@ -74,9 +76,9 @@ ScreenManagerImpl::ScreenManagerImpl()
     refresh();
 };
 
-ScreenManagerPtr ScreenManager::create()
+ScreenManagerPtr ScreenManager::create(const Context* context)
 {
-    return ScreenManagerImpl::create();
+    return ScreenManagerImpl::create(context);
 }
 
 ScreenManagerImpl::~ScreenManagerImpl()
@@ -98,9 +100,6 @@ Screen* ScreenManagerImpl::getScreen(const ScreenId id) const
 
     if (screens_.count(id))
         scr = screens_.at(id).get();
-
-    // Make a cmdLine event or a fault maybe that
-    // displays messaged for couple of seconds and clears it
 
     return scr;
 }

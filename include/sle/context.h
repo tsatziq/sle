@@ -1,34 +1,22 @@
 #ifndef SLE_CONTEXT_H
 #define SLE_CONTEXT_H
 
+#include <memory>
 #include "sle/screenmanager.h"
 #include "sle/buffer.h"
-#include "sle/cursor.h"
 #include "sle/sidebar.h"
-#include <memory>
 
 namespace sle {
 
-class Context;
-using ContextPtr = std::shared_ptr<Context>;
+class SideBar;
+class Buffer;
+class ScreenManager;
 
-class Context
+struct Context
 {
-public:
-    Context()
-        : screens(ScreenManager::create())
-        , buffer(Buffer::create(screens->getScreen(ScreenId::main)))
-        , sideBar(SideBar::create(
-            screens->getScreen(ScreenId::side),
-            screens->getScreen(ScreenId::main),
-            buffer.get()))
-        , cursor(Cursor::create(screens.get(), buffer->getData()))
-    {}
-
-    ScreenManagerPtr screens;
-    BufferPtr buffer;
-    SideBarPtr sideBar;
-    CursorPtr cursor;
+    std::unique_ptr<ScreenManager> screens = nullptr;
+    std::unique_ptr<Buffer> buffer = nullptr;
+    std::unique_ptr<SideBar> sideBar = nullptr;
 };
 
 } // namespace sle

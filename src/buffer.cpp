@@ -1,4 +1,5 @@
 #include "sle/buffer.h"
+#include "sle/context.h"
 #include "sle/linetype.h"
 #include "sle/screen.h"
 #include "sle/screenmanager.h"
@@ -14,13 +15,13 @@ namespace sle {
 class BufferImpl : public Buffer
 {
 public:
-    static std::unique_ptr<BufferImpl> create(Screen* scr)
+    static std::unique_ptr<BufferImpl> create(const Context* context)
     {
-        return std::unique_ptr<BufferImpl>(new BufferImpl(scr));
+        return std::unique_ptr<BufferImpl>(new BufferImpl(context));
     }
 
-    ~BufferImpl();
-
+   ~BufferImpl();
+   
     void readFile(const std::string& path) override;
 
     void saveFile(const std::string& path) override;
@@ -29,7 +30,7 @@ public:
 
     int getSize() const override;
 
-    const Text& getData() const override;
+    const Text* getData() const override;
 
     void clear() override;
 
@@ -39,37 +40,26 @@ public:
 
     void eraseChar(const int num) override;
 
-    // move cursor to own class
-    void moveCursor(const int col, const int lines) override;
-
-    void backWord(const unsigned num) override;
-
-    void setX(const int value) override;
-
-    Coord getCursor() const override;
 private:
-    BufferImpl(Screen* scr);
+    BufferImpl(const Context* context);
 
-    bool isBasic(const char c);
-
-    bool isSymbol(const char c);
-
+    const Context* c_;
     std::vector<std::string> lines_{""};
     Coord cursor_{0, 0};
-    int topVisibleLine_;
-    bool modified_;
-    Screen* scr_;
+    int topVisibleLine_ = 1;
+    bool modified_ = false;
+    Screen* scr_ = nullptr;
 };
 
-BufferImpl::BufferImpl(Screen* scr)
-    : topVisibleLine_(1)
-    , modified_(false)
-    , scr_(scr)
+BufferImpl::BufferImpl(const Context* context)
+    : c_(context)
+    , scr_(context->screens->getScreen(ScreenId::main))
 {}
 
-BufferPtr Buffer::create(Screen* scr)
+
+BufferPtr Buffer::create(const Context* context)
 {
-    return BufferImpl::create(scr);
+    return BufferImpl::create(context);
 }
 
 BufferImpl::~BufferImpl()
@@ -106,9 +96,9 @@ int BufferImpl::getSize() const
     return lines_.size();
 }
 
-const Text& BufferImpl::getData() const
+const Text* BufferImpl::getData() const
 {
-    return lines_;
+    return &lines_;
 }
 
 void BufferImpl::clear()
@@ -152,53 +142,6 @@ void BufferImpl::eraseChar(const int num)
         cursor_.x += num;
         lines_.at(cursor_.y).erase(cursor_.x, num);
     }
-}
-
-void BufferImpl::moveCursor(const int col, const int lines)
-{
-    cursor_.x += col;
-    cursor_.y += lines;
-    wmove(scr_->getCurse(), cursor_.y, cursor_.x);
-}
-
-void BufferImpl::backWord(const unsigned num)
-{
-    std::string line = lines_.at(cursor_.y);
-    std::string::iterator lit = line.begin() + cursor_.x;
-
-    if (isBasic(*(lit - 1))) {
-        do {
-            lit--;
-            if (!isBasic(*(lit - 1))) {
-                cursor_.x = lit - line.begin();
-                break;
-            } else if (lit == line.begin()) {
-                cursor_.x = 0;
-                break;
-            }
-        }
-        while (lit != line.begin());
-    }
-}
-
-void BufferImpl::setX(const int value)
-{
-    cursor_.x = value;
-}
-
-Coord BufferImpl::getCursor() const
-{
-    return cursor_;
-}
-
-bool BufferImpl::isBasic(const char c)
-{
-    return std::isalnum(c) || c == '_';
-}
-
-bool BufferImpl::isSymbol(const char c)
-{
-    return std::ispunct(c) && c != '_';
 }
 
 }
