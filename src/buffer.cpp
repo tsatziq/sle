@@ -14,9 +14,9 @@ namespace sle {
 class BufferImpl : public Buffer
 {
 public:
-    static std::unique_ptr<BufferImpl> create()
+    static std::unique_ptr<BufferImpl> create(Screen* scr)
     {
-        return std::unique_ptr<BufferImpl>(new BufferImpl());
+        return std::unique_ptr<BufferImpl>(new BufferImpl(scr));
     }
 
     ~BufferImpl();
@@ -25,7 +25,7 @@ public:
 
     void saveFile(const std::string& path) override;
 
-    void show(Screen* scr) const override;
+    void show() const override;
 
     int getSize() const override;
 
@@ -48,7 +48,7 @@ public:
 
     Coord getCursor() const override;
 private:
-    BufferImpl();
+    BufferImpl(Screen* scr);
 
     bool isBasic(const char c);
 
@@ -58,16 +58,18 @@ private:
     Coord cursor_{0, 0};
     int topVisibleLine_;
     bool modified_;
+    Screen* scr_;
 };
 
-BufferImpl::BufferImpl()
+BufferImpl::BufferImpl(Screen* scr)
     : topVisibleLine_(1)
     , modified_(false)
+    , scr_(scr)
 {}
 
-BufferPtr Buffer::create()
+BufferPtr Buffer::create(Screen* scr)
 {
-    return BufferImpl::create();
+    return BufferImpl::create(scr);
 }
 
 BufferImpl::~BufferImpl()
@@ -84,17 +86,19 @@ void BufferImpl::readFile(const std::string& path)
     if (file.is_open()) {
         while (file) {
             std::getline(file, line);
-            lines_.push_back(line);
+            lines_.push_back(line + "\n");
         }
     }
+    
+    show();
 }
 
 void BufferImpl::saveFile(const std::string& path)
 {}
 
-void BufferImpl::show(Screen* scr) const
+void BufferImpl::show() const
 {
-    scr->paint(lines_);
+    scr_->paint(lines_);
 }
 
 int BufferImpl::getSize() const
@@ -154,6 +158,7 @@ void BufferImpl::moveCursor(const int col, const int lines)
 {
     cursor_.x += col;
     cursor_.y += lines;
+    wmove(scr_->getCurse(), cursor_.y, cursor_.x);
 }
 
 void BufferImpl::backWord(const unsigned num)

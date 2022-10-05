@@ -22,7 +22,7 @@ using BufferPtr = std::unique_ptr<Buffer>;
 class Buffer
 {
 public:
-    static BufferPtr create();
+    static BufferPtr create(Screen* scr);
 
     virtual ~Buffer() = default;
 
@@ -30,7 +30,7 @@ public:
 
     virtual void saveFile(const std::string& path) = 0;
 
-    virtual void show(Screen* scr) const = 0;
+    virtual void show() const = 0;
 
     virtual int getSize() const = 0;
 

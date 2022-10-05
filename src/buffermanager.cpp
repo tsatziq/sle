@@ -40,7 +40,7 @@ BufferManagerImpl::~BufferManagerImpl()
 
 BufferId BufferManagerImpl::addBuffer()
 {
-    bufs_.emplace(++prevId_, Buffer::create());
+    bufs_.emplace(++prevId_, Buffer::create(nullptr));
     return BufferId(prevId_);
 }
 

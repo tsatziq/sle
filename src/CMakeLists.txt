@@ -8,5 +8,6 @@ target_sources(common
         modeloop.cpp
         buffermanager.cpp
         sidebar.cpp
+        cursor.cpp
 )
 

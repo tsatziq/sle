@@ -17,18 +17,16 @@ class Context
 public:
     Context()
         : screens(ScreenManager::create())
-        , buffer(Buffer::create())
-        , sideBuf(Buffer::create())
+        , buffer(Buffer::create(screens->getScreen(ScreenId::main)))
         , sideBar(SideBar::create(
             screens->getScreen(ScreenId::side),
             screens->getScreen(ScreenId::main),
             buffer.get()))
-        , cursor(Cursor::create(screens, buffer->getData()))
+        , cursor(Cursor::create(screens.get(), buffer->getData()))
     {}
 
     ScreenManagerPtr screens;
     BufferPtr buffer;
-    BufferPtr sideBuf; // remove after SideBar is working
     SideBarPtr sideBar;
     CursorPtr cursor;
 };

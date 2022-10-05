@@ -87,6 +87,12 @@ void ModeLoopImpl::normalLoopRun()
                 mode_ = Mode::insert;
                 quit = true;
                 break;
+            case 'j':
+                buf->moveCursor(0,1);
+                break;
+            case 'k':
+                buf->moveCursor(0,-1);
+                break;
             case 'Q':
             case 'q':
                 mode_ = Mode::quit;
@@ -117,7 +123,7 @@ void ModeLoopImpl::insertLoopRun()
         if ((c > 31) && (c < 127)) {
             buf->addChar(c);
             buf->moveCursor(1, 0);
-            buf->show(scr);
+            buf->show();
         } else {
             switch (c) {
                 case 27:
@@ -129,12 +135,12 @@ void ModeLoopImpl::insertLoopRun()
                     buf->addChar('\n');
                     buf->moveCursor(0,1);
                     buf->setX(0);
-                    buf->show(scr);
+                    buf->show();
                     break;
 
                 case 127:
                     buf->eraseChar(-1);
-                    buf->show(scr);
+                    buf->show();
                     break;
             }
 

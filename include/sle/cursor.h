@@ -27,8 +27,6 @@ public:
 
     virtual void forward(const unsigned count) = 0;
 
-    virtual void backWord(const unsigned num) = 0;
-
     virtual Coord coord() const = 0;
 
 protected:

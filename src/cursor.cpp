@@ -1,7 +1,7 @@
 #include "sle/cursor.h"
 #include "sle/screenmanager.h"
 #include "sle/types.h"
-#inclue <memory>
+#include <memory>
 
 namespace sle {
 
@@ -26,15 +26,13 @@ public:
 
     void forward(const unsigned count) override;
 
-    void backWord(const unsigned num) override;
-
     Coord coord() const override;
 
 private:
     CursorImpl(const ScreenManager* scrs, const Text& txt);
 
     const ScreenManager* scrs_;
-    const Text::iterator txt_;
+    const Text::const_iterator txt_;
     Coord point_{0, 0};
 };
 
@@ -47,7 +45,7 @@ CursorPtr Cursor::create(const ScreenManager* scrs, const Text& txt)
     return CursorImpl::create(scrs, txt);
 }
 
-CursorImpl::~CursorImpl)
+CursorImpl::~CursorImpl()
 {}
 
 void CursorImpl::move(const Coord to, bool setX, bool setY)
@@ -79,7 +77,7 @@ void CursorImpl::forward(const unsigned count)
     point_.x += count;
 }
 
-Coord CursorImpl::coord const
+Coord CursorImpl::coord() const
 {
     return point_;
 }
