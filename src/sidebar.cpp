@@ -1,6 +1,7 @@
 #include "sle/sidebar.h"
 #include "sle/context.h"
 #include "sle/screen.h"
+#include "sle/types.h"
 #include <map>
 #include <ncurses.h>
 
@@ -26,7 +27,8 @@ private:
 };
 
 SideBarImpl::SideBarImpl(const Context* context)
-    : c_(context), scr_(c_->screens->getScreen(ScreenId::side))
+    : c_(context)
+    , scr_(c_->screens->getScreen(ScreenId::side))
 {}
 
 SideBarPtr SideBar::create(const Context* context)
@@ -39,8 +41,7 @@ SideBarImpl::~SideBarImpl()
 
 void SideBarImpl::refresh()
 {
-/*
-    int size = buf_->getSize();
+    int size = c_->buffer->getSize();
     if (size == 0)
         size = 1;
 
@@ -52,7 +53,7 @@ void SideBarImpl::refresh()
         lineNums.push_back(line);
     }
 
-    int h = sideScr_->getHeight();
+    int h = scr_->getHeight();
     h -= lineNums.size();
 
     for (int i = 1; i <= h; i++) {
@@ -60,11 +61,8 @@ void SideBarImpl::refresh()
         lineNums.push_back(line);
     }
 
-    sideScr_->paint(lineNums);
-
-    Coord cursor = buf_->getCursor();
-    wmove(mainScr_->getCurse(), cursor.y, cursor.x);
-    */
+    scr_->paint(lineNums);
+    c_->cursor->redraw();
 }
 
 }

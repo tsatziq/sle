@@ -1,4 +1,4 @@
-#include "sle/cursor.h"
+#include "sle/finder.h"
 #include "sle/types.h"
 #include <memory>
 
@@ -7,27 +7,26 @@ namespace sle {
 class FinderImpl : public Finder
 {
 public:
-    static std::unique_ptr<FinderImpl> create(
-        const Text* txt)
+    static std::unique_ptr<FinderImpl> create(const Context* context)
     {
-        return std::unique_ptr<FinderImpl>(new FinderImpl(txt));
+        return std::unique_ptr<FinderImpl>(new FinderImpl(context));
     }
 
     ~FinderImpl();
 
 private:
-    FinderImpl(const Text* txt);
+    FinderImpl(const Context* context);
 
-    const Text* txt_ = nullptr;
+    const Context* c_ = nullptr;
 };
 
-FinderImpl::FinderImpl(const Text* txt)
-    : txt_(txt)
+FinderImpl::FinderImpl(const Context* context)
+    : c_(context)
 {}
 
-FinderPtr Finder::create(const Text* txt)
+FinderPtr Finder::create(const Context* context)
 {
-    return FinderImpl::create(txt);
+    return FinderImpl::create(context);
 }
 
 FinderImpl::~FinderImpl()

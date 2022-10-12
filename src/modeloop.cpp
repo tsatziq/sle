@@ -1,4 +1,5 @@
 #include "sle/modeloop.h"
+#include "sle/context.h"
 #include "sle/screen.h"
 #include "sle/screenmanager.h"
 #include <memory>
@@ -9,10 +10,9 @@ namespace sle {
 class ModeLoopImpl : public ModeLoop
 {
 public:
-    static std::unique_ptr<ModeLoopImpl> create(
-        ContextPtr context, const std::string& file)
+    static std::unique_ptr<ModeLoopImpl> create(const Context* context)
     {
-        return std::unique_ptr<ModeLoopImpl>(new ModeLoopImpl(context, file));
+        return std::unique_ptr<ModeLoopImpl>(new ModeLoopImpl(context));
     }
 
     ~ModeLoopImpl();
@@ -26,21 +26,21 @@ public:
     void cmdLoopRun() override;
 
 private:
-    ModeLoopImpl(ContextPtr context, const std::string& file);
+    ModeLoopImpl(const Context* context);
 
-    ContextPtr c_;
-    std::string file_;
+    const Context* c_;
+    Screen* main_ = nullptr;
     Mode mode_ = Mode::normal;
 };
 
-ModeLoopImpl::ModeLoopImpl(ContextPtr context, const std::string& file)
+ModeLoopImpl::ModeLoopImpl(const Context* context)
     : c_(context)
-    , file_(file)
+    , main_(context->screens->getScreen(ScreenId::main))
 {}
 
-ModeLoopPtr ModeLoop::create(ContextPtr context, const std::string& file)
+ModeLoopPtr ModeLoop::create(const Context* context)
 {
-    return ModeLoopImpl::create(context, file);
+    return ModeLoopImpl::create(context);
 }
 
 ModeLoopImpl::~ModeLoopImpl()
@@ -48,10 +48,6 @@ ModeLoopImpl::~ModeLoopImpl()
 
 void ModeLoopImpl::start()
 {
-    c_->buffer->readFile(file_);
-
-    c_->sideBar->refresh();
-
     while (mode_ != Mode::quit) {
         switch (mode_) {
             case Mode::normal:
@@ -73,25 +69,30 @@ void ModeLoopImpl::start()
 void ModeLoopImpl::normalLoopRun()
 {
     Screen* scr = c_->screens->getScreen(ScreenId::main);
-    Buffer* buf = c_->buffer.get();
+   // Buffer* buf = c_->buffer.get();
 
     bool quit = false;
 
     while (char c = scr->getChar()) {
         switch (c) {
             case 'b':
-                buf->backWord(1);
+                //buf->backWord(1);
                 break;
-            case 'I':
             case 'i':
                 mode_ = Mode::insert;
                 quit = true;
                 break;
+            case 'h':
+                c_->cursor->leftRight(-1);
+                break;
             case 'j':
-                buf->moveCursor(0,1);
+                c_->cursor->upDown(1);
                 break;
             case 'k':
-                buf->moveCursor(0,-1);
+                c_->cursor->upDown(-1);
+                break;
+            case 'l':
+                c_->cursor->leftRight(1);
                 break;
             case 'Q':
             case 'q':
@@ -111,6 +112,7 @@ void ModeLoopImpl::normalLoopRun()
 
 void ModeLoopImpl::insertLoopRun()
 {
+/*
     Screen* scr = c_->screens->getScreen(ScreenId::main);
     Buffer* buf = c_->buffer.get();
 
@@ -152,6 +154,7 @@ void ModeLoopImpl::insertLoopRun()
         if (buf->getSize() != numLines)
             c_->sideBar->refresh();
     }
+    */
 }
 
 void ModeLoopImpl::cmdLoopRun()

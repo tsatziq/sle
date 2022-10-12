@@ -1,8 +1,10 @@
 #include "sle/context.h"
 #include "sle/screenmanager.h"
 #include "sle/buffer.h"
+#include "sle/cursor.h"
+#include "sle/finder.h"
 #include "sle/sidebar.h"
-//#include "sle/modeloop.h"
+#include "sle/modeloop.h"
 #include <cstdlib>
 
 using namespace sle;
@@ -12,15 +14,20 @@ int main(int argc, char** argv)
     std::string file = "";
     if (argc > 1)
         file = argv[1];
-    
-    Context context{}; 
+
+    Context context{};
 
     context.screens = ScreenManager::create(&context);
     context.buffer = Buffer::create(&context);
     context.sideBar = SideBar::create(&context);
+    context.cursor = Cursor::create(&context);
+    context.finder = Finder::create(&context);
 
-    //ModeLoopPtr modeLoop{ModeLoop::create(context, file)};
-    //modeLoop->start();
+    context.buffer->readFile(file);
+    context.sideBar->refresh();
+
+    ModeLoopPtr modeLoop{ModeLoop::create(&context)};
+    modeLoop->start();
 
     return EXIT_SUCCESS;
 }

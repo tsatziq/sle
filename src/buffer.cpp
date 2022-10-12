@@ -21,7 +21,7 @@ public:
     }
 
    ~BufferImpl();
-   
+
     void readFile(const std::string& path) override;
 
     void saveFile(const std::string& path) override;
@@ -74,12 +74,16 @@ void BufferImpl::readFile(const std::string& path)
     std::string line;
 
     if (file.is_open()) {
+
+        lines_.clear();
+
         while (file) {
             std::getline(file, line);
-            lines_.push_back(line + "\n");
+            if (!line.empty())
+                lines_.push_back(line + "\n");
         }
     }
-    
+
     show();
 }
 

@@ -18,4 +18,11 @@ FINDER:
 -IN: Const pointer to text. Optional position (get from cursor if not given).
 -OUT: Coord of the match. (Unset if not found).
 
-next change cursor to be like above and implement moving up and down by lines.
+PAGER:
+-Responsible: Send portions of text to show on screen. keep tabs on where we are.
+-Holds: Current position..
+-Notes: Fits between buffer and screen. Needs to know window height. Also check
+what happens with too long lines.
+-IN: Context ofc.
+-OUT: Vector of strings that will be displayed. No point in sending all the text
+every time to the screen, if it cannot show everything.

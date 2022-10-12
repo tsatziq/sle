@@ -6,13 +6,17 @@
 
 namespace sle {
 
+class Context;
+class Buffer;
+class ScreenManager;
+
 class Finder;
 using FinderPtr = std::unique_ptr<Finder>;
 
 class Finder
 {
 public:
-    static FinderPtr create(const Text* txt);
+    static FinderPtr create(const Context* context);
 
     virtual ~Finder() = default;
 

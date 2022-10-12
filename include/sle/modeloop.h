@@ -1,10 +1,13 @@
 #ifndef SLE_MODELOOP_H
 #define SLE_MODELOOP_H
 
-#include "sle/context.h"
 #include "sle/screen.h"
 
 namespace sle {
+
+class Context;
+class Buffer;
+class ScreenManager;
 
 class ModeLoop;
 using ModeLoopPtr = std::unique_ptr<ModeLoop>;
@@ -19,8 +22,7 @@ enum class Mode {
 class ModeLoop
 {
 public:
-    static ModeLoopPtr create(
-        ContextPtr context, const std::string& file);
+    static ModeLoopPtr create(const Context* context);
 
     virtual ~ModeLoop() = default;
 

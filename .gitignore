@@ -36,3 +36,6 @@ build/*
 
 # Ignore tags
 *tags
+
+# QtCreator files
+CMakeLists.txt.user
