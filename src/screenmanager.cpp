@@ -1,4 +1,5 @@
 #include "sle/screenmanager.h"
+#include "sle/coord.h"
 #include "sle/context.h"
 #include "sle/screen.h"
 #include <map>

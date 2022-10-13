@@ -2,6 +2,7 @@
 #define SLE_SCREENMANAGER_H
 
 #include "sle/screenmanager.h"
+#include "sle/coord.h"
 #include "sle/screen.h"
 #include <memory>
 

@@ -1,7 +1,7 @@
 #ifndef SLE_CURSOR_H
 #define SLE_CURSOR_H
 
-#include "sle/types.h"
+#include "sle/coord.h"
 #include <memory>
 
 namespace sle {

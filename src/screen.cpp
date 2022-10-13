@@ -1,4 +1,5 @@
 #include "sle/screen.h"
+#include "sle/coord.h"
 #include "sle/types.h"
 #include <memory>
 #include <ncurses.h>
@@ -34,7 +35,7 @@ private:
     explicit ScreenImpl(int height, int width, const Coord& start)
         : height_(height), width_(width), start_(start), curse_(nullptr)
     {
-        curse_ = newwin(height, width, start.y, start.x);
+        curse_ = newwin(height, width, start.y(), start.x());
     }
 
     ScreenImpl(const ScreenImpl&) = delete;
@@ -77,7 +78,7 @@ int ScreenImpl::getChar() const
 }
 
 std::string ScreenImpl::getLine() const {
-    return "";    
+    return "";
 }
 
 CursePtr ScreenImpl::getCurse() const {

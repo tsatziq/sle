@@ -3,6 +3,7 @@
 #include "sle/buffer.h"
 #include "sle/cursor.h"
 #include "sle/finder.h"
+#include "sle/pager.h"
 #include "sle/sidebar.h"
 #include "sle/modeloop.h"
 #include <cstdlib>
@@ -20,10 +21,13 @@ int main(int argc, char** argv)
     context.screens = ScreenManager::create(&context);
     context.buffer = Buffer::create(&context);
     context.sideBar = SideBar::create(&context);
+    context.pager = Pager::create(&context);
     context.cursor = Cursor::create(&context);
     context.finder = Finder::create(&context);
 
+
     context.buffer->readFile(file);
+    context.pager->show();
     context.sideBar->refresh();
 
     ModeLoopPtr modeLoop{ModeLoop::create(&context)};

@@ -10,5 +10,6 @@ target_sources(common
         sidebar.cpp
         cursor.cpp
         finder.cpp
+        pager.cpp
 )
 

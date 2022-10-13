@@ -7,17 +7,10 @@
 
 namespace sle {
 
-struct Coord {
-    int x;
-    int y;
-    bool xSet;
-    bool ySet;
-};
- 
 using CursePtr = WINDOW*;
 
 using Text = std::vector<std::string>;
 
-} // namespace sle 
+} // namespace sle
 
 #endif // SLE_TYPES_H

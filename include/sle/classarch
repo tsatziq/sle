@@ -26,3 +26,5 @@ what happens with too long lines.
 -IN: Context ofc.
 -OUT: Vector of strings that will be displayed. No point in sending all the text
 every time to the screen, if it cannot show everything.
+-REFACTOR: for now make it so that moving down when cursor is on last line of the screen
+will not move to next page. moving on pages will happen only with keys meant for that.

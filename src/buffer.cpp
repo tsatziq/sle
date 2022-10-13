@@ -1,4 +1,5 @@
 #include "sle/buffer.h"
+#include "sle/coord.h"
 #include "sle/context.h"
 #include "sle/linetype.h"
 #include "sle/screen.h"
@@ -45,7 +46,7 @@ private:
 
     const Context* c_;
     std::vector<std::string> lines_{""};
-    Coord cursor_{0, 0};
+    Coord cursor_{};
     int topVisibleLine_ = 1;
     bool modified_ = false;
     Screen* scr_ = nullptr;
@@ -83,8 +84,6 @@ void BufferImpl::readFile(const std::string& path)
                 lines_.push_back(line + "\n");
         }
     }
-
-    show();
 }
 
 void BufferImpl::saveFile(const std::string& path)
@@ -120,14 +119,15 @@ void BufferImpl::addChar(const char c)
 {
     //lines_.front() += c;
 
-    lines_.at(cursor_.y).insert(cursor_.x, 1, c);
+    lines_.at(cursor_.y()).insert(cursor_.x(), 1, c);
     if (c == '\n')
         lines_.push_back("");
 }
 
 void BufferImpl::eraseChar(const int num)
 {
-    if (cursor_.x + num < 0) {
+/*
+    if (cursor_.x() + num < 0) {
         // if first line, do nothing
         if (cursor_.y == 0)
             return;
@@ -146,6 +146,7 @@ void BufferImpl::eraseChar(const int num)
         cursor_.x += num;
         lines_.at(cursor_.y).erase(cursor_.x, num);
     }
+    */
 }
 
 }

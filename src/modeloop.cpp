@@ -78,6 +78,9 @@ void ModeLoopImpl::normalLoopRun()
             case 'b':
                 //buf->backWord(1);
                 break;
+            case 'd':
+                c_->pager->movePage(1);
+                break;
             case 'i':
                 mode_ = Mode::insert;
                 quit = true;
@@ -98,6 +101,9 @@ void ModeLoopImpl::normalLoopRun()
             case 'q':
                 mode_ = Mode::quit;
                 quit = true;
+            case 'u':
+                c_->pager->movePage(-1);
+                break;
             case 'w':
                 //buf->fwdWord(1);
                 break;

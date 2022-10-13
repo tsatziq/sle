@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <ncurses.h>
+#include "sle/coord.h"
 #include "sle/types.h"
 
 namespace sle {
