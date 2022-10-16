@@ -28,14 +28,12 @@ class Buffer
 {
 public:
     static BufferPtr create(const Context* context);
-    
+
     virtual ~Buffer() = default;
 
     virtual void readFile(const std::string& path) = 0;
 
     virtual void saveFile(const std::string& path) = 0;
-
-    virtual void show() const = 0;
 
     virtual int getSize() const = 0;
 

@@ -118,38 +118,42 @@ void ModeLoopImpl::normalLoopRun()
 
 void ModeLoopImpl::insertLoopRun()
 {
-/*
     Screen* scr = c_->screens->getScreen(ScreenId::main);
     Buffer* buf = c_->buffer.get();
 
     bool quit = false;
 
-    while (char c = scr->getChar()) {
+    while (char c = scr->getChar())
+    {
 
         int numLines = buf->getSize();
 
-        if ((c > 31) && (c < 127)) {
+        if ((c > 31) && (c < 127))
+        {
             buf->addChar(c);
-            buf->moveCursor(1, 0);
-            buf->show();
-        } else {
-            switch (c) {
-                case 27:
-                    mode_ = Mode::normal;
-                    quit = true;
-                    break;
+            c_->pager->show();
+            c_->cursor->leftRight(1);
+        }
+        else
+        {
+            switch (c)
+            {
+            case 27:
+                mode_ = Mode::normal;
+                quit = true;
+                break;
 
-                case 10:
-                    buf->addChar('\n');
-                    buf->moveCursor(0,1);
-                    buf->setX(0);
-                    buf->show();
-                    break;
+            case 10:
+                buf->addChar('\n');
+                //buf->moveCursor(0,1);
+                //buf->setX(0);
+                c_->pager->show();
+                break;
 
-                case 127:
-                    buf->eraseChar(-1);
-                    buf->show();
-                    break;
+            case 127:
+                buf->eraseChar(-1);
+                c_->pager->show();
+                break;
             }
 
         }
@@ -160,7 +164,6 @@ void ModeLoopImpl::insertLoopRun()
         if (buf->getSize() != numLines)
             c_->sideBar->refresh();
     }
-    */
 }
 
 void ModeLoopImpl::cmdLoopRun()

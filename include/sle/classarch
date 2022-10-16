@@ -28,3 +28,17 @@ what happens with too long lines.
 every time to the screen, if it cannot show everything.
 -REFACTOR: for now make it so that moving down when cursor is on last line of the screen
 will not move to next page. moving on pages will happen only with keys meant for that.
+
+
+INSERTER/DELETER JNE:
+-maybe do these in addition to buffer
+-they would hold a non-const pointer to the text.
+
+CHORDER:
+-ottais inputin ja kattois sen ennen kun tehaan mitaan.
+-taa vois olla hyva, varsinki jos tulee sit yli kahen keyn chordeja.
+
+### NEXT ###
+-toi leftRight ja varmaan upDown:
+	-pitaa olla erikseen kun ollaan insert tilassa. silloin ei haittaa
+	vaikka uusi positio olisi enemman kuin tekstin nykynen koko.

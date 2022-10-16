@@ -27,8 +27,6 @@ public:
 
     void saveFile(const std::string& path) override;
 
-    void show() const override;
-
     int getSize() const override;
 
     const Text* getData() const override;
@@ -46,8 +44,6 @@ private:
 
     const Context* c_;
     std::vector<std::string> lines_{""};
-    Coord cursor_{};
-    int topVisibleLine_ = 1;
     bool modified_ = false;
     Screen* scr_ = nullptr;
 };
@@ -89,11 +85,6 @@ void BufferImpl::readFile(const std::string& path)
 void BufferImpl::saveFile(const std::string& path)
 {}
 
-void BufferImpl::show() const
-{
-    scr_->paint(lines_);
-}
-
 int BufferImpl::getSize() const
 {
     return lines_.size();
@@ -117,11 +108,15 @@ void BufferImpl::addLines(const Text& strs)
 
 void BufferImpl::addChar(const char c)
 {
-    //lines_.front() += c;
+    Coord cursor = c_->cursor->coord();
 
+    lines_.at(cursor.y()).insert(cursor.x(), 1, c);
+
+/*
     lines_.at(cursor_.y()).insert(cursor_.x(), 1, c);
     if (c == '\n')
         lines_.push_back("");
+*/
 }
 
 void BufferImpl::eraseChar(const int num)
