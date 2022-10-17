@@ -37,7 +37,9 @@ public:
 
     void addChar(const char c) override;
 
-    void eraseChar(const int num) override;
+    bool eraseChar(const int num) override;
+
+    bool eraseLine(const int num) override;
 
 private:
     BufferImpl(const Context* context);
@@ -119,8 +121,22 @@ void BufferImpl::addChar(const char c)
 */
 }
 
-void BufferImpl::eraseChar(const int num)
+bool BufferImpl::eraseChar(const int num)
 {
+    Coord cursor = c_->cursor->coord();
+    bool ret = true;
+
+    //std::string& s = lines_.at(cursor.y());
+
+    // Return if at beginning of line.
+    if (cursor.x() == 0)
+        ret = false;
+
+    if (ret)
+        lines_.at(cursor.y()).erase(cursor.x() - 1, 1);
+
+    return ret;
+
 /*
     if (cursor_.x() + num < 0) {
         // if first line, do nothing
@@ -142,6 +158,21 @@ void BufferImpl::eraseChar(const int num)
         lines_.at(cursor_.y).erase(cursor_.x, num);
     }
     */
+}
+
+bool BufferImpl::eraseLine(const int num)
+{
+    Coord cursor = c_->cursor->coord();
+    bool ret = true;
+
+    if (lines_.size() == 1 && lines_.at(0).empty())
+        ret = false;
+    else if (lines_.size() == 1 && !lines_.at(0).empty())
+        lines_.at(0).clear();
+    else
+        lines_.erase(lines_.begin() + cursor.y());
+
+    return ret;
 }
 
 }

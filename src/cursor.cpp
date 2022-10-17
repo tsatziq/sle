@@ -29,6 +29,8 @@ public:
 
     void leftRight(const int count) override;
 
+    void setY(const int val) override;
+
 private:
     CursorImpl(const Context* context);
 
@@ -124,6 +126,11 @@ void CursorImpl::leftRight(const int count)
 int CursorImpl::txtToScrCoord(int yCoord)
 {
     return yCoord - (pager_->getPageNum() * scr_->getHeight());
+}
+
+void CursorImpl::setY(const int val)
+{
+    txtPos_.setY(val);
 }
 
 }

@@ -30,6 +30,10 @@ public:
 
     virtual void leftRight(const int count) = 0;
 
+    /// Sets the y text position without moving screen position.
+    /// Used after lines have been removed to correct the line number.
+    virtual void setY(const int val) = 0;
+
 protected:
     Cursor() = default;
 

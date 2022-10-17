@@ -45,7 +45,10 @@ public:
 
     virtual void addChar(const char c) = 0;
 
-    virtual void eraseChar(const int num) = 0;
+    virtual bool eraseChar(const int num) = 0;
+
+    /// Erase line, return true if cursor y pos must be adjusted.
+    virtual bool eraseLine(const int num) = 0;
 
 protected:
     Buffer() = default;

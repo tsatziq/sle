@@ -69,7 +69,7 @@ void ModeLoopImpl::start()
 void ModeLoopImpl::normalLoopRun()
 {
     Screen* scr = c_->screens->getScreen(ScreenId::main);
-   // Buffer* buf = c_->buffer.get();
+    Buffer* buf = c_->buffer.get();
 
     bool quit = false;
 
@@ -107,6 +107,19 @@ void ModeLoopImpl::normalLoopRun()
             case 'w':
                 //buf->fwdWord(1);
                 break;
+            case 'x':
+            {
+                bool lastLine = c_->cursor->coord().y() + 1 == buf->getSize();
+                if (!buf->eraseLine(1))
+                    break;
+
+                if (lastLine)
+                    c_->cursor->upDown(-1);
+                c_->pager->show();
+                c_->sideBar->refresh();
+                c_->cursor->redraw();
+                break;
+            }
             default:
                 break;
         }
@@ -151,8 +164,11 @@ void ModeLoopImpl::insertLoopRun()
                 break;
 
             case 127:
-                buf->eraseChar(-1);
-                c_->pager->show();
+                if (buf->eraseChar(-1))
+                {
+                    c_->pager->show();
+                    c_->cursor->leftRight(-1);
+                }
                 break;
             }
 
