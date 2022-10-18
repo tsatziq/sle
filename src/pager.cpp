@@ -26,7 +26,9 @@ public:
 
     int firstLineNum() override;
 
-    int getPageNum() override;
+    int pageNum() override;
+
+    int numLinesOnScr() override;
 
 private:
     PagerImpl(const Context* context);
@@ -35,14 +37,15 @@ private:
     Screen* scr_ = nullptr;
     const Text* txt_ = nullptr;
 
-    int topVisibleLine = 0;
-    int pageNum = 0;
+    int topVisibleLine_ = 0;
+    int pageNum_ = 0;
+    int linesOnScr_ = 0;
 };
 
 PagerImpl::PagerImpl(const Context* context)
     : c_(context)
-    , scr_(context->screens->getScreen(ScreenId::main))
-    , txt_(context->buffer->getData())
+    , scr_(context->screens->screen(ScreenId::main))
+    , txt_(context->buffer->data())
 {}
 
 PagerPtr Pager::create(const Context* context)
@@ -56,9 +59,9 @@ PagerImpl::~PagerImpl()
 void PagerImpl::show()
 {
     Text lines{};
-    int height = scr_->getHeight();
+    int height = scr_->height();
 
-    auto it = std::next(txt_->begin(), topVisibleLine);
+    auto it = std::next(txt_->begin(), topVisibleLine_);
 
     for (int i = 0; i < height; ++i, ++it)
     {
@@ -68,35 +71,41 @@ void PagerImpl::show()
     }
 
     scr_->paint(lines);
+    linesOnScr_ = lines.size();
 }
 
 void PagerImpl::movePage(const int count)
 {
     // Check if move is legal
-    int nTopLine = topVisibleLine + (count * scr_->getHeight());
+    int nTopLine = topVisibleLine_ + (count * scr_->height());
     if (nTopLine > static_cast<int>(txt_->size())
         || nTopLine < 0)
             return;
 
-    topVisibleLine = nTopLine;
-    pageNum += count;
+    topVisibleLine_ = nTopLine;
+    pageNum_ += count;
     show();
-    c_->cursor->move(Coord(0, topVisibleLine, false, true));
+    c_->cursor->move(Coord(0, topVisibleLine_), Coord(0, 0));
 }
 
 int PagerImpl::lastLineNum()
 {
-    return topVisibleLine + scr_->getHeight();
+    return topVisibleLine_ + linesOnScr_;
 }
 
 int PagerImpl::firstLineNum()
 {
-    return topVisibleLine;
+    return topVisibleLine_;
 }
 
-int PagerImpl::getPageNum()
+int PagerImpl::pageNum()
 {
-    return pageNum;
+    return pageNum_;
+}
+
+int PagerImpl::numLinesOnScr()
+{
+    return linesOnScr_;
 }
 
 }

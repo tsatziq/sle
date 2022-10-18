@@ -25,7 +25,7 @@ public:
 
     virtual void deleteScreen(const ScreenId screen) = 0;
 
-    virtual Screen* getScreen(const ScreenId id) const = 0;
+    virtual Screen* screen(const ScreenId id) const = 0;
 
 protected:
     ScreenManager() = default;

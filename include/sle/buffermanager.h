@@ -12,7 +12,7 @@ using BufferManagerPtr = std::unique_ptr<BufferManager>;
 class BufferManager
 {
 public:
-    static BufferManagerPtr create(); 
+    static BufferManagerPtr create();
 
     virtual ~BufferManager() = default;
 
@@ -20,7 +20,7 @@ public:
 
     virtual void deleteBuffer(BufferId id) = 0;
 
-    virtual Buffer* getBuffer(BufferId id) const = 0;
+    virtual Buffer* buffer(BufferId id) const = 0;
 
 protected:
     BufferManager() = default;

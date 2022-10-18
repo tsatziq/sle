@@ -13,6 +13,16 @@ class ScreenManager;
 class Cursor;
 using CursorPtr = std::unique_ptr<Cursor>;
 
+enum class QuickMove
+{
+    H,
+    L,
+    M,
+    B,
+    C,
+    E,
+};
+
 class Cursor
 {
 public:
@@ -20,7 +30,9 @@ public:
 
     virtual ~Cursor() = default;
 
-    virtual void move(const Coord to) = 0;
+    virtual void move(const Coord textPos, const Coord scrPos) = 0;
+
+    virtual void move(const QuickMove pos) = 0;
 
     virtual void redraw() = 0;
 

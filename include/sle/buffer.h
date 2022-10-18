@@ -33,11 +33,11 @@ public:
 
     virtual void readFile(const std::string& path) = 0;
 
-    virtual void saveFile(const std::string& path) = 0;
+    virtual void saveFile(const std::string& path = "") = 0;
 
-    virtual int getSize() const = 0;
+    virtual int size() const = 0;
 
-    virtual const Text* getData() const = 0;
+    virtual const Text* data() const = 0;
 
     virtual void clear() = 0;
 

@@ -39,11 +39,11 @@ public:
 
     virtual std::string getLine() const = 0;
 
-    virtual CursePtr getCurse() const = 0;
+    virtual CursePtr curse() const = 0;
 
-    virtual int getHeight() const = 0;
+    virtual int height() const = 0;
 
-    virtual int getWidth() const = 0;
+    virtual int width() const = 0;
 
 protected:
     Screen() = default;

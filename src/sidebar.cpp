@@ -28,7 +28,7 @@ private:
 
 SideBarImpl::SideBarImpl(const Context* context)
     : c_(context)
-    , scr_(c_->screens->getScreen(ScreenId::side))
+    , scr_(c_->screens->screen(ScreenId::side))
 {}
 
 SideBarPtr SideBar::create(const Context* context)
@@ -41,7 +41,7 @@ SideBarImpl::~SideBarImpl()
 
 void SideBarImpl::refresh()
 {
-    int size = c_->buffer->getSize();
+    int size = c_->buffer->size();
     if (size == 0)
         size = 1;
 
@@ -53,7 +53,7 @@ void SideBarImpl::refresh()
         lineNums.push_back(line);
     }
 
-    int h = scr_->getHeight();
+    int h = scr_->height();
     h -= lineNums.size();
 
     for (int i = 1; i <= h; i++) {

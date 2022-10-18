@@ -19,7 +19,9 @@ public:
 
     ~CursorImpl();
 
-    void move(const Coord to) override;
+    void move(const Coord textPos, const Coord scrPos) override;
+
+    void move(const QuickMove pos) override;
 
     void redraw() override;
 
@@ -46,9 +48,9 @@ private:
 
 CursorImpl::CursorImpl(const Context* context)
     : c_(context)
-    , scr_(context->screens->getScreen(ScreenId::main))
+    , scr_(context->screens->screen(ScreenId::main))
     , pager_(context->pager.get())
-    , txt_(context->buffer->getData())
+    , txt_(context->buffer->data())
 {}
 
 CursorPtr Cursor::create(const Context* context)
@@ -59,16 +61,64 @@ CursorPtr Cursor::create(const Context* context)
 CursorImpl::~CursorImpl()
 {}
 
-void CursorImpl::move(const Coord to)
+void CursorImpl::move(const Coord textPos, const Coord scrPos)
 {
-    txtPos_ <<= to;
-    scrPos_.setY(0);
+    if (!textPos.isUnset())
+        txtPos_ <<= textPos;
+    if (!scrPos.isUnset())
+        scrPos_ <<= scrPos;
     redraw();
+}
+
+void CursorImpl::move(const QuickMove pos)
+{
+    switch (pos)
+    {
+    case QuickMove::B:
+    {
+        move(Coord(0, 0, true, false), Coord(0, 0, true, false));
+        break;
+    }
+    case QuickMove::C:
+    {
+        int center = (txt_->at(txtPos_.y()).size() - 2) / 2;
+        move(Coord(center, 0, true, false), Coord(center, 0, true, false));
+        break;
+    }
+    case QuickMove::E:
+    {
+        int length = txt_->at(txtPos_.y()).size() - 2;
+        move(Coord(length, 0, true, false), Coord(length, 0, true, false));
+        break;
+    }
+    case QuickMove::H:
+    {
+        Coord txt(0, pager_->firstLineNum());
+        move(txt, Coord(0, 0));
+        break;
+    }
+    case QuickMove::L:
+    {
+        Coord txt(0, pager_->lastLineNum() - 1);
+        move(txt, Coord(0, pager_->numLinesOnScr() - 1));
+        break;
+    }
+    case QuickMove::M:
+    {
+        int height = pager_->numLinesOnScr() - 1;
+        int middle = pager_->firstLineNum() + (height / 2);
+        Coord txt(0, middle);
+        move(txt, Coord(0, height / 2));
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 void CursorImpl::redraw()
 {
-    wmove(scr_->getCurse(), scrPos_.y(), scrPos_.x());
+    wmove(scr_->curse(), scrPos_.y(), scrPos_.x());
 }
 
 Coord CursorImpl::coord() const
@@ -82,7 +132,7 @@ void CursorImpl::upDown(const int count)
 
     // Check if the move is legal in scr.
     int nScrLine = scrPos_.y() + count;
-    if (nScrLine >= scr_->getHeight() || nScrLine < 0)
+    if (nScrLine >= scr_->height() || nScrLine < 0)
         return;
 
     // Then check if it is legal in the text.
@@ -109,7 +159,7 @@ void CursorImpl::leftRight(const int count)
 {
     // Check if the move is legal in scr.
     int nScrCol = scrPos_.x() + count;
-    if (nScrCol >= scr_->getWidth() || nScrCol < 0)
+    if (nScrCol >= scr_->width() || nScrCol < 0)
         return;
 
     // Then check if it is legal in the text.
@@ -125,7 +175,7 @@ void CursorImpl::leftRight(const int count)
 
 int CursorImpl::txtToScrCoord(int yCoord)
 {
-    return yCoord - (pager_->getPageNum() * scr_->getHeight());
+    return yCoord - (pager_->pageNum() * scr_->height());
 }
 
 void CursorImpl::setY(const int val)

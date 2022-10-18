@@ -25,11 +25,11 @@ public:
 
     std::string getLine() const override;
 
-    CursePtr getCurse() const override;
+    CursePtr curse() const override;
 
-    int getHeight() const override;
+    int height() const override;
 
-    int getWidth() const override;
+    int width() const override;
 
 private:
     explicit ScreenImpl(int height, int width, const Coord& start)
@@ -81,16 +81,16 @@ std::string ScreenImpl::getLine() const {
     return "";
 }
 
-CursePtr ScreenImpl::getCurse() const {
+CursePtr ScreenImpl::curse() const {
     return curse_;
 }
 
-int ScreenImpl::getHeight() const
+int ScreenImpl::height() const
 {
     return height_;
 }
 
-int ScreenImpl::getWidth() const
+int ScreenImpl::width() const
 {
     return width_;
 }

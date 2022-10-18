@@ -35,7 +35,7 @@ private:
 
 ModeLoopImpl::ModeLoopImpl(const Context* context)
     : c_(context)
-    , main_(context->screens->getScreen(ScreenId::main))
+    , main_(context->screens->screen(ScreenId::main))
 {}
 
 ModeLoopPtr ModeLoop::create(const Context* context)
@@ -68,22 +68,34 @@ void ModeLoopImpl::start()
 
 void ModeLoopImpl::normalLoopRun()
 {
-    Screen* scr = c_->screens->getScreen(ScreenId::main);
+    Screen* scr = c_->screens->screen(ScreenId::main);
     Buffer* buf = c_->buffer.get();
 
     bool quit = false;
 
     while (char c = scr->getChar()) {
         switch (c) {
+            case 'B':
+                c_->cursor->move(QuickMove::B);
+                break;
             case 'b':
                 //buf->backWord(1);
+                break;
+            case 'C':
+                c_->cursor->move(QuickMove::C);
                 break;
             case 'd':
                 c_->pager->movePage(1);
                 break;
+            case 'E':
+                c_->cursor->move(QuickMove::E);
+                break;
             case 'i':
                 mode_ = Mode::insert;
                 quit = true;
+                break;
+            case 'H':
+                c_->cursor->move(QuickMove::H);
                 break;
             case 'h':
                 c_->cursor->leftRight(-1);
@@ -94,8 +106,14 @@ void ModeLoopImpl::normalLoopRun()
             case 'k':
                 c_->cursor->upDown(-1);
                 break;
+            case 'L':
+                c_->cursor->move(QuickMove::L);
+                break;
             case 'l':
                 c_->cursor->leftRight(1);
+                break;
+            case 'M':
+                c_->cursor->move(QuickMove::M);
                 break;
             case 'Q':
             case 'q':
@@ -109,7 +127,7 @@ void ModeLoopImpl::normalLoopRun()
                 break;
             case 'x':
             {
-                bool lastLine = c_->cursor->coord().y() + 1 == buf->getSize();
+                bool lastLine = c_->cursor->coord().y() + 1 == buf->size();
                 if (!buf->eraseLine(1))
                     break;
 
@@ -120,6 +138,9 @@ void ModeLoopImpl::normalLoopRun()
                 c_->cursor->redraw();
                 break;
             }
+            case 'z':
+                buf->saveFile();
+                break;
             default:
                 break;
         }
@@ -131,7 +152,7 @@ void ModeLoopImpl::normalLoopRun()
 
 void ModeLoopImpl::insertLoopRun()
 {
-    Screen* scr = c_->screens->getScreen(ScreenId::main);
+    Screen* scr = c_->screens->screen(ScreenId::main);
     Buffer* buf = c_->buffer.get();
 
     bool quit = false;
@@ -139,7 +160,7 @@ void ModeLoopImpl::insertLoopRun()
     while (char c = scr->getChar())
     {
 
-        int numLines = buf->getSize();
+        int numLines = buf->size();
 
         if ((c > 31) && (c < 127))
         {
@@ -177,7 +198,7 @@ void ModeLoopImpl::insertLoopRun()
         if (quit)
             break;
 
-        if (buf->getSize() != numLines)
+        if (buf->size() != numLines)
             c_->sideBar->refresh();
     }
 }

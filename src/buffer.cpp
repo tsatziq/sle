@@ -25,11 +25,11 @@ public:
 
     void readFile(const std::string& path) override;
 
-    void saveFile(const std::string& path) override;
+    void saveFile(const std::string& path = "") override;
 
-    int getSize() const override;
+    int size() const override;
 
-    const Text* getData() const override;
+    const Text* data() const override;
 
     void clear() override;
 
@@ -48,11 +48,12 @@ private:
     std::vector<std::string> lines_{""};
     bool modified_ = false;
     Screen* scr_ = nullptr;
+    std::string filePath_{};
 };
 
 BufferImpl::BufferImpl(const Context* context)
     : c_(context)
-    , scr_(context->screens->getScreen(ScreenId::main))
+    , scr_(context->screens->screen(ScreenId::main))
 {}
 
 
@@ -69,14 +70,16 @@ void BufferImpl::readFile(const std::string& path)
     if (path.empty())
         return;
 
+    filePath_ = path;
     std::ifstream file(path);
     std::string line;
 
-    if (file.is_open()) {
-
+    if (file.is_open())
+    {
         lines_.clear();
 
-        while (file) {
+        while (file)
+        {
             std::getline(file, line);
             if (!line.empty())
                 lines_.push_back(line + "\n");
@@ -85,14 +88,29 @@ void BufferImpl::readFile(const std::string& path)
 }
 
 void BufferImpl::saveFile(const std::string& path)
-{}
+{
+    if (path.empty() && filePath_.empty())
+        return;
+    else if (!path.empty())
+        filePath_ = path;
 
-int BufferImpl::getSize() const
+    std::ofstream outFile(filePath_);
+
+    if (outFile.is_open())
+    {
+        for (const auto& s : lines_)
+            outFile << s;
+
+        outFile.close();
+    }
+}
+
+int BufferImpl::size() const
 {
     return lines_.size();
 }
 
-const Text* BufferImpl::getData() const
+const Text* BufferImpl::data() const
 {
     return &lines_;
 }

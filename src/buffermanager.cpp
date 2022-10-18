@@ -17,7 +17,7 @@ public:
 
     void deleteBuffer(BufferId id) override;
 
-    Buffer* getBuffer(BufferId id) const override;
+    Buffer* buffer(BufferId id) const override;
 
 private:
     BufferManagerImpl();
@@ -47,9 +47,9 @@ BufferId BufferManagerImpl::addBuffer()
 void BufferManagerImpl::deleteBuffer(BufferId id)
 {}
 
-Buffer* BufferManagerImpl::getBuffer(BufferId id) const
+Buffer* BufferManagerImpl::buffer(BufferId id) const
 {
-    return bufs_.at(id).get(); 
+    return bufs_.at(id).get();
 }
 
 }

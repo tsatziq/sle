@@ -28,7 +28,9 @@ public:
 
     virtual int firstLineNum() = 0;
 
-    virtual int getPageNum() = 0;
+    virtual int pageNum() = 0;
+
+    virtual int numLinesOnScr() = 0;
 
 protected:
     Pager() = default;

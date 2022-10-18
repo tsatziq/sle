@@ -26,7 +26,7 @@ NormalMode::Impl::Impl(const DispatcherPtr& dispatcher, const ScreenPtr& scr)
     : dispatcher_(dispatcher)
     , actions_(dispatcher)
     , scr_(scr)
-    , curse_(scr->getCurse())
+    , curse_(scr->curse())
 {
     actions_.on<StartNormalMode>([&](const StartNormalMode&)
     {

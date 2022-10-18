@@ -21,7 +21,7 @@ public:
 
     void deleteScreen(const ScreenId screen) override;
 
-    Screen* getScreen(const ScreenId id) const override;
+    Screen* screen(const ScreenId id) const override;
 
 private:
     ScreenManagerImpl(const Context* context);
@@ -95,7 +95,7 @@ ScreenId ScreenManagerImpl::addScreen(const Coord& startPoint)
 void ScreenManagerImpl::deleteScreen(const ScreenId screen)
 {}
 
-Screen* ScreenManagerImpl::getScreen(const ScreenId id) const
+Screen* ScreenManagerImpl::screen(const ScreenId id) const
 {
     Screen* scr{nullptr};
 
