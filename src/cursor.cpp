@@ -19,7 +19,9 @@ public:
 
     ~CursorImpl();
 
-    void move(const Coord textPos, const Coord scrPos) override;
+    void move(const Coord txtPos, const Coord scrPos) override;
+
+    void move(const Coord txtPos) override;
 
     void move(const QuickMove pos) override;
 
@@ -61,13 +63,18 @@ CursorPtr Cursor::create(const Context* context)
 CursorImpl::~CursorImpl()
 {}
 
-void CursorImpl::move(const Coord textPos, const Coord scrPos)
+void CursorImpl::move(const Coord txtPos, const Coord scrPos)
 {
-    if (!textPos.isUnset())
-        txtPos_ <<= textPos;
+    if (!txtPos.isUnset())
+        txtPos_ <<= txtPos;
     if (!scrPos.isUnset())
         scrPos_ <<= scrPos;
     redraw();
+}
+
+void CursorImpl::move(const Coord txtPos)
+{
+    move(txtPos, Coord(txtPos.x(), txtToScrCoord(txtPos.y())));
 }
 
 void CursorImpl::move(const QuickMove pos)

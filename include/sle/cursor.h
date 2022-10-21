@@ -30,7 +30,9 @@ public:
 
     virtual ~Cursor() = default;
 
-    virtual void move(const Coord textPos, const Coord scrPos) = 0;
+    virtual void move(const Coord txtPos, const Coord scrPos) = 0;
+
+    virtual void move(const Coord txtPos) = 0;
 
     virtual void move(const QuickMove pos) = 0;
 

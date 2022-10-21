@@ -1,6 +1,7 @@
 #ifndef SLE_FINDER_H
 #define SLE_FINDER_H
 
+#include "sle/coord.h"
 #include "sle/types.h"
 #include <memory>
 
@@ -19,6 +20,8 @@ public:
     static FinderPtr create(const Context* context);
 
     virtual ~Finder() = default;
+
+    virtual Coord findWord() = 0;
 
 protected:
     Finder() = default;

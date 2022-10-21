@@ -123,8 +123,11 @@ void ModeLoopImpl::normalLoopRun()
                 c_->pager->movePage(-1);
                 break;
             case 'w':
-                //buf->fwdWord(1);
+            {
+                Coord pos = c_->finder->findWord();
+                c_->cursor->move(pos);
                 break;
+            }
             case 'x':
             {
                 bool lastLine = c_->cursor->coord().y() + 1 == buf->size();
