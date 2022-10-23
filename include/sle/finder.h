@@ -21,7 +21,9 @@ public:
 
     virtual ~Finder() = default;
 
-    virtual Coord findWord() = 0;
+    virtual Coord nextWord() = 0;
+
+    virtual Coord prevWord() = 0;
 
 protected:
     Finder() = default;

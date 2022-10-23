@@ -3,6 +3,7 @@
 #include "sle/types.h"
 #include <algorithm>
 #include <cctype>
+#include <iterator>
 #include <memory>
 
 namespace sle
@@ -18,7 +19,9 @@ public:
 
     ~FinderImpl();
 
-    Coord findWord() override;
+    Coord nextWord() override;
+
+    Coord prevWord() override;
 
 private:
     FinderImpl(const Context* context);
@@ -47,7 +50,7 @@ FinderPtr Finder::create(const Context* context)
 FinderImpl::~FinderImpl()
 {}
 
-Coord FinderImpl::findWord()
+Coord FinderImpl::nextWord()
 {
     Coord pos = cursor_->coord();
     std::string line = txt_->at(pos.y());
@@ -70,11 +73,63 @@ Coord FinderImpl::findWord()
     else
     {
     // Adjust cursor position.
-    pos.setX(it - line.begin());
+    pos.setX(std::distance(line.begin(), it));
     pos.setX(pos.x() + 1);
 
     if (pos.x() > static_cast<int>(line.size() - 2))
         pos.setX(line.size() - 2);
+    }
+
+    return pos;
+}
+
+Coord FinderImpl::prevWord()
+{
+    Coord pos = cursor_->coord();
+
+    std::string line = txt_->at(pos.y());
+    int rX = (line.size() - 1) - pos.x(); // Index in reverse
+
+    auto end = std::reverse_iterator(line.rend());
+    auto begin = std::reverse_iterator(line.rbegin());
+    auto posNow = std::reverse_iterator(line.rbegin() + rX);
+
+    // If already at start of word, find prev word first.
+    if (*(posNow + 1) == ' ')
+    {
+        ++posNow;
+        while (*posNow == ' ')
+            ++posNow;
+    }
+
+    rX = std::distance(line.rbegin(), posNow);
+
+    auto rit = std::find_if(begin + rX, end,
+        [&](const auto& c) { return isWordBreak(c); });
+
+    if (rit == end)
+    {
+        // First line in text, return.
+        if (pos.y() == 0 || pos.y() == c_->pager->firstLineNum())
+            pos.setX(0);
+        // Started at beginning of line, skip to end of previous line.
+        else if (pos.x() == 0)
+        {
+            pos.setY(pos.y() - 1);
+            pos.setX(txt_->at(pos.y()).size() - 2);
+        }
+        // Started in first word, go to beginning of current line.
+        else
+            pos.setX(0);
+    }
+    else
+    {
+        // Adjust cursor position.
+        rX = std::distance(line.rbegin(), rit);
+        pos.setX(line.size() - rX);
+
+        if (pos.x() < 0)
+            pos.setX(0);
     }
 
     return pos;

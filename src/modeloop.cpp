@@ -79,8 +79,11 @@ void ModeLoopImpl::normalLoopRun()
                 c_->cursor->move(QuickMove::B);
                 break;
             case 'b':
-                //buf->backWord(1);
+            {
+                Coord pos = c_->finder->prevWord();
+                c_->cursor->move(pos);
                 break;
+            }
             case 'C':
                 c_->cursor->move(QuickMove::C);
                 break;
@@ -124,7 +127,7 @@ void ModeLoopImpl::normalLoopRun()
                 break;
             case 'w':
             {
-                Coord pos = c_->finder->findWord();
+                Coord pos = c_->finder->nextWord();
                 c_->cursor->move(pos);
                 break;
             }
