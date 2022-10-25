@@ -22,13 +22,21 @@ public:
 
     virtual void show() = 0;
 
-    virtual void movePage(const int count) = 0;
+    /// Move to (count) next/previous page.
+    virtual void nextPage(const int count) = 0;
+
+    /// Jump directly to a page number.
+    virtual void toPage(const unsigned pageNum) = 0;
 
     virtual int lastLineNum() = 0;
 
     virtual int firstLineNum() = 0;
 
-    virtual int pageNum() = 0;
+    /// Return the current page number.
+    virtual unsigned pageNum() const = 0;
+
+    /// Return the total amount of pages in file.
+    virtual unsigned pageTotal() const = 0;
 
     virtual int numLinesOnScr() = 0;
 

@@ -4,6 +4,7 @@
 #include "sle/types.h"
 #include <memory>
 #include <vector>
+#include <cmath>
 
 namespace sle {
 
@@ -20,13 +21,17 @@ public:
 
     void show() override;
 
-    void movePage(const int count) override;
+    void nextPage(const int count) override;
+
+    void toPage(const unsigned pageNum) override;
 
     int lastLineNum() override;
 
     int firstLineNum() override;
 
-    int pageNum() override;
+    unsigned pageNum() const override;
+
+    unsigned pageTotal() const override;
 
     int numLinesOnScr() override;
 
@@ -74,7 +79,7 @@ void PagerImpl::show()
     linesOnScr_ = lines.size();
 }
 
-void PagerImpl::movePage(const int count)
+void PagerImpl::nextPage(const int count)
 {
     // Check if move is legal
     int nTopLine = topVisibleLine_ + (count * scr_->height());
@@ -88,6 +93,20 @@ void PagerImpl::movePage(const int count)
     c_->cursor->move(Coord(0, topVisibleLine_), Coord(0, 0));
 }
 
+void PagerImpl::toPage(const unsigned pageNum)
+{
+    unsigned total = pageTotal();
+
+    if (pageNum > total || pageNum < total)
+        return;
+
+    // Calculate the top line of the requested page.
+    topVisibleLine_ = total * scr_->height();
+    pageNum_ = pageNum;
+    show();
+    c_->cursor->move(Coord(0, topVisibleLine_), Coord(0,0));
+}
+
 int PagerImpl::lastLineNum()
 {
     return topVisibleLine_ + linesOnScr_;
@@ -98,7 +117,7 @@ int PagerImpl::firstLineNum()
     return topVisibleLine_;
 }
 
-int PagerImpl::pageNum()
+unsigned PagerImpl::pageNum() const
 {
     return pageNum_;
 }
@@ -106,6 +125,11 @@ int PagerImpl::pageNum()
 int PagerImpl::numLinesOnScr()
 {
     return linesOnScr_;
+}
+
+unsigned PagerImpl::pageTotal() const
+{
+    return std::floor(txt_->size() / static_cast<double>(scr_->height()));
 }
 
 }

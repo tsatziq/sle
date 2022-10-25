@@ -88,10 +88,13 @@ void ModeLoopImpl::normalLoopRun()
                 c_->cursor->move(QuickMove::C);
                 break;
             case 'd':
-                c_->pager->movePage(1);
+                c_->pager->nextPage(1);
                 break;
             case 'E':
                 c_->cursor->move(QuickMove::E);
+                break;
+            case 'G':
+                c_->pager->toPage(c_->pager->pageTotal());
                 break;
             case 'i':
                 mode_ = Mode::insert;
@@ -123,7 +126,7 @@ void ModeLoopImpl::normalLoopRun()
                 mode_ = Mode::quit;
                 quit = true;
             case 'u':
-                c_->pager->movePage(-1);
+                c_->pager->nextPage(-1);
                 break;
             case 'w':
             {
