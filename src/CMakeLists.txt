@@ -11,5 +11,6 @@ target_sources(common
         cursor.cpp
         finder.cpp
         pager.cpp
+        chorder.cpp
 )
 

@@ -37,6 +37,13 @@ INSERTER/DELETER JNE:
 CHORDER:
 -ottais inputin ja kattois sen ennen kun tehaan mitaan.
 -taa vois olla hyva, varsinki jos tulee sit yli kahen keyn chordeja.
+-INPUT: The input character from getChar()
+-OUTPUT: An enum of char/chord, or maybe a string is easier?
+If it is an enum, you may do just one value that is INVALID, which is returned if it is not
+a valid command.
+-HOLDS: The state of the pending input.
+-NOTES: How to manage when it should wait for another input? Do we need a timer or something?
+MAYBE do like there is a class Input or something, and inside that it uses the Chorder...
 
 ### NEXT ###
 -toi leftRight ja varmaan upDown:

@@ -12,13 +12,6 @@ class ScreenManager;
 class ModeLoop;
 using ModeLoopPtr = std::unique_ptr<ModeLoop>;
 
-enum class Mode {
-    normal,
-    insert,
-    cmd,
-    quit,
-};
-
 class ModeLoop
 {
 public:

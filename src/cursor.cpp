@@ -164,16 +164,23 @@ void CursorImpl::upDown(const int count)
 
 void CursorImpl::leftRight(const int count)
 {
-    // Check if the move is legal in scr.
+    // Calculate new text and screen positions.
     int nScrCol = scrPos_.x() + count;
+    int nTxtCol = txtPos_.x() + count;
+
+    // Checking the screen bounds is enough in insert mode.
     if (nScrCol >= scr_->width() || nScrCol < 0)
         return;
 
-    // Then check if it is legal in the text.
-    int nTxtCol = txtPos_.x() + count;
-    int length = txt_->at(txtPos_.y()).size() - 1;
-    if (nTxtCol >= length || nTxtCol < 0)
-        return;
+    if (c_->currentMode->mode == Mode::normal)
+    {
+        if (txt_->at(txtPos_.y())[nScrCol] == '\n')
+            return;
+        if (txt_->at(txtPos_.y())[nTxtCol - 1] == '\n')
+            return;
+        if (nTxtCol > txt_->at(txtPos_.y()).size() || nTxtCol < 0)
+            return;
+    }
 
     txtPos_.setX(nTxtCol);
     scrPos_.setX(nScrCol);

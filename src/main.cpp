@@ -1,6 +1,7 @@
 #include "sle/context.h"
 #include "sle/screenmanager.h"
 #include "sle/buffer.h"
+#include "sle/chorder.h"
 #include "sle/cursor.h"
 #include "sle/finder.h"
 #include "sle/pager.h"
@@ -24,7 +25,7 @@ int main(int argc, char** argv)
     context.pager = Pager::create(&context);
     context.cursor = Cursor::create(&context);
     context.finder = Finder::create(&context);
-
+    context.chorder = Chorder::create(&context);
 
     context.buffer->readFile(file);
     context.pager->show();

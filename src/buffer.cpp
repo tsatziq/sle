@@ -45,7 +45,7 @@ private:
     BufferImpl(const Context* context);
 
     const Context* c_;
-    std::vector<std::string> lines_{""};
+    std::vector<std::string> lines_{"\n"};
     bool modified_ = false;
     Screen* scr_ = nullptr;
     std::string filePath_{};
@@ -132,11 +132,12 @@ void BufferImpl::addChar(const char c)
 
     lines_.at(cursor.y()).insert(cursor.x(), 1, c);
 
-/*
-    lines_.at(cursor_.y()).insert(cursor_.x(), 1, c);
     if (c == '\n')
-        lines_.push_back("");
-*/
+    {
+        auto sub = lines_.at(cursor.y()).substr(cursor.x() + 1);
+        lines_.at(cursor.y()).erase(cursor.x() + 1);
+        lines_.insert(lines_.begin() + cursor.y() + 1, sub);
+    }
 }
 
 bool BufferImpl::eraseChar(const int num)

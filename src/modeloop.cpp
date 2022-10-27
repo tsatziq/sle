@@ -48,22 +48,25 @@ ModeLoopImpl::~ModeLoopImpl()
 
 void ModeLoopImpl::start()
 {
-    while (mode_ != Mode::quit) {
+    while (mode_ != Mode::quit)
+    {
         switch (mode_) {
             case Mode::normal:
+                c_->currentMode->mode = Mode::normal;
                 normalLoopRun();
                 break;
             case Mode::insert:
+                c_->currentMode->mode = Mode::insert;
                 insertLoopRun();
                 break;
             case Mode::cmd:
+                c_->currentMode->mode = Mode::cmd;
                 cmdLoopRun();
                 break;
             default:
                 break;
         }
     }
-
 }
 
 void ModeLoopImpl::normalLoopRun()
@@ -187,11 +190,15 @@ void ModeLoopImpl::insertLoopRun()
                 break;
 
             case 10:
+            {
                 buf->addChar('\n');
-                //buf->moveCursor(0,1);
-                //buf->setX(0);
+                Coord pos = c_->cursor->coord();
+                pos.setX(0);
+                pos.setY(pos.y() + 1);
                 c_->pager->show();
+                c_->cursor->move(pos);
                 break;
+            }
 
             case 127:
                 if (buf->eraseChar(-1))
