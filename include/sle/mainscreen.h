@@ -2,39 +2,26 @@
 #define SLE_MAINSCREEN_H
 
 #include "sle/screen.h"
-#include "sle/dispatcher.h"
-#include "sle/linetype.h"
 
 namespace sle
 {
 
-struct PaintMainScr {
-    StrPacket txt;
-};
-
-class MainScreen :
-    public ScreenBase
+class MainScreen
 {
 public:
-	static ScreenPtr create(
-		const DispatcherPtr& dispatcher,
-		const ScreenSize& maxSize); 
+	MainScreen();
 
-    virtual ~MainScreen() = default;
+    ~MainScreen() = default;
 
-    virtual void paint(
-        const StrPacket& text) = 0;
+    void init(int height, int width);
+
+    void paint(const std::vector<std::string>& text) = 0;
+
+private:
+    CursePtr screen_ = nullptr_;
+    int width_, height_;
+
 };
-// FUNCTIONS:
-// -show text that fits in screen
-// -scrolling, next/prev page
-//     -except these too are handled by others and then tehy just say PAINT
-// 		-toisaalta kylla taa vois teha scrollin jos haluu, mut emt. ehk parempi ettei
-// -remember height,width,number of lines, modes etc.
-// possibly folding, wrapping, search, even completion?
-// 
-// NII enta jos oliski aina et koko muuttuu. lahtee eventti jos on uus max size,
-// ja sit eri ikkunat ite muutas kokoaan? no mieti.. alus ainaki saa luua ittensa
 
 } // namespace sle
 

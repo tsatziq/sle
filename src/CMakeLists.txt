@@ -2,16 +2,8 @@
 
 target_sources(common
     PRIVATE
-        test.cpp
-        dispatcher.cpp
-        poll.cpp
-    	screenmanager.cpp
     	mainscreen.cpp
-    	sidebar.cpp
-    	cmdline.cpp
-		modeline.cpp
         filehandler.cpp
         buffer.cpp
-        linetype.cpp
 )
 
