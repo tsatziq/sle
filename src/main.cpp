@@ -1,22 +1,25 @@
-#include "sle/test.h"
-#include "sle/dispatcher.h"
-#include "sle/screenmanager.h"
+#include "sle/context.h"
+#include "sle/buffer.h"
+#include "sle/editloop.h"
 #include "sle/filehandler.h"
-#include <cstdlib>
+#include "sle/mainscreen.h"
+#include <memory>
 
 using namespace sle;
 
 int main()
 {
-    DispatcherPtr dispatcher = Dispatcher::createDefault();
-    //Tester test = Tester(dispatcher);
-    //dispatcher->sendEvent(TestEvent());
+    Context context;
 
-    FileHandler fileHandler = FileHandler(dispatcher, "testtxt");
-	ScreenManagerPtr scrManager = ScreenManager::create(dispatcher);
-    
-    dispatcher->dispatch();
-    // varmista etta jatkossakin valittaa eventit
+    std::shared_ptr<Buffer> buf = std::make_shared<Buffer>(context);
+    std::shared_ptr<EditLoop> loop = std::make_shared<EditLoop>(context);
+    std::shared_ptr<FileHandler> file = std::make_shared<FileHandler>(context);
+    std::shared_ptr<MainScreen> scr = std::make_shared<MainScreen>(context);
+
+    context.buf = buf;;
+    context.loop = loop;
+    context.file = file;
+    context.scr = scr;
 
     EXIT_SUCCESS;
 }

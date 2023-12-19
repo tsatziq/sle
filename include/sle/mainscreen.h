@@ -1,6 +1,7 @@
 #ifndef SLE_MAINSCREEN_H
 #define SLE_MAINSCREEN_H
 
+#include "sle/context.h"
 #include "sle/screen.h"
 
 namespace sle
@@ -9,18 +10,19 @@ namespace sle
 class MainScreen
 {
 public:
-	MainScreen();
+	MainScreen(
+        const Context& context);
 
-    ~MainScreen() = default;
+    ~MainScreen();
 
-    void init(int height, int width);
-
-    void paint(const std::vector<std::string>& text) = 0;
+    void init(
+        int height,
+        int width);
 
 private:
-    CursePtr screen_ = nullptr_;
+    Context c_;
+    CursePtr scr_ = nullptr;
     int width_, height_;
-
 };
 
 } // namespace sle

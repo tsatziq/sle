@@ -1,5 +1,5 @@
-#ifndef SLE_FILEHANDLER_H
-#define SLE_FILEHANDLER_H
+#ifndef SLE_EDITLOOP_H
+#define SLE_EDITLOOP_H
 
 #include "sle/context.h"
 #include <memory>
@@ -9,10 +9,10 @@
 namespace sle
 {
 
-class FileHandler
+class EditLoop
 {
 public:
-    FileHandler(
+    EditLoop(
         const Context& context);
 
     void init();
@@ -23,4 +23,4 @@ private:
 
 } // namespace sle
 
-#endif // SLE_FILEHANDLER_H
+#endif // SLE_EDITLOOP_H

@@ -2,8 +2,10 @@
 
 target_sources(common
     PRIVATE
-    	mainscreen.cpp
-        filehandler.cpp
         buffer.cpp
+        ${CMAKE_SOURCE_DIR}/include/sle/context.h
+        editloop.cpp
+        filehandler.cpp
+    	mainscreen.cpp
 )
 

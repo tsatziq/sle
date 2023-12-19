@@ -10,15 +10,10 @@ add_executable(sle src/main.cpp)
 add_library(common "")
 add_subdirectory(src)
 
-# probably dont need this, include in common as public instead
-#target_include_directories(sle PUBLIC
-#    "${PROJECT_SOURCE_DIR}/include")
-
 target_include_directories(common PUBLIC
     "${PROJECT_SOURCE_DIR}/include"
     ${CURSES_INCLUDE_DIRS})
 
-#target_link_libraries(common PUBLIC )
 target_link_libraries(sle PUBLIC common ${CURSES_LIBRARIES})
 target_compile_features(common PRIVATE cxx_std_17)
 target_compile_features(sle PRIVATE cxx_std_17)

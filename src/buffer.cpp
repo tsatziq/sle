@@ -3,10 +3,14 @@
 namespace sle
 {
 
-    Buffer::Buffer()
-    {}
+Buffer::Buffer(
+    const Context& context)
+    :
+    c_(context)
+{}
 
-    Buffer::~Buffer()
-    {}
+void Buffer::init()
+{
+}
 
 }

@@ -1,21 +1,24 @@
 #ifndef SLE_BUFFER_H
 #define SLE_BUFFER_H
 
+#include "sle/context.h"
 #include <map>
 #include <memory>
 
-namespace sle {
+namespace sle
+{
 
-class Buffer;
-using BufferPtr = std::unique_ptr<Buffer>;
-
-class Buffer {
+class Buffer
+{
 public:
-    Buffer();
+    Buffer(
+        const Context& context);
 
-    ~Buffer();
+    void init();
 
 private:
+    Context c_;
+
     //void addToScreen(const LineNum from);
     /* 
     std::map<LineNum, std::string> lines_;
