@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(sle VERSION 0.1)
+set(CMAKE_BUILD_TYPE Debug)
 
 # find packages
 find_package(Curses REQUIRED)

@@ -2,6 +2,7 @@
 #define SLE_EDITLOOP_H
 
 #include "sle/context.h"
+#include "sle/buffer.h"
 #include <memory>
 #include <vector>
 #include <string>
@@ -13,12 +14,12 @@ class EditLoop
 {
 public:
     EditLoop(
-        const Context& context);
+        const ContextPtr& context);
 
     void init();
 
 private:
-    Context c_;
+    ContextPtr c_ = nullptr;
 };
 
 } // namespace sle

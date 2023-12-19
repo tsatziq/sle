@@ -1,23 +1,67 @@
 #ifndef SLE_BUFFER_H
 #define SLE_BUFFER_H
 
+#include "sle/point.h"
 #include "sle/context.h"
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace sle
 {
+
+enum class Direction
+{
+    NONE,
+    HORIZONTAL,
+    VERTICAL,
+};
 
 class Buffer
 {
 public:
     Buffer(
-        const Context& context);
+        const ContextPtr& context);
 
     void init();
 
+    void addCh(
+        const char ch);
+
+    void addText(
+        const std::string& txt);
+
+    void addText(
+        const std::vector<std::string>& txt);
+
+    const std::vector<std::string>& getText();
+
+    //korvaa toi vector string joskus sharedpointerilla
+    std::vector<std::string> getRange(
+        const Range& range) const;
+
+    void move(
+        const Direction dir,
+        const int count);
+
+    // joku to from screen coord static funk?
+    // ettei tartte muistaa eriksee screen ja buf kursoria
+    // kattoo vaa ettei mee yli rajojen ja et mik' on ylin nakyva rivi.
+    // screenille kans cursor? ja jonneki ehk isPointVisible() ja sit
+    // noi convert funkkarit.
+    // pitasko sittenki olla vaa yks screen ja yks buffer. sitte tehaa
+    // serveri joka handlaa sen filujen vaihdon jne? ois ainaki simppeli
+    // sais contextii kaiken :s
+    // oisko toScreenPoint tjsp tos screen luokassa. ja isPointVisible()
+    // muista kattoo et onko menny sivureunojen yli jne.
+    // sitte toBufferPoint pitas olla helppo, mut tarkasta kuitneki et
+    // se pointti ei ole tyhjaa tilaa.
+
 private:
-    Context c_;
+    ContextPtr c_ = nullptr;
+    std::vector<std::string> txt_;
+    Point point_;
 
     //void addToScreen(const LineNum from);
     /* 

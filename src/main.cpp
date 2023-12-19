@@ -9,17 +9,20 @@ using namespace sle;
 
 int main()
 {
-    Context context;
+    ContextPtr context = std::make_shared<Context>();
 
-    std::shared_ptr<Buffer> buf = std::make_shared<Buffer>(context);
-    std::shared_ptr<EditLoop> loop = std::make_shared<EditLoop>(context);
-    std::shared_ptr<FileHandler> file = std::make_shared<FileHandler>(context);
-    std::shared_ptr<MainScreen> scr = std::make_shared<MainScreen>(context);
+    Buffer buf(context);
+    EditLoop loop(context);
+    FileHandler file(context);
+    MainScreen scr(context);
 
-    context.buf = buf;;
-    context.loop = loop;
-    context.file = file;
-    context.scr = scr;
+    context->buf = &buf;
+    context->loop = &loop;
+    context->file = &file;
+    context->scr = &scr;
+
+    scr.init();
+    loop.init();
 
     EXIT_SUCCESS;
 }
