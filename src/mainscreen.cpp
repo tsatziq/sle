@@ -1,4 +1,5 @@
 #include "sle/mainscreen.h"
+#include "sle/buffer.h"
 #include <iostream>
 #include <ncurses.h>
 
@@ -21,8 +22,6 @@ void MainScreen::init()
 {
     initscr();
     noecho();
-    idlok(scr_, true);
-    scrollok(scr_, true);
     getmaxyx(stdscr, height_, width_); 
     scr_ = newwin(height_, width_, 0, 0);
 }
@@ -40,15 +39,6 @@ void MainScreen::paintCh(
     case '\n':
         addNewline();
         break;
-    case 'p':
-        wmove(scr_, height_ - 1, 0);
-        break;
-    case 'o':
-        waddch(scr_, '\n');
-        break; 
-    case 'l':
-        wmove(scr_, height_, 0);
-        break;
     default:
         if (cursor_.x() < width_ - 2)
         {
@@ -62,34 +52,51 @@ void MainScreen::paintCh(
         }
         break;
     }
-        
-    // SEURAAVAKSI: tahan et pitkat rivit tulee \ vai mika onkaa symboli
-    // ei wrappia. ja kato et newlinet tulee. ja paivita visiblerange ja
-    // handlaa scrolli kun ruutu tayttyy.
 }
 
 void MainScreen::addNewline()
 {
-        mvwaddch(scr_, cursor_.y(), cursor_.x(), '\n');
-        cursor_.set(0, cursor_.y() + 1);
-    /*else
+    if (cursor_.y() < height_ - 1)
     {
         mvwaddch(scr_, cursor_.y(), cursor_.x(), '\n');
         cursor_.set(0, cursor_.y() + 1);
-        wscrl(scr_, 1);
-    }*/
-
+        c_->visibleRange.end().incY();
+    }
+    else
+    {
+        c_->visibleRange.start().incY();
+        werase(scr_);
+        paint(c_->buf->getRange(c_->visibleRange));
+        c_->visibleRange.end().incY();
+        int x, y;
+        getyx(scr_, y, x);
+        cursor_.set(x, y);
+    }
 }
 
-/*
 void MainScreen::paint(const std::vector<std::string>& text)
 {
-    for (std::string line : text) {
-        wprintw(scr_, line.c_->tr());
-    } 
-
-    wrefresh(scr_);
+    wmove(scr_, 0, 0);
+    for (const auto& str : text)
+        wprintw(scr_, str.c_str());
 }
-*/
+
+void MainScreen::test()
+{
+    werase(scr_);
+
+    std::vector<std::string> v =
+    {
+        "heipp vaan taas",
+        "kokeillaan onnistuisko tama jotenkin nyt",
+        "ehkapa viela muutama pieni rivi",
+        "ja sitten saa hetkeksi riittaa."
+    };
+
+    paint(v);
+    int x, y;
+    getyx(scr_, y, x);
+    cursor_.set(x, y);
+}
 
 }

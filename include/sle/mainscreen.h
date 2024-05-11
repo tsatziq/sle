@@ -24,13 +24,18 @@ public:
     void paintCh(
         const char c);
 
+    /// Paints lines from start of the screen.
+    void paint(const std::vector<std::string>& text);
+
+    void test();
+
 private:
     void addNewline();
 
     ContextPtr c_ = nullptr;
     CursePtr scr_ = nullptr;
     int width_, height_;
-    Point cursor_;
+    Point cursor_ = Point(0, 0);
 };
 
 } // namespace sle

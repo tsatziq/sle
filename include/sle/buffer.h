@@ -39,7 +39,7 @@ public:
 
     //korvaa toi vector string joskus sharedpointerilla
     std::vector<std::string> getRange(
-        const Range& range) const;
+        Range range);
 
     void move(
         const Direction dir,
@@ -60,8 +60,8 @@ public:
 
 private:
     ContextPtr c_ = nullptr;
-    std::vector<std::string> txt_;
-    Point point_;
+    std::vector<std::string> txt_ = { std::string() };
+    Point point_ = Point(0, 0);
 
     //void addToScreen(const LineNum from);
     /* 

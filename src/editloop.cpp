@@ -25,9 +25,12 @@ void EditLoop::init()
         case 'q':
             endLoop = true;
             break;
+        case 'z':
+            c_->scr->test();
+            break;
         default:
-            c_->scr->paintCh(ch);
             c_->buf->addCh(ch);
+            c_->scr->paintCh(ch);
             break;
         }
 

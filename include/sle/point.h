@@ -1,6 +1,8 @@
 #ifndef SLE_POINT_H
 #define SLE_POINT_H
 
+#include <memory>
+
 namespace sle
 {
 
@@ -127,14 +129,44 @@ public:
         :
         start_(start),
         end_(end)
-        {}
+    {
+        sortRange();
+    }
 
-    Point start() const
+    // Ensure start of range is lower than the end.
+    void sortRange()
+    {
+        if (start_.y() < 0)
+            start_.setY(0);
+        if (start_.x() < 0)
+            start_.setX(0);
+        if (end_.y() < 0)
+            end_.setY(0);
+        if (end_.x() < 0)
+            end_.setX(0);
+
+        if (start_.y() > end_.y())
+        {
+            Point tmp = start_;
+            start_ = end_;
+            end_ = tmp;
+        }
+
+        if ((start_.y() == end_.y())
+            && (start_.x() > end_.x()))
+        {
+            int tmp = start_.x();
+            start_.setX(end_.x());
+            end_.setX(tmp);
+        }
+    }
+
+    Point& start() 
     {
         return start_;
     }
 
-    Point end() const
+    Point& end()
     {
         return end_;
     }
@@ -145,6 +177,7 @@ public:
     {
         start_ = start;
         end_ = end;
+        sortRange();
     }
 
     void setStart(
@@ -158,11 +191,35 @@ public:
     {
         end_ = end;
     }
+
+    void fitToSize(
+        const int lines,
+        const int firstLnLen,
+        const int lastLnLen)
+    {
+        int lastIndex = lines - 1;
+
+        if (end_.y() > lastIndex)
+            end_.setY(lastIndex);
+        if (start_.y() > lastIndex)
+            return;
+    
+        if (!firstLnLen)
+            start_.setX(0);
+        else if (start_.x() > firstLnLen - 1)
+            start_.setX(firstLnLen - 1);
+        if (!lastLnLen)
+            end_.setX(0);
+        else if (end_.x() > lastLnLen - 1)
+            end_.setX(lastLnLen - 1);
+    }
         
 private:
     Point start_;
     Point end_;
 };
+
+using RangePtr = std::shared_ptr<Range>;
 
 } // namespace tickingbot
 
