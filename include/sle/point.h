@@ -110,7 +110,7 @@ public:
     {
         --y_;
     }
-        
+
 private:
     int x_ = 0;
     int y_ = 0;
@@ -197,6 +197,10 @@ public:
         const int firstLnLen,
         const int lastLnLen)
     {
+        // SEURAAVAKS: toimii/kaytetaan huonosti! jos annan firstlnlen koko txt_ ekan rivin
+        // pituuden, mut se range on vaa joku yks rivi muualla, ni mita jarkee?
+        // siit aiheutu ongelmia.
+        // voi olla et getRangessaki sita kyaytetaa vaarin! korjasin erases sita vahan, varmista
         int lastIndex = lines - 1;
 
         if (end_.y() > lastIndex)
@@ -212,6 +216,16 @@ public:
             end_.setX(0);
         else if (end_.x() > lastLnLen - 1)
             end_.setX(lastLnLen - 1);
+    }
+
+    std::size_t lines() const
+    {
+        return end_.y() - start_.y() + 1;
+    }
+
+    bool empty() const
+    {
+        return (start_.y() == end_.y()) && (start_.x() == end_.x());
     }
         
 private:

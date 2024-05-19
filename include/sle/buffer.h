@@ -14,8 +14,10 @@ namespace sle
 enum class Direction
 {
     NONE,
-    HORIZONTAL,
-    VERTICAL,
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
 };
 
 class Buffer
@@ -41,9 +43,27 @@ public:
     std::vector<std::string> getRange(
         Range range);
 
-    void move(
-        const Direction dir,
-        const int count);
+    const Point&  move(
+        const Direction& dir,
+        const unsigned count = 1);
+
+    const Point& move(
+        const Direction& dir,
+        const int count) = delete;
+
+    std::size_t size() const;
+
+    /// Returns length of the line.
+    std::size_t lineLen(
+        const Point& point) const;
+
+    // kato tarviiko tata loppujen lopuks, kunka usein kaytetaan.
+    /// Returns rest of line from the specified point onwards.
+    std::string getLine(
+        const Point& start) const;
+
+    void erase(
+        Range& range);
 
     // joku to from screen coord static funk?
     // ettei tartte muistaa eriksee screen ja buf kursoria

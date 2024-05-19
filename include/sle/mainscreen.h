@@ -21,13 +21,32 @@ public:
     int getCh();
 
     /// Paints a character at current position of screen cursor.
-    void paintCh(
+    /// \return False, if char could not be painted (e.g. line too long).
+    bool paintCh(
         const char c);
 
     /// Paints lines from start of the screen.
     void paint(const std::vector<std::string>& text);
 
     void test();
+
+    /// Moves the cursor within the bounds of the screen.
+    ///
+    /// If the specified point is not within the screen, cursor does not move.
+    /// \param point Point in the coordinate space of the screen.
+    void moveCursor(
+        const Point& point);
+
+    /// Converts a point in buffer space to a point in the screen space.
+    Point toScrCoord(
+        const Point& bufCoord) const;
+
+    /// Converts a point in screen space to a point in the buffer space.
+    Point toBufCoord(
+        const Point& scrCoord) const;
+
+    /// Returns true if there is text after the cursor.
+    bool isAtLineEnd() const;
 
 private:
     void addNewline();
