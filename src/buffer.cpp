@@ -29,9 +29,12 @@ void Buffer::addCh(
     {
         point_.incX();
         std::string cutText = getLine(point_);
-        Range delRange = Range(point_, Point(lineLen(point_) - 1, point_.y()));
-        erase(delRange);
 
+        if (!cutText.empty())
+        {
+            Range delRange{point_, Point(lineLen(point_) - 1, point_.y())};
+            erase(delRange);
+        }
 
         txt_.insert(txt_.begin() + point_.y() + 1, cutText);
         point_.set(0, point_.y() + 1);
@@ -74,14 +77,21 @@ std::vector<std::string> Buffer::getRange(
     if (newVec.empty())
         return {};
 
-    std::string& firstLn = newVec.front();
-    std::string& lastLn = newVec.back();
+    if (range.start().isXSet())
+    {
+        std::string& firstLn = newVec.front();
 
-    if (firstLn.length() >= range.start().x()) 
-        firstLn = firstLn.substr(range.start().x());
+        if (firstLn.length() >= range.start().x()) 
+            firstLn = firstLn.substr(range.start().x());
+    }
 
-    if (lastLn.length() >= range.end().x()) 
-        lastLn = lastLn.substr(range.end().x());
+    if (range.end().isXSet())
+    {
+        std::string& lastLn = newVec.back();
+
+        if (lastLn.length() >= range.end().x()) 
+            lastLn = lastLn.substr(range.end().x());
+    }
 
    return newVec;
 }
@@ -98,6 +108,61 @@ const Point& Buffer::move(
         else
            point_.setX(0);
         break;
+    case Direction::RIGHT:
+    {
+        auto length = lineLen(point_);
+
+        if ((point_.x() + count) > length - 2)
+        {
+            if (length <= 2)
+                point_.setX(0);
+            else if (point_.y() == size() - 1)
+                point_.setX(length - 1);
+            else
+                point_.setX(length - 2);
+        }
+        else
+            point_.setX(point_.x() + count);
+        break;
+    }
+    case Direction::UP:
+    {
+        if (point_.y() > count)
+            point_.setY(point_.y() - count);
+        else
+            point_.setY(0);
+
+        auto nextLnLen = lineLen(point_);
+
+        if (nextLnLen <= point_.x())
+        {
+            if (nextLnLen <= 2)
+                point_.setX(0);
+            else
+                point_.setX(nextLnLen - 2);
+        }
+        break;
+    }
+    case Direction::DOWN:
+    {
+        if (point_.y() + count > size() - 1)
+            point_.setY(size() - 1);
+        else
+            point_.setY(point_.y() + count);
+
+        auto nextLnLen = lineLen(point_);
+
+        if (nextLnLen <= point_.x())
+        {
+            if (nextLnLen <= 2)
+                point_.setX(0);
+            else if (point_.y() == size() - 1)
+                point_.setX(nextLnLen - 1);
+            else
+                point_.setX(nextLnLen - 2);
+        }
+        break;
+    }
     default:
         break;
     }
@@ -125,10 +190,15 @@ std::string Buffer::getLine(
 void Buffer::erase(
     Range& range)
 {
-    range.fitToSize(txt_.size(), txt_.at(range.start().y()).size(), txt_.at(range.end().y()).size());
+    // pitasko olla tan sijaan vaa assert noista? ja range cosntructoris
+    // varmistaa et pienempi arvo on start? tai joku isValid?
+    range.fitToSize(
+        txt_.size(),
+        txt_.at(range.start().y()).size(),
+        txt_.at(range.end().y()).size());
 
-    if (range.empty())
-        return;
+    //if (range.empty())
+     //   return;
 
     if (range.lines() == 1)
         txt_.at(range.start().y()).erase(range.start().x(), range.end().x());
@@ -141,7 +211,35 @@ void Buffer::erase(
             txt_.at(range.end().y()).erase(0, range.end().x());
     }
     else if (range.lines() > 2)
-        txt_.erase(txt_.begin() + range.start().y() + 1, txt_.begin() + range.end().y());
+        txt_.erase(
+            txt_.begin() + range.start().y() + 1,
+            txt_.begin() + range.end().y());
+}
+
+const Point& Buffer::cursor() const
+{
+    return point_;
+}
+
+const Point& Buffer::setCursor(
+    Point newPos)
+{
+    auto lastY = size();
+    auto lastX = txt_.at(newPos.y()).size();
+
+    if (newPos.y() != point_.y())
+        if (newPos.y() > 0 && newPos.y() <= lastY)
+           point_.setY(newPos.y());
+
+    if (newPos.x() != point_.x())
+    {
+        if (newPos.x() > lastX)
+            point_.setX(lastX);
+        else if (newPos.x() > 0)
+            point_.setX(newPos.x());
+    }
+
+    return point_;
 }
 
 }

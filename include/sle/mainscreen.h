@@ -25,8 +25,10 @@ public:
     bool paintCh(
         const char c);
 
-    /// Paints lines from start of the screen.
-    void paint(const std::vector<std::string>& text);
+    /// Paints supplied lines starting from specified point.
+    void paint(
+        const std::vector<std::string>& text,
+        Point point = Point(0, 0));
 
     void test();
 

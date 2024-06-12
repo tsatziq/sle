@@ -68,22 +68,15 @@ void MainScreen::addNewline()
         if (c_->buf->size() - 1 < height_)
             c_->visibleRange.end().incY();
 
+        wclrtoeol(scr_);
+        cursor_.set(0, cursor_.y() + 1);
+
         auto moveLines = c_->buf->getRange({
-            toBufCoord(Point(0, cursor_.y())), 
+            toBufCoord(cursor_), 
             c_->visibleRange.end()});
 
-        Point cursorPos = cursor_;
-        int i = cursor_.y();
-        for (const auto& line : moveLines)
-        {
-            moveCursor({0, i});
-            wclrtoeol(scr_);
-            mvwaddstr(scr_, i, 0, line.c_str());
-            ++i;
-        }
-        
-        cursorPos.set(0, cursorPos.y() + 1);
-        moveCursor(cursorPos);
+        paint(moveLines, cursor_);
+        moveCursor(cursor_);
     }
     else
     {
@@ -91,27 +84,25 @@ void MainScreen::addNewline()
         c_->visibleRange.end().incY();
 
         auto moveLines = c_->buf->getRange(c_->visibleRange);
-        int i = 0;
-        for (const auto& line : moveLines)
-        {
-            moveCursor({0, i});
-            wclrtoeol(scr_);
-            mvwaddstr(scr_, i, 0, line.c_str());
-            ++i;
-        }
 
-        cursor_.set(0, cursor_.y());
-        moveCursor(cursor_);
+        paint(moveLines);
+        moveCursor({0, cursor_.y()});
     };
 }
 
-void MainScreen::paint(const std::vector<std::string>& text)
+void MainScreen::paint(
+    const std::vector<std::string>& text,
+    Point point)
 {
-    wmove(scr_, 0, 0);
+    wmove(scr_, point.y(), point.x());
+    point.setX(0);
+
     for (const auto& str : text)
     {
         wclrtoeol(scr_);
         wprintw(scr_, str.c_str());
+        point.incY();
+        wmove(scr_, point.y(), point.x());
     }
 }
 

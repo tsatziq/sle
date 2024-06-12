@@ -43,7 +43,7 @@ public:
     std::vector<std::string> getRange(
         Range range);
 
-    const Point&  move(
+    const Point& move(
         const Direction& dir,
         const unsigned count = 1);
 
@@ -65,31 +65,23 @@ public:
     void erase(
         Range& range);
 
-    // joku to from screen coord static funk?
-    // ettei tartte muistaa eriksee screen ja buf kursoria
-    // kattoo vaa ettei mee yli rajojen ja et mik' on ylin nakyva rivi.
-    // screenille kans cursor? ja jonneki ehk isPointVisible() ja sit
-    // noi convert funkkarit.
-    // pitasko sittenki olla vaa yks screen ja yks buffer. sitte tehaa
-    // serveri joka handlaa sen filujen vaihdon jne? ois ainaki simppeli
-    // sais contextii kaiken :s
-    // oisko toScreenPoint tjsp tos screen luokassa. ja isPointVisible()
-    // muista kattoo et onko menny sivureunojen yli jne.
-    // sitte toBufferPoint pitas olla helppo, mut tarkasta kuitneki et
-    // se pointti ei ole tyhjaa tilaa.
+    const Point& cursor() const;
+
+    /// Sets the cursor to specified point. 
+    ///
+    /// If the position is invalid, sets to the nearest valid position.
+    /// \param newPos The new position of the cursor.
+    /// \returns The new position of the cursor.
+    const Point& setCursor(
+        Point newPos);
+
+    // TODO: muuta toi point ja ehk ranga smart ptr!!! tekee pahaa passata
+    // non const valuena. mut valil pakko.
 
 private:
     ContextPtr c_ = nullptr;
     std::vector<std::string> txt_ = { std::string() };
     Point point_ = Point(0, 0);
-
-    //void addToScreen(const LineNum from);
-    /* 
-    std::map<LineNum, std::string> lines_;
-    LineNum topVisibleLine_;
-    LineNum screenHeight_;
-    bool modified_;
-    */
 };
 
 } // namespace sle

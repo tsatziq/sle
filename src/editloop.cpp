@@ -32,14 +32,65 @@ public:
                 endLoop = true;
                 quitProg = true;
                 break;
+            case 'a':
+            {
+                Point cursor = c_->buf->cursor();
+                cursor = c_->buf->setCursor(cursor.incX());
+                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+
+                parent_->changeMode(Mode::INSERT);
+                endLoop = true;
+                quitProg = false;
+                break;
+            }
+            case 'h':
+            {
+                auto cursor = c_->buf->move(Direction::LEFT);
+                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+                break;
+            }
             case 'i':
                 parent_->changeMode(Mode::INSERT);
                 endLoop = true;
                 quitProg = false;
                 break;
-            case 'h':
+            case 'j':
             {
-                auto cursor = c_->buf->move(Direction::LEFT);
+                auto cursor = c_->buf->move(Direction::DOWN);
+                auto& range = c_->visibleRange;
+
+                if (!range.contains(cursor))
+                {
+                    int diff = cursor.y() - range.end().y();
+                    range.start().setY(range.start().y() + diff); 
+                    range.end().setY(cursor.y());
+
+                    c_->scr->paint(c_->buf->getRange(range));
+                }
+
+                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+                break;
+            }
+            case 'k':
+            {
+                auto cursor = c_->buf->move(Direction::UP);
+                auto& range = c_->visibleRange;
+
+                if (!range.contains(cursor))
+                {
+                    int diff = range.start().y() - cursor.y();
+                    range.end().setY(range.end().y() - diff);
+                    range.start().setY(cursor.y());
+
+                    c_->scr->paint(c_->buf->getRange(range));
+                }
+                
+                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+                break;
+            }
+            case 'l':
+            {
+                auto cursor = c_->buf->move(Direction::RIGHT);
                 c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
                 break;
             }
@@ -83,9 +134,13 @@ public:
             switch (ch)
             {
             case 'q':
+            {
+                auto cursor = c_->buf->move(Direction::LEFT);
+                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
                 parent_->changeMode(Mode::NORMAL);
                 endLoop = true;
                 break;
+            }
             case '\n':
                 c_->buf->addCh(ch);
                 c_->scr->paintCh(ch);

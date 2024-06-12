@@ -91,14 +91,16 @@ public:
         y_ = y;
     }
 
-    void incX()
+    const Point& incX()
     {
         ++x_;
+        return *this;
     }
 
-    void incY()
+    const Point& incY()
     {
         ++y_;
+        return *this;
     }
 
     void decX()
@@ -109,6 +111,28 @@ public:
     void decY()
     {
         --y_;
+    }
+
+    bool isXSet() const
+    {
+        return xSet_;
+    }
+
+    bool isYSet() const
+    {
+        return ySet_;
+    }
+
+    void setXBool(
+        const bool isSet)
+    {
+        xSet_ = isSet;
+    }
+
+    void setYBool(
+        const bool isSet)
+    {
+        ySet_ = isSet;
     }
 
 private:
@@ -226,6 +250,12 @@ public:
     bool empty() const
     {
         return (start_.y() == end_.y()) && (start_.x() == end_.x());
+    }
+
+    bool contains(
+        const Point& point) const
+    {
+        return !(point.y() < start_.y() || point.y() > end_.y());
     }
         
 private:
