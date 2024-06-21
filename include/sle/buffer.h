@@ -75,6 +75,11 @@ public:
     const Point& setCursor(
         Point newPos);
 
+    /// Returns position of first regex match. Undefined if not found.
+    Point find(
+        const std::string& regex,
+        const Point& point = Point(0, 0)) const;
+
     // TODO: muuta toi point ja ehk ranga smart ptr!!! tekee pahaa passata
     // non const valuena. mut valil pakko.
 

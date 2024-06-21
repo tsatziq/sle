@@ -5,6 +5,11 @@
 namespace sle 
 {
 
+// SEURAAVAKS: f ja w/b komennot ainaki.. siin on isompi homma.
+// ehk tee joku Finder classi ja contextii se?
+// VAI bufferin sisal ja siin on funktiota vaan sit paljo?
+// vai voisko sit saada tehtya jollain regex funkkari noi kaikki?
+
 class EditLoop::NormalMode
     : public EditLoop::ModeBase
 {
@@ -43,6 +48,9 @@ public:
                 quitProg = false;
                 break;
             }
+            case 'f':
+                // laita et hyppaa seuraaville riveille myos.
+                break;
             case 'h':
             {
                 auto cursor = c_->buf->move(Direction::LEFT);

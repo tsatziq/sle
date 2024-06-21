@@ -247,4 +247,16 @@ const Point& Buffer::setCursor(
     return point_;
 }
 
+Point Buffer::find(
+    const std::string& regex,
+    const Point& point) const
+{
+    for (int i = point.y(); i < txt_.size(); ++i)
+    {
+        //kayta sita regex iteraattoria... sit tarttis varmaa olla myos eriksee
+        // et kuinka mones etsitaan, tai etta etsitaan kaikki... tai emt kantsii
+        // koskaa ettia kaikkia. ettii vaa ne mitka sopii ruudulle ja naytta ne. 
+    } 
+}
+
 }
