@@ -50,6 +50,11 @@ public:
     /// Returns true if there is text after the cursor.
     bool isAtLineEnd() const;
 
+    /// Deletes character, moves rest of line left.
+    void delCh(
+        const Point& point = Point{},
+        const int count = 1);
+
 private:
     void addNewline();
 

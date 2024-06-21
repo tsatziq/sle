@@ -94,6 +94,13 @@ public:
                 c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
                 break;
             }
+            case 'x':
+            {
+                auto cur = c_->buf->cursor();
+                c_->buf->erase(Range::make(cur, {cur.x() + 1, cur.y()}));
+                c_->scr->delCh();
+                break;
+            }
             case '[':
                 c_->scr->test();
                 break;

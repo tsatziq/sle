@@ -95,15 +95,26 @@ void MainScreen::paint(
     Point point)
 {
     wmove(scr_, point.y(), point.x());
-    point.setX(0);
 
-    for (const auto& str : text)
+    if (text.empty())
+        return;
+    
+    if (text.size() == 1)
     {
         wclrtoeol(scr_);
-        wprintw(scr_, str.c_str());
-        point.incY();
-        wmove(scr_, point.y(), point.x());
+        wprintw(scr_, text.front().c_str());
     }
+    else
+    {
+        for (const auto& str : text)
+        {
+            wclrtoeol(scr_);
+            wprintw(scr_, str.c_str());
+            point.incY();
+            wmove(scr_, point.y(), point.x());
+        }
+    }
+
 }
 
 void MainScreen::test()
@@ -145,6 +156,16 @@ Point MainScreen::toBufCoord(
 bool MainScreen::isAtLineEnd() const
 {      
     return c_->buf->lineLen(toBufCoord(cursor_)) < cursor_.x();
+}
+
+void MainScreen::delCh(
+    const Point& point,
+    const int count)
+{
+    if (point.isUnset())
+        wdelch(scr_);
+    else
+        mvwdelch(scr_, point.y(), point.x());
 }
 
 }

@@ -63,7 +63,7 @@ public:
         const Point& start) const;
 
     void erase(
-        Range& range);
+        const RangePtr& range);
 
     const Point& cursor() const;
 

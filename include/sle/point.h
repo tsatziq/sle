@@ -123,6 +123,11 @@ public:
         return ySet_;
     }
 
+    bool isUnset() const
+    {
+        return !xSet_ && !ySet_;
+    }
+
     void setXBool(
         const bool isSet)
     {
@@ -257,6 +262,13 @@ public:
     {
         return !(point.y() < start_.y() || point.y() > end_.y());
     }
+
+    static std::shared_ptr<Range> make(
+        const Point& start,
+        const Point& end)
+    {
+        return std::make_shared<Range>(start, end);
+    } 
         
 private:
     Point start_;

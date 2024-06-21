@@ -10,7 +10,6 @@
 
 namespace sle
 {
-// SEURAAVAKS: tee insert/cmd mode, ja pari liikkumiskomentoa.
 // vois teha jotenki polymorfisesti, esim et tal on MODE class variablena.
 // ja sit sil on virtuaalifunktio joku handleCmd tjsp, joka sit tehaa erilail
 // riippuen modesta. sit siirra niit tarvittaes eri filuihin et ei tu liia isoa.

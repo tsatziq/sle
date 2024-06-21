@@ -1,4 +1,5 @@
 #include "sle/buffer.h"
+#include <string_view>
 
 namespace sle
 {
@@ -32,8 +33,8 @@ void Buffer::addCh(
 
         if (!cutText.empty())
         {
-            Range delRange{point_, Point(lineLen(point_) - 1, point_.y())};
-            erase(delRange);
+            //Range delRange{point_, Point(lineLen(point_) - 1, point_.y())};
+            erase(Range::make(point_, Point(lineLen(point_) - 1, point_.y())));
         }
 
         txt_.insert(txt_.begin() + point_.y() + 1, cutText);
@@ -118,8 +119,7 @@ const Point& Buffer::move(
                 point_.setX(0);
             else if (point_.y() == size() - 1)
                 point_.setX(length - 1);
-            else
-                point_.setX(length - 2);
+            else point_.setX(length - 2);
         }
         else
             point_.setX(point_.x() + count);
@@ -188,32 +188,37 @@ std::string Buffer::getLine(
 }
 
 void Buffer::erase(
-    Range& range)
+    const RangePtr& range)
 {
     // pitasko olla tan sijaan vaa assert noista? ja range cosntructoris
     // varmistaa et pienempi arvo on start? tai joku isValid?
-    range.fitToSize(
+    range->fitToSize(
         txt_.size(),
-        txt_.at(range.start().y()).size(),
-        txt_.at(range.end().y()).size());
+        txt_.at(range->start().y()).size(),
+        txt_.at(range->end().y()).size());
 
-    //if (range.empty())
+    //if (range->empty())
      //   return;
 
-    if (range.lines() == 1)
-        txt_.at(range.start().y()).erase(range.start().x(), range.end().x());
-    else if (range.lines() == 2)
+    if (range->lines() == 1)
     {
-        if (range.start().x() < lineLen(range.start()) && range.start().x() >= 0)
-            txt_.at(range.start().y()).erase(range.start().x());
-
-        if (range.end().x() > 0 && range.end().x() <= lineLen(range.end()))
-            txt_.at(range.end().y()).erase(0, range.end().x());
+        txt_.at(range->start().y()).erase(
+            range->start().x(),
+            range->end().x() - range->start().x());
     }
-    else if (range.lines() > 2)
+    else if (range->lines() == 2)
+    {
+        if (range->start().x() < 
+            lineLen(range->start()) && range->start().x() >= 0)
+                txt_.at(range->start().y()).erase(range->start().x());
+
+        if (range->end().x() > 0 && range->end().x() <= lineLen(range->end()))
+            txt_.at(range->end().y()).erase(0, range->end().x());
+    }
+    else if (range->lines() > 2)
         txt_.erase(
-            txt_.begin() + range.start().y() + 1,
-            txt_.begin() + range.end().y());
+            txt_.begin() + range->start().y() + 1,
+            txt_.begin() + range->end().y());
 }
 
 const Point& Buffer::cursor() const
