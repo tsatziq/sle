@@ -39,15 +39,14 @@ public:
 
     const std::vector<std::string>& getText();
 
-    //korvaa toi vector string joskus sharedpointerilla
     std::vector<std::string> getRange(
-        Range range);
+        const RangePtr& range);
 
-    const Point& move(
+    const PointPtr& move(
         const Direction& dir,
         const unsigned count = 1);
 
-    const Point& move(
+    const PointPtr& move(
         const Direction& dir,
         const int count) = delete;
 
@@ -55,30 +54,34 @@ public:
 
     /// Returns length of the line.
     std::size_t lineLen(
-        const Point& point) const;
+        const PointPtr& point) const;
 
     // kato tarviiko tata loppujen lopuks, kunka usein kaytetaan.
     /// Returns rest of line from the specified point onwards.
     std::string getLine(
-        const Point& start) const;
+        const PointPtr& start) const;
 
     void erase(
         const RangePtr& range);
 
-    const Point& cursor() const;
+    const PointPtr& cursor() const;
 
     /// Sets the cursor to specified point. 
     ///
     /// If the position is invalid, sets to the nearest valid position.
     /// \param newPos The new position of the cursor.
     /// \returns The new position of the cursor.
-    const Point& setCursor(
-        Point newPos);
+    const PointPtr& setCursor(
+        const PointPtr& newPos);
 
     /// Returns position of first regex match. Undefined if not found.
     Point find(
         const std::string& regex,
-        const Point& point = Point(0, 0)) const;
+        const PointPtr& point = nullptr) const;
+
+    PointPtr findCh(
+        const char ch,
+        const PointPtr& point = nullptr) const;
 
     // TODO: muuta toi point ja ehk ranga smart ptr!!! tekee pahaa passata
     // non const valuena. mut valil pakko.
@@ -86,7 +89,7 @@ public:
 private:
     ContextPtr c_ = nullptr;
     std::vector<std::string> txt_ = { std::string() };
-    Point point_ = Point(0, 0);
+    PointPtr point_ = Point::make(0, 0);
 };
 
 } // namespace sle

@@ -91,16 +91,14 @@ public:
         y_ = y;
     }
 
-    const Point& incX()
+    void incX()
     {
         ++x_;
-        return *this;
     }
 
-    const Point& incY()
+    void incY()
     {
         ++y_;
-        return *this;
     }
 
     void decX()
@@ -140,6 +138,19 @@ public:
         ySet_ = isSet;
     }
 
+    static std::shared_ptr<Point> make(
+        const int x,
+        const int y)
+    {
+        return std::make_shared<Point>(x, y);
+    }
+
+    static std::shared_ptr<Point> make(
+        const std::shared_ptr<Point>& point)
+    {
+        return std::make_shared<Point>(point->x(), point->y());
+    }
+
 private:
     int x_ = 0;
     int y_ = 0;
@@ -147,14 +158,16 @@ private:
     bool ySet_ = false;
 };
 
+using PointPtr = std::shared_ptr<Point>;
+
 class Range
 {
 public:
     Range() = default;
 
     Range(
-        const Point& start,
-        const Point& end)
+        const PointPtr& start,
+        const PointPtr& end)
         :
         start_(start),
         end_(end)
@@ -165,44 +178,44 @@ public:
     // Ensure start of range is lower than the end.
     void sortRange()
     {
-        if (start_.y() < 0)
-            start_.setY(0);
-        if (start_.x() < 0)
-            start_.setX(0);
-        if (end_.y() < 0)
-            end_.setY(0);
-        if (end_.x() < 0)
-            end_.setX(0);
+        if (start_->y() < 0)
+            start_->setY(0);
+        if (start_->x() < 0)
+            start_->setX(0);
+        if (end_->y() < 0)
+            end_->setY(0);
+        if (end_->x() < 0)
+            end_->setX(0);
 
-        if (start_.y() > end_.y())
+        if (start_->y() > end_->y())
         {
-            Point tmp = start_;
+            auto tmp = Point::make(start_);
             start_ = end_;
             end_ = tmp;
         }
 
-        if ((start_.y() == end_.y())
-            && (start_.x() > end_.x()))
+        if ((start_->y() == end_->y())
+            && (start_->x() > end_->x()))
         {
-            int tmp = start_.x();
-            start_.setX(end_.x());
-            end_.setX(tmp);
+            int tmp = start_->x();
+            start_->setX(end_->x());
+            end_->setX(tmp);
         }
     }
 
-    Point& start() 
+    PointPtr start() 
     {
         return start_;
     }
 
-    Point& end()
+    PointPtr end()
     {
         return end_;
     }
 
     void setRange(
-        const Point& start,
-        const Point& end)
+        const PointPtr& start,
+        const PointPtr& end)
     {
         start_ = start;
         end_ = end;
@@ -210,13 +223,13 @@ public:
     }
 
     void setStart(
-        const Point& start)
+        const PointPtr& start)
     {
         start_ = start;
     }
 
     void setEnd(
-        const Point& end)
+        const PointPtr& end)
     {
         end_ = end;
     }
@@ -232,47 +245,74 @@ public:
         // voi olla et getRangessaki sita kyaytetaa vaarin! korjasin erases sita vahan, varmista
         int lastIndex = lines - 1;
 
-        if (end_.y() > lastIndex)
-            end_.setY(lastIndex);
-        if (start_.y() > lastIndex)
+        if (end_->y() > lastIndex)
+            end_->setY(lastIndex);
+        if (start_->y() > lastIndex)
             return;
     
         if (!firstLnLen)
-            start_.setX(0);
-        else if (start_.x() > firstLnLen - 1)
-            start_.setX(firstLnLen - 1);
+            start_->setX(0);
+        else if (start_->x() > firstLnLen - 1)
+            start_->setX(firstLnLen - 1);
         if (!lastLnLen)
-            end_.setX(0);
-        else if (end_.x() > lastLnLen - 1)
-            end_.setX(lastLnLen - 1);
+            end_->setX(0);
+        else if (end_->x() > lastLnLen - 1)
+            end_->setX(lastLnLen - 1);
     }
 
     std::size_t lines() const
     {
-        return end_.y() - start_.y() + 1;
+        return end_->y() - start_->y() + 1;
     }
 
     bool empty() const
     {
-        return (start_.y() == end_.y()) && (start_.x() == end_.x());
+        return (start_->y() == end_->y()) && (start_->x() == end_->x());
     }
 
     bool contains(
-        const Point& point) const
+        const PointPtr& point) const
     {
-        return !(point.y() < start_.y() || point.y() > end_.y());
+        return !(point->y() < start_->y() || point->y() > end_->y());
     }
+
+    static std::shared_ptr<Range> make(
+        const PointPtr& start,
+        const PointPtr& end)
+    {
+        return std::make_shared<Range>(start, end);
+    } 
 
     static std::shared_ptr<Range> make(
         const Point& start,
         const Point& end)
     {
-        return std::make_shared<Range>(start, end);
+        return std::make_shared<Range>(
+            std::make_shared<Point>(start.x(), start.y()),
+            std::make_shared<Point>(end.x(), end.y()));
     } 
+
+    static std::shared_ptr<Range> make(
+        const Point start,
+        const Point end)
+    {
+        return std::make_shared<Range>(
+            std::make_shared<Point>(start.x(), start.y()),
+            std::make_shared<Point>(end.x(), end.y()));
+    }
+
+    static std::shared_ptr<Range> make(
+        const PointPtr& start,
+        const Point end)
+    {
+        return std::make_shared<Range>(
+            start,
+            std::make_shared<Point>(end.x(), end.y()));
+    }
         
 private:
-    Point start_;
-    Point end_;
+    PointPtr start_;
+    PointPtr end_;
 };
 
 using RangePtr = std::shared_ptr<Range>;

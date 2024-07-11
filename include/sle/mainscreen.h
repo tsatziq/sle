@@ -28,7 +28,7 @@ public:
     /// Paints supplied lines starting from specified point.
     void paint(
         const std::vector<std::string>& text,
-        Point point = Point(0, 0));
+        const PointPtr& point = Point::make(0, 0));
 
     void test();
 
@@ -37,22 +37,22 @@ public:
     /// If the specified point is not within the screen, cursor does not move.
     /// \param point Point in the coordinate space of the screen.
     void moveCursor(
-        const Point& point);
+        const PointPtr& point);
 
     /// Converts a point in buffer space to a point in the screen space.
-    Point toScrCoord(
-        const Point& bufCoord) const;
+    PointPtr toScrCoord(
+        const PointPtr& bufCoord) const;
 
     /// Converts a point in screen space to a point in the buffer space.
-    Point toBufCoord(
-        const Point& scrCoord) const;
+    PointPtr toBufCoord(
+        const PointPtr& scrCoord) const;
 
     /// Returns true if there is text after the cursor.
     bool isAtLineEnd() const;
 
     /// Deletes character, moves rest of line left.
     void delCh(
-        const Point& point = Point{},
+        const PointPtr& point = nullptr,
         const int count = 1);
 
 private:
@@ -61,7 +61,7 @@ private:
     ContextPtr c_ = nullptr;
     CursePtr scr_ = nullptr;
     int width_, height_;
-    Point cursor_ = Point(0, 0);
+    PointPtr cursor_ = Point::make(0, 0);
 };
 
 } // namespace sle

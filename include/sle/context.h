@@ -23,7 +23,7 @@ struct Context
     FileHandler* file = nullptr;
     MainScreen* scr = nullptr;
 
-    Range visibleRange = Range(Point(0,0), Point(0,0));
+    RangePtr visibleRange = Range::make(Point::make(0,0), Point::make(0,0));
 };
 
 } // namespace sle

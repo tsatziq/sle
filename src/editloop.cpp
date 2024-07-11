@@ -39,8 +39,9 @@ public:
                 break;
             case 'a':
             {
-                Point cursor = c_->buf->cursor();
-                cursor = c_->buf->setCursor(cursor.incX());
+                auto cursor = c_->buf->cursor();
+                cursor->incX();
+                cursor = c_->buf->setCursor(cursor);
                 c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
 
                 parent_->changeMode(Mode::INSERT);
@@ -49,8 +50,15 @@ public:
                 break;
             }
             case 'f':
-                // laita et hyppaa seuraaville riveille myos.
+            {
+                auto res = c_->buf->findCh('k');
+                if (res)
+                {
+                    c_->buf->setCursor(res);
+                    c_->scr->moveCursor(res);
+                }
                 break;
+            }
             case 'h':
             {
                 auto cursor = c_->buf->move(Direction::LEFT);
@@ -67,11 +75,11 @@ public:
                 auto cursor = c_->buf->move(Direction::DOWN);
                 auto& range = c_->visibleRange;
 
-                if (!range.contains(cursor))
+                if (!range->contains(cursor))
                 {
-                    int diff = cursor.y() - range.end().y();
-                    range.start().setY(range.start().y() + diff); 
-                    range.end().setY(cursor.y());
+                    int diff = cursor->y() - range->end()->y();
+                    range->start()->setY(range->start()->y() + diff); 
+                    range->end()->setY(cursor->y());
 
                     c_->scr->paint(c_->buf->getRange(range));
                 }
@@ -84,11 +92,11 @@ public:
                 auto cursor = c_->buf->move(Direction::UP);
                 auto& range = c_->visibleRange;
 
-                if (!range.contains(cursor))
+                if (!range->contains(cursor))
                 {
-                    int diff = range.start().y() - cursor.y();
-                    range.end().setY(range.end().y() - diff);
-                    range.start().setY(cursor.y());
+                    int diff = range->start()->y() - cursor->y();
+                    range->end()->setY(range->end()->y() - diff);
+                    range->start()->setY(cursor->y());
 
                     c_->scr->paint(c_->buf->getRange(range));
                 }
@@ -105,7 +113,7 @@ public:
             case 'x':
             {
                 auto cur = c_->buf->cursor();
-                c_->buf->erase(Range::make(cur, {cur.x() + 1, cur.y()}));
+                c_->buf->erase(Range::make(cur, {cur->x() + 1, cur->y()}));
                 c_->scr->delCh();
                 break;
             }
