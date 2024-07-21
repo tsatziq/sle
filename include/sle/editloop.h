@@ -6,21 +6,30 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
+#include <queue>
 
 namespace sle
 {
-// vois teha jotenki polymorfisesti, esim et tal on MODE class variablena.
-// ja sit sil on virtuaalifunktio joku handleCmd tjsp, joka sit tehaa erilail
-// riippuen modesta. sit siirra niit tarvittaes eri filuihin et ei tu liia isoa.
-// kayta ObjectPool modeihin, ks ChatGPT!
-// sit editloopin init() laita mode_:n NormalMode.
-// noi modet tarvii sit ainaki contextptrn, tai ehk editloop ptrn
+
 enum class Mode
 {
     NORMAL,
     INSERT,
 };
+
+struct LongCmd
+{
+    int count = 1;
+    char cmd;
+    std::queue<char> to;
+
+    static std::shared_ptr<LongCmd> make()
+    {
+        return std::make_shared<LongCmd>();
+    }
+};
+
+using LongCmdPtr = std::shared_ptr<LongCmd>;
 
 class EditLoop
 {
@@ -31,6 +40,10 @@ public:
     void init();
 
 private:
+    /* TODO / SEURAAVAKS: cmd modessa myos pitaa ottaa yksitelle inputtia
+        koska joskus halutta esim erase. eli sinneki start/continuecmd.
+        ehk tee myos static bool quit_ ModeBaseen, alusta cpp alus.
+    */
     class ModeBase
     {
     public:
@@ -40,9 +53,18 @@ private:
         /// \return true, if program should quit.
         virtual bool handle() = 0;
         // huom korvaa joskus bool enumilla.
+    protected:
+        static bool quit_;
     };
 
     using ModePtr = std::shared_ptr<ModeBase>;
+
+    /// Represents if command was finished or not.
+    enum class CmdState
+    {
+        UNFINISHED,
+        FINISHED,
+    };
 
     void changeMode(
         const Mode& mode);
@@ -53,6 +75,7 @@ private:
     ContextPtr c_ = nullptr;
     ModePtr mode_ = nullptr;
     std::unordered_map<Mode, ModePtr> modePool_;
+    LongCmdPtr prevCmd_ = nullptr;
 };
 
 } // namespace sle

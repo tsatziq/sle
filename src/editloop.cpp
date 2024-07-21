@@ -5,10 +5,7 @@
 namespace sle 
 {
 
-// SEURAAVAKS: f ja w/b komennot ainaki.. siin on isompi homma.
-// ehk tee joku Finder classi ja contextii se?
-// VAI bufferin sisal ja siin on funktiota vaan sit paljo?
-// vai voisko sit saada tehtya jollain regex funkkari noi kaikki?
+bool EditLoop::ModeBase::quit_ = false;
 
 class EditLoop::NormalMode
     : public EditLoop::ModeBase
@@ -23,115 +20,141 @@ public:
 
     bool handle() override
     {
-        auto scr = c_->scr;
-        bool endLoop = false;
-        bool quitProg = false;
-
         while (true)
         {
-            char ch = scr->getCh();
+            if (quit_)
+                return true;
 
-            switch (ch)
+            switch (startCmd())
             {
-            case 'z':
-                endLoop = true;
-                quitProg = true;
-                break;
-            case 'a':
-            {
-                auto cursor = c_->buf->cursor();
-                cursor->incX();
-                cursor = c_->buf->setCursor(cursor);
-                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
-
-                parent_->changeMode(Mode::INSERT);
-                endLoop = true;
-                quitProg = false;
-                break;
-            }
-            case 'f':
-            {
-                auto res = c_->buf->findCh('k');
-                if (res)
-                {
-                    c_->buf->setCursor(res);
-                    c_->scr->moveCursor(res);
-                }
-                break;
-            }
-            case 'h':
-            {
-                auto cursor = c_->buf->move(Direction::LEFT);
-                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
-                break;
-            }
-            case 'i':
-                parent_->changeMode(Mode::INSERT);
-                endLoop = true;
-                quitProg = false;
-                break;
-            case 'j':
-            {
-                auto cursor = c_->buf->move(Direction::DOWN);
-                auto& range = c_->visibleRange;
-
-                if (!range->contains(cursor))
-                {
-                    int diff = cursor->y() - range->end()->y();
-                    range->start()->setY(range->start()->y() + diff); 
-                    range->end()->setY(cursor->y());
-
-                    c_->scr->paint(c_->buf->getRange(range));
-                }
-
-                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
-                break;
-            }
-            case 'k':
-            {
-                auto cursor = c_->buf->move(Direction::UP);
-                auto& range = c_->visibleRange;
-
-                if (!range->contains(cursor))
-                {
-                    int diff = range->start()->y() - cursor->y();
-                    range->end()->setY(range->end()->y() - diff);
-                    range->start()->setY(cursor->y());
-
-                    c_->scr->paint(c_->buf->getRange(range));
-                }
-                
-                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
-                break;
-            }
-            case 'l':
-            {
-                auto cursor = c_->buf->move(Direction::RIGHT);
-                c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
-                break;
-            }
-            case 'x':
-            {
-                auto cur = c_->buf->cursor();
-                c_->buf->erase(Range::make(cur, {cur->x() + 1, cur->y()}));
-                c_->scr->delCh();
-                break;
-            }
-            case '[':
-                c_->scr->test();
+            case CmdState::UNFINISHED:
+                while (continueCmd() != CmdState::FINISHED)
+                    continueCmd();
+            case CmdState::FINISHED:
                 break;
             default:
                 break;
             }
-        
-            if (endLoop)
-               return quitProg;
+            
         }
     }
 
 private:
+    /// Starts taking input for new command.
+    /// \returns True, if command was left unfinished.
+    CmdState startCmd()
+    {
+        auto scr = c_->scr;
+        bool endLoop = false;
+        bool quitProg = false;
+
+        char ch = scr->getCh();
+
+        switch (ch)
+        {
+        case 'z':
+            endLoop = true;
+            quitProg = true;
+            break;
+        case 'a':
+        {
+            auto cursor = c_->buf->cursor();
+            cursor->incX();
+            cursor = c_->buf->setCursor(cursor);
+            c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+
+            parent_->changeMode(Mode::INSERT);
+            endLoop = true;
+            quitProg = false;
+            break;
+        }
+        case 'f':
+        {
+            parent_->prevCmd_ = LongCmd::make();
+            parent_->prevCmd_->cmd = 'f';
+            break;
+        }
+        case 'h':
+        {
+            auto cursor = c_->buf->move(Direction::LEFT);
+            c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+            break;
+        }
+        case 'i':
+            parent_->changeMode(Mode::INSERT);
+            endLoop = true;
+            quitProg = false;
+            break;
+        case 'j':
+        {
+            auto cursor = c_->buf->move(Direction::DOWN);
+            auto& range = c_->visibleRange;
+
+            if (!range->contains(cursor))
+            {
+                int diff = cursor->y() - range->end()->y();
+                range->start()->setY(range->start()->y() + diff); 
+                range->end()->setY(cursor->y());
+
+                c_->scr->paint(c_->buf->getRange(range));
+            }
+
+            c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+            break;
+        }
+        case 'k':
+        {
+            auto cursor = c_->buf->move(Direction::UP);
+            auto& range = c_->visibleRange;
+
+            if (!range->contains(cursor))
+            {
+                int diff = range->start()->y() - cursor->y();
+                range->end()->setY(range->end()->y() - diff);
+                range->start()->setY(cursor->y());
+
+                c_->scr->paint(c_->buf->getRange(range));
+            }
+            
+            c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+            break;
+        }
+        case 'l':
+        {
+            auto cursor = c_->buf->move(Direction::RIGHT);
+            c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+            break;
+        }
+        case 'x':
+        {
+            auto cur = c_->buf->cursor();
+            c_->buf->erase(Range::make(cur, {cur->x() + 1, cur->y()}));
+            c_->scr->delCh();
+            break;
+        }
+        case '[':
+            c_->scr->test();
+            break;
+        default:
+            break;
+        }
+    
+        if (endLoop)
+           return CmdState::QUIT;
+        else if (parent_->prevCmd_)
+            return CmdState::UNFINISHED;
+        else
+            return CmdState::FINISHED;
+    }
+
+    CmdState continueCmd()
+    {
+        return CmdState::FINISHED;
+    }
+
     EditLoop* parent_ = nullptr;
     ContextPtr c_ = nullptr;
+    bool exitMode_ = false;
 };
 
 class EditLoop::InsertMode
@@ -149,6 +172,9 @@ public:
     {
         auto scr = c_->scr;
         bool endLoop = false;
+        bool quitProg = false;
+
+        char ch = scr->getCh();
 
         while (true)
         {

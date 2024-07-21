@@ -307,17 +307,18 @@ PointPtr Buffer::findCh(
 
     // Find in current line.
     auto ln = txt_.at(p->y());
-    auto res = std::find(ln.begin() + p->x(), ln.end(), ch);
+    auto res = std::find(ln.begin() + p->x() + 1, ln.end(), ch);
 
     if (res != ln.end())
     {
         const auto pos = std::distance(ln.begin(), res);
         p->setX(pos);
     }
-    else
+    else if (p->y() != c_->visibleRange->end()->y())
     {
-        // Search rest of visible range->
-        for (int i = p->y() + 1; i < c_->visibleRange->end()->y(); ++i)
+        // Search rest of visible range.
+        auto e = c_->visibleRange->end()->y();
+        for (int i = p->y(); i < c_->visibleRange->end()->y() + 1; ++i)
         {
             ln = txt_.at(i);
             res = std::find(ln.begin(), ln.end(), ch);
@@ -326,6 +327,7 @@ PointPtr Buffer::findCh(
                 const auto pos = std::distance(ln.begin(), res);
                 p->setX(pos);
                 p->setY(i);
+                break;
             }
         }
     }
