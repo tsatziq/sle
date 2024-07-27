@@ -298,6 +298,7 @@ Point Buffer::find(
 
 PointPtr Buffer::findCh(
     const char ch,
+    const Direction dir,
     const PointPtr& point) const
 {
     PointPtr p = point;
@@ -307,13 +308,18 @@ PointPtr Buffer::findCh(
 
     // Find in current line.
     auto ln = txt_.at(p->y());
-    auto res = std::find(ln.begin() + p->x() + 1, ln.end(), ch);
+    size_t pos;
 
-    if (res != ln.end())
-    {
-        const auto pos = std::distance(ln.begin(), res);
+    if (dir == Direction::RIGHT)
+        pos = ln.find(ch, p->x() + 1);
+    else if (dir == Direction::LEFT)
+        pos = ln.rfind(ch, p->x() - 1);
+    else
+        return nullptr;
+
+    if (pos != std::string::npos)
         p->setX(pos);
-    }
+    /*
     else if (p->y() != c_->visibleRange->end()->y())
     {
         // Search rest of visible range.
@@ -331,8 +337,9 @@ PointPtr Buffer::findCh(
             }
         }
     }
+    */
 
-    if (res == ln.end())
+    if (pos == std::string::npos)
         return nullptr;
     else
         return p; 

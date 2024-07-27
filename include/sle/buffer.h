@@ -1,6 +1,7 @@
 #ifndef SLE_BUFFER_H
 #define SLE_BUFFER_H
 
+#include "sle/customtypes.h"
 #include "sle/point.h"
 #include "sle/context.h"
 #include <map>
@@ -10,15 +11,6 @@
 
 namespace sle
 {
-
-enum class Direction
-{
-    NONE,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-};
 
 class Buffer
 {
@@ -81,6 +73,7 @@ public:
 
     PointPtr findCh(
         const char ch,
+        const Direction dir = Direction::RIGHT,
         const PointPtr& point = nullptr) const;
 
     // TODO: muuta toi point ja ehk ranga smart ptr!!! tekee pahaa passata

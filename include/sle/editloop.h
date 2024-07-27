@@ -17,19 +17,46 @@ enum class Mode
     INSERT,
 };
 
-struct LongCmd
+enum class Motion
 {
-    int count = 1;
-    char cmd;
-    std::queue<char> to;
+    NONE,
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN,
+    TILL,
+    TILLBCK,
+    TO,
+    TOBCK,
+    LINE, ///< Whole line commands, e.g. 'dd'.
+    TOLINE,
+};
 
-    static std::shared_ptr<LongCmd> make()
+enum class Action
+{
+    NONE,
+    APPEND,
+    DELCHAR,
+    DELETE,
+    INSERT,
+    TEST,
+    QUIT,
+};
+
+struct Command
+{
+    std::string count = "1";
+    Action action;
+    Motion motion = Motion::NONE;
+    std::string to;
+
+    static std::shared_ptr<Command> make()
     {
-        return std::make_shared<LongCmd>();
+        return std::make_shared<Command>();
     }
 };
 
-using LongCmdPtr = std::shared_ptr<LongCmd>;
+using CommandPtr = std::shared_ptr<Command>;
 
 class EditLoop
 {
@@ -40,10 +67,6 @@ public:
     void init();
 
 private:
-    /* TODO / SEURAAVAKS: cmd modessa myos pitaa ottaa yksitelle inputtia
-        koska joskus halutta esim erase. eli sinneki start/continuecmd.
-        ehk tee myos static bool quit_ ModeBaseen, alusta cpp alus.
-    */
     class ModeBase
     {
     public:
@@ -64,6 +87,7 @@ private:
     {
         UNFINISHED,
         FINISHED,
+        INVALID,
     };
 
     void changeMode(
@@ -75,7 +99,6 @@ private:
     ContextPtr c_ = nullptr;
     ModePtr mode_ = nullptr;
     std::unordered_map<Mode, ModePtr> modePool_;
-    LongCmdPtr prevCmd_ = nullptr;
 };
 
 } // namespace sle
