@@ -26,7 +26,7 @@ void FileHandler::readFile(
     if (!std::filesystem::exists(p))
         return;
 
-    if (std::filesystem::is_regular_file(p))
+    if (!std::filesystem::is_regular_file(p))
         return; 
 
     std::ifstream file(path);

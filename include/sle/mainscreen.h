@@ -50,6 +50,13 @@ public:
     /// Returns true if there is text after the cursor.
     bool isAtLineEnd() const;
 
+    /// Returns the height of the window.
+    int height() const;
+
+    /// Returns true if the point is within the screen dimensions.
+    bool isInsideScr(
+        const PointPtr& point = nullptr) const;
+
     /// Deletes character, moves rest of line left.
     void delCh(
         const PointPtr& point = nullptr,

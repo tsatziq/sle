@@ -13,6 +13,9 @@ enum class Axis
     Y,
 };
 
+class Point;
+using PointPtr = std::shared_ptr<Point>;
+
 class Point
 {
 public:
@@ -121,6 +124,11 @@ public:
         return ySet_;
     }
 
+    bool isFullySet() const
+    {
+        return xSet_ && ySet_;
+    }
+
     bool isUnset() const
     {
         return !xSet_ && !ySet_;
@@ -151,6 +159,14 @@ public:
         return std::make_shared<Point>(point->x(), point->y());
     }
 
+    Point& operator|=(
+        const Point& rhs)
+    {
+        if (!xSet_ && rhs.xSet_) { x_ = rhs.x_; xSet_ = rhs.xSet_; }
+        if (!ySet_ && rhs.ySet_) { y_ = rhs.y_; ySet_ = rhs.ySet_; }
+        return *this;
+    }
+
 private:
     int x_ = 0;
     int y_ = 0;
@@ -158,7 +174,15 @@ private:
     bool ySet_ = false;
 };
 
-using PointPtr = std::shared_ptr<Point>;
+inline const PointPtr& operator|=(
+    const PointPtr& lhs,
+    const PointPtr& rhs)
+{
+    if (lhs && rhs)
+        *lhs |= *rhs;
+
+    return lhs;
+}
 
 class Range
 {
@@ -239,10 +263,6 @@ public:
         const int firstLnLen,
         const int lastLnLen)
     {
-        // SEURAAVAKS: toimii/kaytetaan huonosti! jos annan firstlnlen koko txt_ ekan rivin
-        // pituuden, mut se range on vaa joku yks rivi muualla, ni mita jarkee?
-        // siit aiheutu ongelmia.
-        // voi olla et getRangessaki sita kyaytetaa vaarin! korjasin erases sita vahan, varmista
         int lastIndex = lines - 1;
 
         if (end_->y() > lastIndex)

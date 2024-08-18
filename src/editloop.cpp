@@ -4,6 +4,7 @@
 #include "sle/normalmodelexer.h"
 #include <memory>
 #include <sstream>
+#include <string>
 #include <cctype>
 #include <queue>
 
@@ -295,12 +296,44 @@ private:
             break;
         case Motion::DOWN:
         {
+            // SEURAAVAKS: scrollaus ei toimi... ja f/t vikalta rivilta ei toimi.
+            // huom lldb toimii huonosti koska siin nayton koko jotenki huonosti.
             target = c_->buf->move(Direction::DOWN);
             auto& range = c_->visibleRange;
 
+            #if 0
+            if (target->y() == 23)
+            {
+                
+                auto endY = range->end()->y();
+                auto startY = range->start()->y();
+
+                int diff = target->y() - range->end()->y();
+                #if 1
+                auto str = std::to_string(target->y()) + " " 
+                    + std::to_string(endY)
+                    + " " + std::to_string(startY) + " " + std::to_string(diff);
+                if (!range->contains(target))
+                    str += " false";
+                else
+                    str += " true";
+
+                c_->scr->paint({str}, Point::make(0,5));
+                #endif
+            }
+            #endif
             if (!range->contains(target))
             {
+                auto endY = range->end()->y();
+                auto startY = range->start()->y();
+
                 int diff = target->y() - range->end()->y();
+                #if 1
+                auto str = std::to_string(target->y()) + " " 
+                    + std::to_string(endY)
+                    + " " + std::to_string(startY) + " " + std::to_string(diff);
+                #endif
+
                 range->start()->setY(range->start()->y() + diff); 
                 range->end()->setY(target->y());
 
@@ -359,7 +392,9 @@ private:
 
             if (!range->contains(target))
             {
+                
                 int diff = range->start()->y() - target->y();
+
                 range->end()->setY(range->end()->y() - diff);
                 range->start()->setY(target->y());
 
@@ -566,7 +601,7 @@ EditLoop::EditLoop(
     c_(context)
 {}
 
-void EditLoop::init()
+void EditLoop::run()
 {
     modePool_[Mode::NORMAL] = std::make_shared<NormalMode>(this);
     modePool_[Mode::INSERT] = std::make_shared<InsertMode>(this);

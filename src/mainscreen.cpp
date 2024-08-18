@@ -94,6 +94,9 @@ void MainScreen::paint(
     const std::vector<std::string>& text,
     const PointPtr& point)
 {
+    if (!isInsideScr(point))
+        return;
+
     PointPtr pTemp = Point::make(point); 
     wmove(scr_, pTemp->y(), pTemp->x());
 
@@ -112,6 +115,10 @@ void MainScreen::paint(
             wclrtoeol(scr_);
             wprintw(scr_, str.c_str());
             pTemp->incY();
+
+            if (!isInsideScr(pTemp))
+                break; 
+
             wmove(scr_, pTemp->y(), pTemp->x());
         }
     }
@@ -119,12 +126,11 @@ void MainScreen::paint(
 
 void MainScreen::test()
 {
-    for (int i = 0; i < height_; ++i)
-        mvwaddstr(scr_, i, 0, "joku teksti");
+    wmove(scr_, 1,0);
+    wclrtoeol(scr_);
+    auto cur = c_->buf->cursor();
+    wprintw(scr_, std::to_string(c_->buf->size()).c_str());
 
-    moveCursor(Point::make(0, 0));
-    wdeleteln(scr_);
-    winsertln(scr_);
 }
 
 void MainScreen::moveCursor(
@@ -137,6 +143,7 @@ void MainScreen::moveCursor(
         return;
     cursor_ = point;
     wmove(scr_, point->y(), point->x());
+    wrefresh(scr_);
 }
 
 PointPtr MainScreen::toScrCoord(
@@ -156,6 +163,25 @@ PointPtr MainScreen::toBufCoord(
 bool MainScreen::isAtLineEnd() const
 {      
     return c_->buf->lineLen(toBufCoord(cursor_)) < cursor_->x();
+}
+
+int MainScreen::height() const
+{
+    return height_;
+}
+
+bool MainScreen::isInsideScr(
+    const PointPtr& point) const
+{
+    if (!point->isFullySet())
+        point |= cursor_;
+
+    if (point->y() < 0 || point->y() > height_ - 1)
+        return false;
+    if (point->x() < 0 || point->x() > width_ - 1)
+        return false;
+
+    return true;
 }
 
 void MainScreen::delCh(

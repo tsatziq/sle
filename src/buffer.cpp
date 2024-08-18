@@ -52,6 +52,8 @@ void Buffer::addText(
 void Buffer::addText(
     const std::vector<std::string>& txt)
 {
+    if ((txt_.size() == 1) && txt_.front().empty())
+        txt_.clear();
     txt_.insert(txt_.end(), txt.begin(), txt.end());
 }
 
@@ -119,17 +121,22 @@ const PointPtr& Buffer::move(
     {
         auto length = lineLen(point_);
 
-        if ((point_->x() + count) > length - 2)
+        if ((point_->x() + count) > length - 1)
         {
-            if (length <= 2)
-                point_->setX(0);
-            else if (point_->y() == size() - 1)
-                point_->setX(length - 1);
-            else
+            // If last char is newline.
+            if (txt_.at(point_->y()).back() == '\n')
                 point_->setX(length - 2);
+            else
+                point_->setX(length - 1);
         }
         else
-            point_->setX(point_->x() + count);
+        {
+            if (txt_.at(point_->y()).at(point_->x() + count) == '\n')
+                point_->setX(point_->x() + count - 1);
+            else
+                point_->setX(point_->x() + count);
+
+        }
         break;
     }
     case Direction::UP:
@@ -141,12 +148,14 @@ const PointPtr& Buffer::move(
 
         auto nextLnLen = lineLen(point_);
 
-        if (nextLnLen <= point_->x())
+        if (nextLnLen - 1 < point_->x())
         {
-            if (nextLnLen <= 2)
+            if (nextLnLen == 1)
                 point_->setX(0);
-            else
+            else if (txt_.at(point_->y()).back() == '\n')
                 point_->setX(nextLnLen - 2);
+            else
+                point_->setX(nextLnLen - 1);
         }
         break;
     }
@@ -159,14 +168,14 @@ const PointPtr& Buffer::move(
 
         auto nextLnLen = lineLen(point_);
 
-        if (nextLnLen <= point_->x())
+        if (nextLnLen - 1 < point_->x())
         {
-            if (nextLnLen <= 2)
+            if (nextLnLen == 1)
                 point_->setX(0);
-            else if (point_->y() == size() - 1)
-                point_->setX(nextLnLen - 1);
-            else
+            else if (txt_.at(point_->y()).back() == '\n')
                 point_->setX(nextLnLen - 2);
+            else
+                point_->setX(nextLnLen - 1);
         }
         break;
     }
@@ -254,14 +263,14 @@ const PointPtr& Buffer::setCursor(
     auto lastX = txt_.at(newPos->y()).size();
 
     if (newPos->y() != point_->y())
-        if (newPos->y() > 0 && newPos->y() <= lastY)
+        if (newPos->y() >= 0 && newPos->y() <= lastY)
            point_->setY(newPos->y());
 
     if (newPos->x() != point_->x())
     {
         if (newPos->x() > lastX)
             point_->setX(lastX);
-        else if (newPos->x() > 0)
+        else if (newPos->x() >= 0)
             point_->setX(newPos->x());
     }
 
@@ -319,25 +328,52 @@ PointPtr Buffer::findCh(
 
     if (pos != std::string::npos)
         p->setX(pos);
-    /*
-    else if (p->y() != c_->visibleRange->end()->y())
+    else
     {
+        // SEURAAVAKS: taa ei toimi kunnol!
         // Search rest of visible range.
         auto e = c_->visibleRange->end()->y();
-        for (int i = p->y(); i < c_->visibleRange->end()->y() + 1; ++i)
+        
+        if (dir == Direction::RIGHT)
         {
-            ln = txt_.at(i);
-            res = std::find(ln.begin(), ln.end(), ch);
-            if (res != ln.end())
+            for (int i = p->y(); i < c_->visibleRange->end()->y() + 1; ++i)
             {
-                const auto pos = std::distance(ln.begin(), res);
-                p->setX(pos);
-                p->setY(i);
-                break;
+                ln = txt_.at(i);
+                if (i == cursor()->y())
+                    pos = ln.find(ch, p->x() + 1);
+                else
+                    pos = ln.find(ch);
+
+                if (pos != std::string::npos)
+                {
+                    p->setX(pos);
+                    p->setY(i);
+                    break;
+                }
             }
         }
+        else if (dir == Direction::LEFT)
+        {
+            auto s = c_->visibleRange->start()->y();
+            for (int i = p->y(); i >= c_->visibleRange->start()->y(); --i)
+            {
+                ln = txt_.at(i);
+                if (i == cursor()->y())
+                    pos = ln.rfind(ch, p->x());
+                else
+                    pos = ln.rfind(ch);
+
+                if (pos != std::string::npos)
+                {
+                    p->setX(pos);
+                    p->setY(i);
+                    break;
+                }
+            }
+        }
+        else
+            return nullptr;
     }
-    */
 
     if (pos == std::string::npos)
         return nullptr;

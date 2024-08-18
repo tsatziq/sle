@@ -40,6 +40,8 @@ enum class Action
     DELETE,
     INSERT,
     TEST,
+    WRITE,
+    WRITEQUIT,
     QUIT,
 };
 
@@ -64,7 +66,7 @@ public:
     EditLoop(
         const ContextPtr& context);
 
-    void init();
+    void run();
 
 private:
     class ModeBase

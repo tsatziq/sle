@@ -7,7 +7,7 @@
 
 using namespace sle;
 
-int main()
+int main(int argc, char* argv[])
 {
     ContextPtr context = std::make_shared<Context>();
 
@@ -22,7 +22,22 @@ int main()
     context->scr = &scr;
 
     scr.init();
-    loop.init();
+
+    if (argc > 1)
+    {
+        file.readFile(std::string(argv[1]), &buf);
+        if (!buf.getText().empty())
+        {
+            scr.paint(buf.getText());
+            if (buf.size() > scr.height())
+                context->visibleRange->end()->setY(scr.height() - 1);
+            else
+                context->visibleRange->end()->setY(buf.size() - 1);
+        }
+        scr.moveCursor(Point::make(0, 0));
+    }
+
+    loop.run();
 
     EXIT_SUCCESS;
 }
