@@ -287,7 +287,7 @@ private:
         const Command& cmd)
     {
         auto scr = c_->scr;
-        PointPtr target = nullptr;
+        PointPtr target = Point::make(0, 0);
 
         switch (cmd_.motion)
         {
@@ -296,43 +296,16 @@ private:
             break;
         case Motion::DOWN:
         {
-            // SEURAAVAKS: scrollaus ei toimi... ja f/t vikalta rivilta ei toimi.
             // huom lldb toimii huonosti koska siin nayton koko jotenki huonosti.
             target = c_->buf->move(Direction::DOWN);
             auto& range = c_->visibleRange;
 
-            #if 0
-            if (target->y() == 23)
-            {
-                
-                auto endY = range->end()->y();
-                auto startY = range->start()->y();
-
-                int diff = target->y() - range->end()->y();
-                #if 1
-                auto str = std::to_string(target->y()) + " " 
-                    + std::to_string(endY)
-                    + " " + std::to_string(startY) + " " + std::to_string(diff);
-                if (!range->contains(target))
-                    str += " false";
-                else
-                    str += " true";
-
-                c_->scr->paint({str}, Point::make(0,5));
-                #endif
-            }
-            #endif
             if (!range->contains(target))
             {
                 auto endY = range->end()->y();
                 auto startY = range->start()->y();
 
                 int diff = target->y() - range->end()->y();
-                #if 1
-                auto str = std::to_string(target->y()) + " " 
-                    + std::to_string(endY)
-                    + " " + std::to_string(startY) + " " + std::to_string(diff);
-                #endif
 
                 range->start()->setY(range->start()->y() + diff); 
                 range->end()->setY(target->y());
@@ -344,6 +317,43 @@ private:
         case Motion::RIGHT:
             target = c_->buf->move(Direction::RIGHT);
             break;
+        case Motion::SCRFWD:
+        case Motion::SCRBCK:
+        {
+            int yNow = c_->buf->cursor()->y();
+
+            if (cmd_.motion == Motion::SCRFWD)
+                c_->scr->scrollScr(c_->scr->height() / 2, Direction::DOWN);
+            else if (cmd_.motion == Motion::SCRBCK)
+                c_->scr->scrollScr(c_->scr->height() / 2, Direction::UP);
+            
+            auto cur = c_->scr->toBufCoord(c_->scr->cursor());
+
+            if (cur->y() == yNow)
+            {
+                if (cmd_.motion == Motion::SCRFWD)
+                    cur->setY(yNow + c_->scr->height() / 2);
+                if (cmd_.motion == Motion::SCRBCK)
+                    cur->setY(yNow - c_->scr->height() / 2);
+
+                if (cur->y() < 0)
+                    cur->setY(0);
+                if (cur->y() > c_->buf->size())
+                    cur->setY(c_->buf->size() - 1);
+            }
+
+            std::regex pattern(R"(\S)");
+            auto endX = c_->buf->lineLen(cur) - 1;
+            auto ln = Range::make(cur, Point::make(endX, cur->y()));
+            auto res = c_->buf->find(pattern, ln);
+            if (!res)
+                cur->setX(0);
+
+            target->set(cur->x(), cur->y());
+            c_->scr->moveCursor(c_->scr->toScrCoord(cur));
+            c_->buf->setCursor(cur);
+            break;
+        }
         case Motion::TILL:
         case Motion::TILLBCK:
         case Motion::TO:
@@ -392,7 +402,6 @@ private:
 
             if (!range->contains(target))
             {
-                
                 int diff = range->start()->y() - target->y();
 
                 range->end()->setY(range->end()->y() - diff);
@@ -509,6 +518,8 @@ private:
     {
         switch (c)
         {
+        case 0x04: return Motion::SCRFWD;
+        case 0x15: return Motion::SCRBCK;
         case 'f': return Motion::TO;
         case 'F': return Motion::TOBCK;
         case 'h': return Motion::LEFT;

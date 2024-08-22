@@ -277,32 +277,37 @@ const PointPtr& Buffer::setCursor(
     return point_;
 }
 
-Point Buffer::find(
-    const std::string& regex,
-    const PointPtr& point) const
+PointPtr Buffer::find(
+    std::regex& regex,
+    const RangePtr& range) const
 {
-    // tee tasta se / find. eriksee simppelimpi f find.
-    // ja se f tee vaa ettii nakyvasta rangesta.
-    // kait kayta sit regex_search ja eti kaikki, ku iter ei toimi...
-    /*    
-    // tee se hemmetin PointPtr
-    Point start = point;
+    auto sX = range->start()->x();
+    auto sY = range->start()->y();
+    auto eX = range->end()->x();
+    auto eY = range->end()->y();
 
-    if (point->isUnset())
-        start = point_;
+    if (!range->start()->isFullySet())
+        range->start() |= point_;
+    if (!range->end()->isFullySet())
+        range->end()->set(point_->x() - 1, size() - 1);
 
-    for (int i = start.y(); i < txt_.size(); ++i)
+    for (int y = range->start()->y(); y <= range->end()->y(); ++y)
     {
-        auto begin = std::regex_iterator<std::string::iterator>{
-            txt_.at(i).begin(),
-            txt_.at(i).end(),
-            std::regex(regex)};
+        std::smatch match;
+        std::string ln = txt_.at(y);
 
-        auto end = std::sregex_iterator();
-    } 
-    */
+        int start = (y == range->start()->y()) ? range->start()->x() : 0;        
+        int end = (y == range->end()->y()) ? range->end()->x() : ln.size();
 
-    return Point{};
+        end = std::min(end, static_cast<int>(ln.size()));
+        if (std::regex_search(
+            ln.cbegin() + start, ln.cbegin() + end, match, regex))
+                return Point::make(
+                    static_cast<int>(match.position(0)) + start,
+                    y);
+    }
+
+    return Point::make();
 }
 
 PointPtr Buffer::findCh(

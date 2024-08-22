@@ -24,6 +24,8 @@ enum class Motion
     RIGHT,
     UP,
     DOWN,
+    SCRFWD,
+    SCRBCK,
     TILL,
     TILLBCK,
     TO,

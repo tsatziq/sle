@@ -6,6 +6,7 @@
 #include "sle/context.h"
 #include <map>
 #include <memory>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -67,9 +68,9 @@ public:
         const PointPtr& newPos);
 
     /// Returns position of first regex match. Undefined if not found.
-    Point find(
-        const std::string& regex,
-        const PointPtr& point = nullptr) const;
+    PointPtr find(
+        std::regex& regex,
+        const RangePtr& range = nullptr) const;
 
     PointPtr findCh(
         const char ch,

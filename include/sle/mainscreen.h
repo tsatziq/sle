@@ -2,6 +2,7 @@
 #define SLE_MAINSCREEN_H
 
 #include "sle/context.h"
+#include "sle/customtypes.h"
 #include "sle/point.h"
 #include "sle/screen.h"
 
@@ -30,6 +31,8 @@ public:
         const std::vector<std::string>& text,
         const PointPtr& point = Point::make(0, 0));
 
+    const PointPtr& cursor() const;
+
     void test();
 
     /// Moves the cursor within the bounds of the screen.
@@ -38,6 +41,11 @@ public:
     /// \param point Point in the coordinate space of the screen.
     void moveCursor(
         const PointPtr& point);
+
+    /// Srolls the screen up/down <lines> lines. Cursor is not moved.
+    void scrollScr(
+        const int lines,
+        const Direction dir);
 
     /// Converts a point in buffer space to a point in the screen space.
     PointPtr toScrCoord(

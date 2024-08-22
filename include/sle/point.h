@@ -146,11 +146,25 @@ public:
         ySet_ = isSet;
     }
 
+    static std::shared_ptr<Point> make()
+    {
+        return std::make_shared<Point>();
+    }
+
     static std::shared_ptr<Point> make(
         const int x,
         const int y)
     {
         return std::make_shared<Point>(x, y);
+    }
+
+    static std::shared_ptr<Point> make(
+        const int x,
+        const int y,
+        bool xSet,
+        bool ySet)
+    {
+        return std::make_shared<Point>(x, y, xSet, ySet);
     }
 
     static std::shared_ptr<Point> make(
@@ -258,6 +272,7 @@ public:
         end_ = end;
     }
 
+// NOTE: TAA POIS!!
     void fitToSize(
         const int lines,
         const int firstLnLen,

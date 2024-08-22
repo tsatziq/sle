@@ -23,6 +23,7 @@ void MainScreen::init()
     initscr();
     noecho();
     getmaxyx(stdscr, height_, width_); 
+    height_ = 23; // LLDB DEBUG! // LLDB DEBUG!
     scr_ = newwin(height_, width_, 0, 0);
 }
 
@@ -113,7 +114,7 @@ void MainScreen::paint(
         for (const auto& str : text)
         {
             wclrtoeol(scr_);
-            wprintw(scr_, str.c_str());
+            mvwprintw(scr_, pTemp->y(), pTemp->x(), str.c_str());
             pTemp->incY();
 
             if (!isInsideScr(pTemp))
@@ -124,12 +125,16 @@ void MainScreen::paint(
     }
 }
 
+const PointPtr& MainScreen::cursor() const
+{
+    return cursor_;
+}
+
 void MainScreen::test()
 {
     wmove(scr_, 1,0);
     wclrtoeol(scr_);
-    auto cur = c_->buf->cursor();
-    wprintw(scr_, std::to_string(c_->buf->size()).c_str());
+    wprintw(scr_, "moi");
 
 }
 
@@ -144,6 +149,64 @@ void MainScreen::moveCursor(
     cursor_ = point;
     wmove(scr_, point->y(), point->x());
     wrefresh(scr_);
+}
+
+void MainScreen::scrollScr(
+    const int lines,
+    const Direction dir)
+{
+    if (c_->buf->size() < height_)
+        return;
+
+    auto r = c_->visibleRange;
+    auto top = r->start();
+    auto end = r->end();
+
+    int sX, sY, eX, eY;
+    sX = r->start()->x();
+    sY = r->start()->y();
+    eX = r->end()->x();
+    eY = r->end()->y();
+
+    switch (dir)
+    {
+    case Direction::DOWN:
+    {
+        top->setY(top->y() + lines);
+        end->setY(end->y() + lines);
+
+        if (end->y() > c_->buf->size() - 1)
+        {
+            end->setY(c_->buf->size() - 1);
+            top->setY(end->y() + 1 - height_);
+        }
+        break;
+    }
+    case Direction::UP:
+    {
+        top->setY(top->y() - lines);
+        end->setY(end->y() - lines);
+
+        if (top->y() < 0)
+        {
+            top->setY(0);
+            end->setY(height_ - 1);
+        }
+        break;
+    }
+    default:
+        return;
+    }
+
+    r = c_->visibleRange;
+    sX = r->start()->x();
+    sY = r->start()->y();
+    eX = r->end()->x();
+    eY = r->end()->y();
+
+    paint(c_->buf->getRange(r));
+    moveCursor(cursor_); 
+    c_->visibleRange = r;
 }
 
 PointPtr MainScreen::toScrCoord(
