@@ -395,6 +395,60 @@ private:
             }
             break;
         }
+        case Motion::BEGINLN:
+        case Motion::ENDLN:
+        case Motion::MIDDLELN:
+        {
+            auto cur = Point::make(0, c_->buf->cursor()->y());
+            std::regex pattern(R"(\S)");
+            auto endX = c_->buf->lineLen(cur) - 1;
+
+            auto str = c_->buf->getLine(cur);
+            auto revStr = str;
+            std::reverse(revStr.begin(), revStr.end());
+
+            auto firstCh = c_->buf->find(pattern, cur->y(), str);
+            auto lastCh = c_->buf->find(pattern, cur->y(), revStr);
+
+            if (!firstCh || !lastCh)
+                break;
+
+            int revPos = str.size() - lastCh->x() - 1;
+            int mid = (revPos - firstCh->x()) / 2;
+
+            if (cmd_.motion == Motion::BEGINLN)
+                target = c_->scr->toScrCoord(firstCh);
+            else if (cmd_.motion == Motion::MIDDLELN)
+                target = c_->scr->toScrCoord(Point::make(mid, cur->y()));
+            else if (cmd_.motion == Motion::ENDLN)
+                target = c_->scr->toScrCoord(Point::make(revPos, cur->y()));
+            break;
+        }
+        case Motion::BOTTOM:
+        case Motion::MIDDLE:
+        case Motion::TOP:
+            // SEURAAVAKS: naa H,L,M ja horisontaalisesti samat.
+        {
+            PointPtr cur;
+
+            if (cmd_.motion == Motion::TOP)
+                cur = c_->scr->toBufCoord(Point::make(0, 0));
+            else if (cmd_.motion == Motion::BOTTOM)
+                cur = c_->scr->toBufCoord(Point::make(0, c_->scr->height() - 1));
+            else if (cmd_.motion == Motion::MIDDLE)
+                cur = c_->scr->toBufCoord(Point::make(0, c_->scr->height() / 2));
+
+            std::regex pattern(R"(\S)");
+            auto endX = c_->buf->lineLen(cur) - 1;
+            auto ln = Range::make(cur, Point::make(endX, cur->y()));
+            auto res = c_->buf->find(pattern, ln);
+            if (!res)
+                cur->setX(0);
+
+            c_->buf->setCursor(res);
+            target = c_->scr->toScrCoord(res);
+            break;
+        }
         case Motion::UP:
         {
             target = c_->buf->move(Direction::UP);
@@ -519,13 +573,19 @@ private:
         switch (c)
         {
         case 0x04: return Motion::SCRFWD;
+        case 0x08: return Motion::BEGINLN;
+        case 0x0C: return Motion::ENDLN;
+        case 0x02: return Motion::MIDDLELN;
         case 0x15: return Motion::SCRBCK;
         case 'f': return Motion::TO;
         case 'F': return Motion::TOBCK;
         case 'h': return Motion::LEFT;
+        case 'H': return Motion::TOP;
         case 'j': return Motion::DOWN;
         case 'k': return Motion::UP;
         case 'l': return Motion::RIGHT;
+        case 'L': return Motion::BOTTOM;
+        case 'B': return Motion::MIDDLE;
         case 't': return Motion::TILL;
         case 'T': return Motion::TILLBCK;
         default: return Motion::NONE;

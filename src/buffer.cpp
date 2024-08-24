@@ -213,13 +213,6 @@ void Buffer::erase(
     auto eX = range->end()->x();
     auto eY = range->end()->y();
 
-    /*
-    range->fitToSize(
-        txt_.size(),
-        txt_.at(range->start()->y()).size(),
-        txt_.at(range->end()->y()).size());
-    */
-
     //if (range->empty())
      //   return;
 
@@ -279,13 +272,25 @@ const PointPtr& Buffer::setCursor(
 
 PointPtr Buffer::find(
     std::regex& regex,
-    const RangePtr& range) const
+    const int y,
+    const std::string& ln) const
 {
-    auto sX = range->start()->x();
-    auto sY = range->start()->y();
-    auto eX = range->end()->x();
-    auto eY = range->end()->y();
+    if (ln.empty())
+        return nullptr;
 
+    std::smatch match;
+    if (std::regex_search(
+        ln.cbegin(), ln.cend(), match, regex))
+            return Point::make(static_cast<int>(match.position(0)), y);
+    else
+        return nullptr; 
+}
+
+PointPtr Buffer::find(
+    std::regex& regex,
+    const RangePtr& range,
+    const std::string& ln) const
+{
     if (!range->start()->isFullySet())
         range->start() |= point_;
     if (!range->end()->isFullySet())
@@ -307,7 +312,7 @@ PointPtr Buffer::find(
                     y);
     }
 
-    return Point::make();
+    return nullptr;
 }
 
 PointPtr Buffer::findCh(
@@ -382,7 +387,7 @@ PointPtr Buffer::findCh(
 
     if (pos == std::string::npos)
         return nullptr;
-    else
+   else
         return p; 
 }
 

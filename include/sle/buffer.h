@@ -67,10 +67,17 @@ public:
     const PointPtr& setCursor(
         const PointPtr& newPos);
 
-    /// Returns position of first regex match. Undefined if not found.
+    /// Returns position of first regex match in string. Nullptr if not found.
     PointPtr find(
         std::regex& regex,
-        const RangePtr& range = nullptr) const;
+        const int y,
+        const std::string& ln) const;
+
+    /// Returns position of first regex match. Nullptr if not found.
+    PointPtr find(
+        std::regex& regex,
+        const RangePtr& range = nullptr,
+        const std::string& ln = {}) const;
 
     PointPtr findCh(
         const char ch,

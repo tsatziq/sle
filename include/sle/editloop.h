@@ -20,7 +20,12 @@ enum class Mode
 enum class Motion
 {
     NONE,
+    BEGINLN,
+    BOTTOM,
+    ENDLN,
     LEFT,
+    MIDDLE,
+    MIDDLELN,
     RIGHT,
     UP,
     DOWN,
@@ -30,10 +35,16 @@ enum class Motion
     TILLBCK,
     TO,
     TOBCK,
+    TOP,
     LINE, ///< Whole line commands, e.g. 'dd'.
     TOLINE,
 };
 
+/*
+-h,l,b korvaa h,l,m. sit saa control versiot kaikista
+-ctrl k completioniin. ois hyva jos vaik u keskeyttais sen
+    ja palais siihen sanajuureen.
+*/
 enum class Action
 {
     NONE,
