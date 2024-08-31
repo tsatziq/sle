@@ -22,7 +22,8 @@ public:
     void init();
 
     void addCh(
-        const char ch);
+        const char ch,
+        const bool replace = false);
 
     void addText(
         const std::string& txt);
@@ -47,7 +48,7 @@ public:
 
     /// Returns length of the line.
     std::size_t lineLen(
-        const PointPtr& point) const;
+        const PointPtr& point = nullptr) const;
 
     // kato tarviiko tata loppujen lopuks, kunka usein kaytetaan.
     /// Returns rest of line from the specified point onwards.

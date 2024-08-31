@@ -18,14 +18,18 @@ void Buffer::init()
 }
 
 void Buffer::addCh(
-    const char ch)
+    const char ch,
+    const bool replace)
 {
     if (point_->y() < 0)
         return;
     if (point_->y() > txt_.size() - 1)
         return;
 
-    txt_.at(point_->y()).insert(point_->x(), 1, ch);
+    if (!replace)
+        txt_.at(point_->y()).insert(point_->x(), 1, ch);
+    else
+        txt_.at(point_->y())[point_->x()] = ch;
 
     if (ch != '\n')
         point_->incX();
@@ -194,7 +198,10 @@ std::size_t Buffer::size() const
 std::size_t Buffer::lineLen(
     const PointPtr& point) const
 {
-    return txt_.at(point->y()).size();
+    if (!point)
+        return txt_.at(point_->y()).size();
+    else
+        return txt_.at(point->y()).size();
 }
 
 std::string Buffer::getLine(

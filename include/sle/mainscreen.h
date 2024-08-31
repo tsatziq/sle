@@ -21,10 +21,20 @@ public:
 
     int getCh();
 
-    /// Paints a character at current position of screen cursor.
+    /// Replace a character at given position, does not advance cursor.
+    /// \returns False, if char could not be painted.
+    bool paintAt(
+        const char c,
+        const PointPtr& point);
+
+    /// Paints a character at current position and advances.
+    ///
+    /// \param c The char to paint at current cursor position.
+    /// \param replace If true, replaces any previous character.
     /// \return False, if char could not be painted (e.g. line too long).
     bool paintCh(
-        const char c);
+        const char c,
+        const bool replace = false);
 
     /// Paints supplied lines starting from specified point.
     void paint(

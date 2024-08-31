@@ -7,7 +7,9 @@ target_sources(common
         ${CMAKE_SOURCE_DIR}/include/sle/normalmodelexer.h
         editloop.cpp
         filehandler.cpp
+        insertmode.cpp
     	mainscreen.cpp
+        normalmode.cpp
         ${FLEX_normalModeLexer_OUTPUTS}
 )
 

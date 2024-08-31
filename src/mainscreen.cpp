@@ -32,8 +32,34 @@ int MainScreen::getCh()
     return wgetch(scr_);
 }
 
+bool MainScreen::paintAt(
+    const char c,
+    const PointPtr& point)
+{
+    if (!point)
+        point->set(cursor_->x(), cursor_->y());
+    if (!isInsideScr(point))
+        return false;
+
+    switch (c)
+    {
+    case '\n':
+        addNewline();
+        return true;
+    default:
+        if (point->x() == width_ - 1)
+            return false;
+
+        mvwaddch(scr_, point->y(), point->x(), c);
+        wmove(scr_, cursor_->y(), cursor_->x());
+
+        return true;
+    }
+}
+
 bool MainScreen::paintCh(
-    const char c)
+    const char c,
+    const bool replace)
 {
     auto lineLen = c_->buf->lineLen(toBufCoord(cursor_));
     bool atLineEnd = isAtLineEnd(); // True, if there is no text after cursor.
@@ -47,7 +73,7 @@ bool MainScreen::paintCh(
         if (lineLen == width_ - 1)
             return false;
 
-        if (!atLineEnd)
+        if (!atLineEnd && !replace)
             mvwinsch(scr_, cursor_->y(), cursor_->x(), c);
         else
             mvwaddch(scr_, cursor_->y(), cursor_->x(), c);
@@ -61,8 +87,6 @@ bool MainScreen::paintCh(
 
 void MainScreen::addNewline()
 {
-    // HUOH siirry joskus kayttaa deleteln/insertln, ja muutenki turha tyo pois
- 
     if (cursor_->y() < height_ - 1)
     {
         // Screen was not full.
