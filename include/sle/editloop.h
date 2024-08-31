@@ -30,12 +30,8 @@ public:
 
 private:
     void changeMode(
-        const Mode& mode);
-
-    /*void changeMode(
         const Mode& mode,
-        const ModeDataPtr& data);
-    */
+        ModeDataBase* data = nullptr); 
 
     class NormalMode;
     class InsertMode;

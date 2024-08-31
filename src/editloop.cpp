@@ -30,11 +30,24 @@ void EditLoop::run()
 }
 
 void EditLoop::changeMode(
-    const Mode& newMode)
+    const Mode& newMode,
+    ModeDataBase* data)
 {
     mode_ = modePool_.at(newMode);
-    // jos teet sen ModeData, niin tee perus pure abstract ModeData* data() = 0
-    // ja derived classis InsertModeData* data() override. toimii!
+
+    switch (newMode)
+    {
+    case Mode::INSERT:
+    {
+        auto im = static_cast<EditLoop::InsertMode*>(mode_.get());
+        auto d = static_cast<InsertModeData*>(data);
+        im->setData(d);
+        break;
+    }
+    case Mode::NORMAL:
+    default:
+        break;
+    }
 }
 
 }

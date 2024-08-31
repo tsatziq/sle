@@ -276,9 +276,11 @@ void MainScreen::delCh(
     const int count)
 {
     if (!point || point->isUnset())
-        wdelch(scr_);
+        for (int i = 0; i < count; ++i)
+            wdelch(scr_);
     else
-        mvwdelch(scr_, point->y(), point->x());
+        for (int i = 0; i < count; ++i)
+            mvwdelch(scr_, point->y(), point->x());
 }
 
 }

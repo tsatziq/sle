@@ -1,4 +1,5 @@
 #include "sle/normalmode.h"
+#include "sle/insertmode.h"
 #include "sle/mainscreen.h"
 
 namespace sle
@@ -366,7 +367,11 @@ void EditLoop::NormalMode::execute(
     {
         auto eol = Point::make(c_->buf->cursor());
         eol->setX(c_->buf->lineLen() - 1);
-        parent_->changeMode(Mode::INSERT);
+        if (eol->y() != c_->buf->size() - 1)
+            eol->decX();
+        parent_->changeMode(
+            Mode::INSERT,
+            new InsertModeData(InsertType::CHANGE, eol));
 
         exitMode_ = true;
         break;
@@ -406,6 +411,7 @@ bool EditLoop::NormalMode::isPrimaryAct(
     switch (a)
     {
         case Action::APPEND:
+        case Action::CHANGEEOL:
         case Action::INSERT:
         case Action::DELCHAR:
         case Action::TEST:

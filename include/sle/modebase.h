@@ -80,32 +80,23 @@ public:
     /// \return true, if program should quit.
     virtual bool handle() = 0;
     // huom korvaa joskus bool enumilla.
+
+    //ehk joskus virtual void setData() = 0;
 protected:
     static bool quit_;
 };
 
 using ModePtr = std::shared_ptr<ModeBase>;
 
-/* SIIRRA MODET JA VARMAA TAA DATABASE OMIIN FILUIHIN!
+class ModeDataBase;
+using ModeDataPtr = std::shared_ptr<ModeDataBase>;
+
 /// Base class for passing data from one mode to another.
 class ModeDataBase
 {
 public:
     virtual ~ModeDataBase() = default;
-
-    virtual ModeDataBase* data() = 0;
 };
-
-using ModeDataPtr = std::shared_ptr<ModeDataBase>;
-
-class InsertModeData
-    : public ModeDataBase
-{
-public:
-    InsertModeData(
-        Insert        
-};
-*/
 
 } // namespace sle
 

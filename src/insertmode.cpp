@@ -1,5 +1,6 @@
 #include "sle/insertmode.h"
 #include "sle/mainscreen.h"
+#include "sle/point.h"
 
 namespace sle
 {
@@ -8,67 +9,79 @@ EditLoop::InsertMode::InsertMode(
     EditLoop* parent)
     :
     parent_(parent),
-    c_(parent->c_)
+    c_(parent->c_),
+    buf_(c_->buf),
+    scr_(c_->scr)
 {}
 
 bool EditLoop::InsertMode::handle()
 {
-    switch (data_.type)
+    switch (data_.type())
     {
     case InsertType::BASIC:
     {
         while (true)
         {
-            char ch = c_->scr->getCh();
+            char ch = scr_->getCh();
             
             switch (ch)
             {
             case 'q':
-            {
                 quitMode();
                 return false;
-            }
             case '\n':
-                c_->buf->addCh(ch);
-                c_->scr->paintCh(ch);
-                return false;
+                buf_->addCh(ch);
+                scr_->paintCh(ch);
+                break;
             default:
-                if (c_->scr->paintCh(ch))
-                    c_->buf->addCh(ch);
-                return false;
+                if (scr_->paintCh(ch))
+                    buf_->addCh(ch);
+                break;
             }
         }
         break;
     }
     case InsertType::CHANGE:
     {
-        /*
-        c_->scr->paintAt('$', cEnd_);
+        scr_->paintAt('$', data_.end());
         while (true)
         {
-            char ch = c_->scr->getCh();
+            char ch = scr_->getCh();
             
             switch (ch)
             {
             case 'q':
             {
+                auto cur = scr_->cursor();
+                if (cur->x() <= data_.end()->x())
+                    delBufScr(Range::make(cur, data_.end()));
                 quitMode();
                 return false;
             }
             case '\n':
-                c_->buf->addCh(ch);
-                c_->scr->paintCh(ch);
-                return false;
+            {
+                auto cur = scr_->cursor();
+                if (cur->x() <= data_.end()->x())
+                    delBufScr(Range::make(cur, data_.end()));
+                buf_->addCh(ch);
+                scr_->paintCh(ch);
+                break;
+            }
             default:
-                if (c_->buf->cursor()->x() <= cEnd_->x())
-                    if (c_->scr->paintCh(ch, true))
-                       c_->buf->addCh(ch, true); 
-                if (c_->scr->paintCh(ch))
-                    c_->buf->addCh(ch);
-                return false;
+                if (buf_->cursor()->x() <= data_.end()->x())
+                {
+                    if (scr_->paintCh(ch, true))
+                       buf_->addCh(ch, true); 
+                }
+                else
+                {
+                    if (scr_->paintCh(ch))
+                        buf_->addCh(ch);
+                }
+                break;
             }
         }
-        */
+        
         return false;
         break;
     }
@@ -77,11 +90,28 @@ bool EditLoop::InsertMode::handle()
     }
 }
 
+void EditLoop::InsertMode::setData(
+    InsertModeData* data)
+{
+    if (!data)
+        return;
+
+    data_ = *data;
+    delete data;
+}
+
 void EditLoop::InsertMode::quitMode()
 {
-    auto cursor = c_->buf->move(Direction::LEFT);
-    c_->scr->moveCursor(c_->scr->toScrCoord(cursor));
+    auto cursor = buf_->move(Direction::LEFT);
+    scr_->moveCursor(scr_->toScrCoord(cursor));
     parent_->changeMode(Mode::NORMAL);
+}
+
+void EditLoop::InsertMode::delBufScr(
+    const RangePtr& range)
+{
+    buf_->erase(range);
+    scr_->delCh(nullptr, range->end()->x() - range->start()->x() + 1);
 }
 
 }

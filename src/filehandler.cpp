@@ -38,7 +38,7 @@ void FileHandler::readFile(
     std::string line;
     
     while (std::getline(file, line))
-        txt.push_back(line);
+        txt.push_back(line.append(1, '\n'));
     
     file.close();
 
