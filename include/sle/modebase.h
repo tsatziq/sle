@@ -33,10 +33,12 @@ enum class Motion
     TOP,
     LINE, ///< Whole line commands, e.g. 'dd'.
     TOLINE,
+    WORDFWD,
 };
 
 /*
 -h,l,b korvaa h,l,m. sit saa control versiot kaikista
+    -itse asias laita f, h, l
 -ctrl k completioniin. ois hyva jos vaik u keskeyttais sen
     ja palais siihen sanajuureen.
 */

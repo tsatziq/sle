@@ -53,7 +53,7 @@ public:
     // kato tarviiko tata loppujen lopuks, kunka usein kaytetaan.
     /// Returns rest of line from the specified point onwards.
     std::string getLine(
-        const PointPtr& start) const;
+        const PointPtr& start = nullptr) const;
 
     void erase(
         const RangePtr& range);
@@ -69,13 +69,15 @@ public:
         const PointPtr& newPos);
 
     /// Returns position of first regex match in string. Nullptr if not found.
+    // SEURAAVAKS: joskus kato voiks tan toisen poistaa
+    // JA muuta toi seuraava palauttaa Range, toka on matchin loppu.
     PointPtr find(
         std::regex& regex,
         const int y,
         const std::string& ln) const;
 
     /// Returns position of first regex match. Nullptr if not found.
-    PointPtr find(
+    RangePtr find(
         std::regex& regex,
         const RangePtr& range = nullptr,
         const std::string& ln = {}) const;

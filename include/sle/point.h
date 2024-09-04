@@ -92,6 +92,17 @@ public:
     {
         x_ = x;
         y_ = y;
+        xSet_ = true;
+        ySet_ = true;
+    }
+
+    void set(
+        const PointPtr& point)
+    {
+        x_ = point->x();
+        y_ = point->y();
+        xSet_ = point->xSet_;
+        ySet_ = point->ySet_;
     }
 
     void incX()

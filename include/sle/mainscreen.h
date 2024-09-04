@@ -9,6 +9,13 @@
 namespace sle
 {
 
+enum class ScreenState
+{
+    NONE,
+    REFRESH,
+    REDRAW,
+};
+
 class MainScreen
 {
 public:
@@ -42,6 +49,10 @@ public:
         const PointPtr& point = Point::make(0, 0));
 
     const PointPtr& cursor() const;
+
+    void refreshScr(
+        const ScreenState state,
+        const PointPtr& point = nullptr);
 
     void test();
 

@@ -23,7 +23,8 @@ void MainScreen::init()
     initscr();
     noecho();
     getmaxyx(stdscr, height_, width_); 
-    height_ = 23; // LLDB DEBUG! // LLDB DEBUG!
+    height_ = 23; // LLDB DEBUG!
+    width_ = 80; // LLDB DEBUG!
     scr_ = newwin(height_, width_, 0, 0);
 }
 
@@ -123,6 +124,8 @@ void MainScreen::paint(
         return;
 
     PointPtr pTemp = Point::make(point); 
+    pTemp->setX(0);
+    pTemp->setY(0);
     wmove(scr_, pTemp->y(), pTemp->x());
 
     if (text.empty())
@@ -147,11 +150,35 @@ void MainScreen::paint(
             wmove(scr_, pTemp->y(), pTemp->x());
         }
     }
+
+    doupdate();
+    redrawwin(scr_);
+    wnoutrefresh(scr_);
 }
 
 const PointPtr& MainScreen::cursor() const
 {
     return cursor_;
+}
+
+void MainScreen::refreshScr(
+    const ScreenState state,
+    const PointPtr& point)
+{
+    switch (state)
+    {
+    case ScreenState::REFRESH:
+        wrefresh(scr_);
+        break;
+    case ScreenState::REDRAW:
+        if (point)
+            wredrawln(scr_, point->y(), 1);
+        else
+            redrawwin(scr_);
+        break;
+    default:
+        break;
+    };
 }
 
 void MainScreen::test()
@@ -172,7 +199,11 @@ void MainScreen::moveCursor(
         return;
     cursor_ = point;
     wmove(scr_, point->y(), point->x());
-    wrefresh(scr_);
+
+    // SEURAAVAKS: tee tasta funktio ja suorita se vasta kun ollaan komento
+    // vuoron lopussa!!!! tota vikaa ei ehka tarvii. 
+    // kato kans jos se lagaa paljo ni mika kombo noita komenntoja toimii.
+    // wrefresh on doupdate ja wnoutrefresh ja doupdate
 }
 
 void MainScreen::scrollScr(
@@ -185,12 +216,6 @@ void MainScreen::scrollScr(
     auto r = c_->visibleRange;
     auto top = r->start();
     auto end = r->end();
-
-    int sX, sY, eX, eY;
-    sX = r->start()->x();
-    sY = r->start()->y();
-    eX = r->end()->x();
-    eY = r->end()->y();
 
     switch (dir)
     {
@@ -222,13 +247,7 @@ void MainScreen::scrollScr(
         return;
     }
 
-    r = c_->visibleRange;
-    sX = r->start()->x();
-    sY = r->start()->y();
-    eX = r->end()->x();
-    eY = r->end()->y();
-
-    paint(c_->buf->getRange(r));
+    paint(c_->buf->getRange(c_->visibleRange));
     moveCursor(cursor_); 
     c_->visibleRange = r;
 }

@@ -1,9 +1,13 @@
 #include "sle/normalmode.h"
 #include "sle/insertmode.h"
 #include "sle/mainscreen.h"
+#include <cmath>
 
 namespace sle
 {
+
+// HETI SEURAAVAKS: ks toi seuraava commit, teinko sinne jo jotai mita
+// pitaa sailyttaa? enta se middle ln yhel regexilla? eiks se jo onnistunu?
 
 EditLoop::NormalMode::NormalMode(
     EditLoop* parent)
@@ -167,17 +171,20 @@ CmdState EditLoop::NormalMode::parse(
 void EditLoop::NormalMode::execute(
     const Command& cmd)
 {
+    ScreenState state = ScreenState::NONE;
     auto scr = c_->scr;
-    PointPtr target = Point::make(0, 0);
+    PointPtr target = Point::make();
 
     switch (cmd_.motion)
     {
     case Motion::LEFT:
         target = c_->buf->move(Direction::LEFT);
+        c_->buf->setCursor(target);
         break;
     case Motion::DOWN:
     {
-        // huom lldb toimii huonosti koska siin nayton koko jotenki huonosti.
+        // SEURAAVAKS: jos on just \n kohalla yla/alarivil ja menee ylos/alas
+        // ni se menee siihe kohtaan, sen pitas menna vikaan nakyvaan chariin.
         target = c_->buf->move(Direction::DOWN);
         auto& range = c_->visibleRange;
 
@@ -193,29 +200,38 @@ void EditLoop::NormalMode::execute(
 
             c_->scr->paint(c_->buf->getRange(range));
         }
+
+        c_->buf->setCursor(target);
+        // NOTE: tama ja monet muut tarvitaa ainaki et lldb debug onnistuu.
+        // muuten se teksti liikkuessa jotenki menee sekasin
+        c_->scr->refreshScr(ScreenState::REDRAW,
+            c_->scr->toScrCoord(target));
         break;
     }
     case Motion::RIGHT:
         target = c_->buf->move(Direction::RIGHT);
+        c_->buf->setCursor(target);
+        state = ScreenState::NONE;
         break;
     case Motion::SCRFWD:
     case Motion::SCRBCK:
     {
         int yNow = c_->buf->cursor()->y();
+        int scroll = c_->scr->height() / 2;
 
         if (cmd_.motion == Motion::SCRFWD)
-            c_->scr->scrollScr(c_->scr->height() / 2, Direction::DOWN);
+            c_->scr->scrollScr(scroll, Direction::DOWN);
         else if (cmd_.motion == Motion::SCRBCK)
-            c_->scr->scrollScr(c_->scr->height() / 2, Direction::UP);
+            c_->scr->scrollScr(scroll, Direction::UP);
         
         auto cur = c_->scr->toBufCoord(c_->scr->cursor());
 
-        if (cur->y() == yNow)
+        if (cur->y() == yNow || std::abs(cur->y() - yNow) < scroll) 
         {
             if (cmd_.motion == Motion::SCRFWD)
-                cur->setY(yNow + c_->scr->height() / 2);
+                cur->setY(yNow + scroll);
             if (cmd_.motion == Motion::SCRBCK)
-                cur->setY(yNow - c_->scr->height() / 2);
+                cur->setY(yNow - scroll);
 
             if (cur->y() < 0)
                 cur->setY(0);
@@ -230,9 +246,8 @@ void EditLoop::NormalMode::execute(
         if (!res)
             cur->setX(0);
 
-        target->set(cur->x(), cur->y());
-        c_->scr->moveCursor(c_->scr->toScrCoord(cur));
-        c_->buf->setCursor(cur);
+        target->set(res->start());
+        c_->buf->setCursor(res->start());
         break;
     }
     case Motion::TILL:
@@ -274,6 +289,8 @@ void EditLoop::NormalMode::execute(
             }
             c_->buf->setCursor(target);
         }
+        c_->scr->refreshScr(ScreenState::REDRAW,
+            c_->scr->toScrCoord(target));
         break;
     }
     case Motion::BEGINLN:
@@ -288,6 +305,8 @@ void EditLoop::NormalMode::execute(
         auto revStr = str;
         std::reverse(revStr.begin(), revStr.end());
 
+        // SEURAAVAKS: saisko yhel findil rgx '\\S+*'?
+        // sita varte pitaa yhistaa vaa yks find funkkari
         auto firstCh = c_->buf->find(pattern, cur->y(), str);
         auto lastCh = c_->buf->find(pattern, cur->y(), revStr);
 
@@ -303,12 +322,12 @@ void EditLoop::NormalMode::execute(
             target = c_->scr->toScrCoord(Point::make(mid, cur->y()));
         else if (cmd_.motion == Motion::ENDLN)
             target = c_->scr->toScrCoord(Point::make(revPos, cur->y()));
+        c_->buf->setCursor(target);
         break;
     }
     case Motion::BOTTOM:
     case Motion::MIDDLE:
     case Motion::TOP:
-        // SEURAAVAKS: naa H,L,M ja horisontaalisesti samat.
     {
         PointPtr cur;
 
@@ -326,8 +345,9 @@ void EditLoop::NormalMode::execute(
         if (!res)
             cur->setX(0);
 
-        c_->buf->setCursor(res);
-        target = c_->scr->toScrCoord(res);
+        c_->buf->setCursor(res->end());
+        target = c_->scr->toScrCoord(res->end());
+        c_->buf->setCursor(target);
         break;
     }
     case Motion::UP:
@@ -343,6 +363,22 @@ void EditLoop::NormalMode::execute(
             range->start()->setY(target->y());
 
             c_->scr->paint(c_->buf->getRange(range));
+        }
+        c_->buf->setCursor(target);
+        break;
+    }
+    case Motion::WORDFWD:
+    {
+        std::regex pattern("\\s+\\S");
+        auto cur = c_->buf->cursor();
+        auto endX = c_->buf->lineLen(cur) - 1;
+
+        auto ln = Range::make(cur, Point::make(endX, cur->y()));
+        auto res = c_->buf->find(pattern, ln);
+        if (res)
+        {
+            target = res->end();
+            c_->buf->setCursor(res->end());
         }
         break;
     }
@@ -385,6 +421,9 @@ void EditLoop::NormalMode::execute(
     }
     case Action::NONE:
     {
+        if (!target->isFullySet())
+            break;
+
         auto p = scr->toScrCoord(target);
         c_->scr->moveCursor(scr->toScrCoord(target));
         break;
@@ -403,6 +442,9 @@ void EditLoop::NormalMode::execute(
     default:
         break;
     }
+
+    //if (target)
+    c_->scr->refreshScr(state); 
 }
 
 bool EditLoop::NormalMode::isPrimaryAct(
@@ -482,6 +524,7 @@ Motion EditLoop::NormalMode::toMotion(
     case 'B': return Motion::MIDDLE;
     case 't': return Motion::TILL;
     case 'T': return Motion::TILLBCK;
+    case 'w': return Motion::WORDFWD;
     default: return Motion::NONE;
     }
 }

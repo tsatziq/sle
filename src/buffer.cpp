@@ -1,6 +1,7 @@
 #include "sle/buffer.h"
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <string_view>
 #include <regex>
 
@@ -207,7 +208,10 @@ std::size_t Buffer::lineLen(
 std::string Buffer::getLine(
     const PointPtr& start) const
 {
-    return txt_.at(start->y()).substr(start->x());
+    if (!start)
+        return txt_.at(point_->y());
+    else
+        return txt_.at(start->y()).substr(start->x());
 }
 
 void Buffer::erase(
@@ -259,6 +263,8 @@ const PointPtr& Buffer::cursor() const
 const PointPtr& Buffer::setCursor(
     const PointPtr& newPos)
 {
+    if (!newPos)
+        return point_;
     auto lastY = size();
     auto lastX = txt_.at(newPos->y()).size();
 
@@ -286,14 +292,14 @@ PointPtr Buffer::find(
         return nullptr;
 
     std::smatch match;
-    if (std::regex_search(
-        ln.cbegin(), ln.cend(), match, regex))
-            return Point::make(static_cast<int>(match.position(0)), y);
+    if (std::regex_search(ln.cbegin(), ln.cend(), match, regex))
+            return Point::make(static_cast<int>(
+                match.position(0)) + match.length(0), y);
     else
         return nullptr; 
 }
 
-PointPtr Buffer::find(
+RangePtr Buffer::find(
     std::regex& regex,
     const RangePtr& range,
     const std::string& ln) const
@@ -312,11 +318,16 @@ PointPtr Buffer::find(
         int end = (y == range->end()->y()) ? range->end()->x() : ln.size();
 
         end = std::min(end, static_cast<int>(ln.size()));
-        if (std::regex_search(
-            ln.cbegin() + start, ln.cbegin() + end, match, regex))
-                return Point::make(
-                    static_cast<int>(match.position(0)) + start,
-                    y);
+
+        std::regex_search(
+            ln.cbegin() + start, ln.cbegin() + end, match, regex);
+
+        if (!match.empty())
+            return Range::make(
+                Point::make(match.position(0) + start, y),
+                Point::make(
+                    match.position(0) + start + match.length(0) - 1,
+                    y));
     }
 
     return nullptr;
