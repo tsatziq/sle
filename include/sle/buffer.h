@@ -8,6 +8,7 @@
 #include <memory>
 #include <regex>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace sle
@@ -50,10 +51,16 @@ public:
     std::size_t lineLen(
         const PointPtr& point = nullptr) const;
 
+    bool atLnEnd(
+        const PointPtr& point = nullptr) const;
+
     // kato tarviiko tata loppujen lopuks, kunka usein kaytetaan.
     /// Returns rest of line from the specified point onwards.
     std::string getLine(
         const PointPtr& start = nullptr) const;
+
+    char charAt(
+        const PointPtr& point = nullptr) const;
 
     void erase(
         const RangePtr& range);
@@ -71,16 +78,14 @@ public:
     /// Returns position of first regex match in string. Nullptr if not found.
     // SEURAAVAKS: joskus kato voiks tan toisen poistaa
     // JA muuta toi seuraava palauttaa Range, toka on matchin loppu.
-    PointPtr find(
+    RangePtr find(
         std::regex& regex,
-        const int y,
-        const std::string& ln) const;
+        const PointPtr& point) const;
 
     /// Returns position of first regex match. Nullptr if not found.
     RangePtr find(
         std::regex& regex,
-        const RangePtr& range = nullptr,
-        const std::string& ln = {}) const;
+        const RangePtr& range = nullptr) const;
 
     PointPtr findCh(
         const char ch,

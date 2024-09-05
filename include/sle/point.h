@@ -181,7 +181,10 @@ public:
     static std::shared_ptr<Point> make(
         const std::shared_ptr<Point>& point)
     {
-        return std::make_shared<Point>(point->x(), point->y());
+        if (!point)
+            return nullptr;
+        else
+            return std::make_shared<Point>(point->x(), point->y());
     }
 
     Point& operator|=(

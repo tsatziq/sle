@@ -6,9 +6,6 @@
 namespace sle
 {
 
-// HETI SEURAAVAKS: ks toi seuraava commit, teinko sinne jo jotai mita
-// pitaa sailyttaa? enta se middle ln yhel regexilla? eiks se jo onnistunu?
-
 EditLoop::NormalMode::NormalMode(
     EditLoop* parent)
     :
@@ -255,6 +252,8 @@ void EditLoop::NormalMode::execute(
     case Motion::TO:
     case Motion::TOBCK:
     {
+        // SEURAAVAKS: ctrl u valilla ku menee iha alkuun kaataa.
+        auto cur = c_->buf->cursor();
         if (cmd_.to.empty())
             break;
 
@@ -272,9 +271,7 @@ void EditLoop::NormalMode::execute(
             break;
         }
 
-        if (!target)
-            target = c_->buf->cursor();
-        else
+        if (target)
         {
             switch (cmd_.motion)
             {
@@ -288,40 +285,39 @@ void EditLoop::NormalMode::execute(
                 break;
             }
             c_->buf->setCursor(target);
+
+            c_->scr->refreshScr(ScreenState::REDRAW,
+                c_->scr->toScrCoord(target));
         }
-        c_->scr->refreshScr(ScreenState::REDRAW,
-            c_->scr->toScrCoord(target));
         break;
     }
     case Motion::BEGINLN:
     case Motion::ENDLN:
     case Motion::MIDDLELN:
     {
-        auto cur = Point::make(0, c_->buf->cursor()->y());
-        std::regex pattern(R"(\S)");
-        auto endX = c_->buf->lineLen(cur) - 1;
+        std::regex pattern(R"(\S+.*\S|\S)");
+        auto cur = Point::make(c_->buf->cursor());
 
-        auto str = c_->buf->getLine(cur);
-        auto revStr = str;
-        std::reverse(revStr.begin(), revStr.end());
+        auto res = c_->buf->find(
+            pattern,
+            Range::make(
+                Point::make(0, cur->y()),
+                Point::make(c_->buf->lineLen(cur) - 1, cur->y())));
 
-        // SEURAAVAKS: saisko yhel findil rgx '\\S+*'?
-        // sita varte pitaa yhistaa vaa yks find funkkari
-        auto firstCh = c_->buf->find(pattern, cur->y(), str);
-        auto lastCh = c_->buf->find(pattern, cur->y(), revStr);
-
-        if (!firstCh || !lastCh)
+        if (!res)
             break;
 
-        int revPos = str.size() - lastCh->x() - 1;
-        int mid = (revPos - firstCh->x()) / 2;
+        int start = res->start()->x();
+        int end = res->end()->x();
+        int mid = start + ((end - start) / 2);
 
         if (cmd_.motion == Motion::BEGINLN)
-            target = c_->scr->toScrCoord(firstCh);
+            target = c_->scr->toScrCoord(res->start());
         else if (cmd_.motion == Motion::MIDDLELN)
-            target = c_->scr->toScrCoord(Point::make(mid, cur->y()));
+            target = c_->scr->toScrCoord(Point::make(mid + 1, cur->y()));
         else if (cmd_.motion == Motion::ENDLN)
-            target = c_->scr->toScrCoord(Point::make(revPos, cur->y()));
+            target = c_->scr->toScrCoord(res->end());
+
         c_->buf->setCursor(target);
         break;
     }
@@ -421,7 +417,7 @@ void EditLoop::NormalMode::execute(
     }
     case Action::NONE:
     {
-        if (!target->isFullySet())
+        if (!target || !target->isFullySet())
             break;
 
         auto p = scr->toScrCoord(target);

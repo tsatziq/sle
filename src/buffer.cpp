@@ -196,6 +196,19 @@ std::size_t Buffer::size() const
     return txt_.size();
 }
 
+bool Buffer::atLnEnd(
+    const PointPtr& point) const
+{
+    PointPtr p = point_;
+    if (point)
+        p = point;
+
+    if (p->y() == size())
+        return p->x() == lineLen() - 1;
+    else 
+        return p->x() == lineLen() - 2;
+}
+
 std::size_t Buffer::lineLen(
     const PointPtr& point) const
 {
@@ -212,6 +225,15 @@ std::string Buffer::getLine(
         return txt_.at(point_->y());
     else
         return txt_.at(start->y()).substr(start->x());
+}
+
+char Buffer::charAt(
+    const PointPtr& point) const
+{
+    if (!point)
+        return txt_.at(point_->y()).at(point_->x());
+    else
+        return txt_.at(point->y()).at(point->x());
 }
 
 void Buffer::erase(
@@ -283,31 +305,36 @@ const PointPtr& Buffer::setCursor(
     return point_;
 }
 
-PointPtr Buffer::find(
+RangePtr Buffer::find(
     std::regex& regex,
-    const int y,
-    const std::string& ln) const
+    const PointPtr& point) const
 {
-    if (ln.empty())
+    if (!point)
         return nullptr;
 
     std::smatch match;
-    if (std::regex_search(ln.cbegin(), ln.cend(), match, regex))
-            return Point::make(static_cast<int>(
-                match.position(0)) + match.length(0), y);
+    const std::string& ln = txt_.at(point->y());
+
+    std::regex_search(ln.cbegin(), ln.cend(), match, regex);
+
+    if (!match.empty())
+        return Range::make(
+            Point::make(match.position(0), point->y()),
+            Point::make(
+                match.position(0) + match.length(0) - 1,
+                point->y()));
     else
-        return nullptr; 
+        return nullptr;
 }
 
 RangePtr Buffer::find(
     std::regex& regex,
-    const RangePtr& range,
-    const std::string& ln) const
+    const RangePtr& range) const
 {
     if (!range->start()->isFullySet())
         range->start() |= point_;
     if (!range->end()->isFullySet())
-        range->end()->set(point_->x() - 1, size() - 1);
+        range->end()->set(point_->x(), size() - 1);
 
     for (int y = range->start()->y(); y <= range->end()->y(); ++y)
     {
@@ -338,6 +365,9 @@ PointPtr Buffer::findCh(
     const Direction dir,
     const PointPtr& point) const
 {
+    if (dir == Direction::UP || dir == Direction::DOWN)
+        return nullptr;
+
     PointPtr p = point;
 
     if (!point)
@@ -345,20 +375,17 @@ PointPtr Buffer::findCh(
 
     // Find in current line.
     auto ln = txt_.at(p->y());
-    size_t pos;
+    size_t pos = std::string::npos;
 
-    if (dir == Direction::RIGHT)
+    if (dir == Direction::RIGHT && !atLnEnd(p))
         pos = ln.find(ch, p->x() + 1);
-    else if (dir == Direction::LEFT)
+    else if (dir == Direction::LEFT && (p->x() != 0))
         pos = ln.rfind(ch, p->x() - 1);
-    else
-        return nullptr;
 
     if (pos != std::string::npos)
         p->setX(pos);
     else
     {
-        // SEURAAVAKS: taa ei toimi kunnol!
         // Search rest of visible range.
         auto e = c_->visibleRange->end()->y();
         
@@ -368,7 +395,10 @@ PointPtr Buffer::findCh(
             {
                 ln = txt_.at(i);
                 if (i == cursor()->y())
-                    pos = ln.find(ch, p->x() + 1);
+                    if (atLnEnd(p))
+                        continue;
+                    else
+                        pos = ln.find(ch, p->x() + 1);
                 else
                     pos = ln.find(ch);
 
@@ -387,7 +417,10 @@ PointPtr Buffer::findCh(
             {
                 ln = txt_.at(i);
                 if (i == cursor()->y())
-                    pos = ln.rfind(ch, p->x());
+                    if (!p->x())
+                        continue;
+                    else
+                        pos = ln.rfind(ch, p->x() - 1);
                 else
                     pos = ln.rfind(ch);
 
