@@ -153,7 +153,7 @@ const PointPtr& Buffer::move(
 
         auto nextLnLen = lineLen(point_);
 
-        if (nextLnLen - 1 < point_->x())
+        if (nextLnLen - 1 <= point_->x())
         {
             if (nextLnLen == 1)
                 point_->setX(0);
@@ -173,7 +173,7 @@ const PointPtr& Buffer::move(
 
         auto nextLnLen = lineLen(point_);
 
-        if (nextLnLen - 1 < point_->x())
+        if (nextLnLen - 1 <= point_->x())
         {
             if (nextLnLen == 1)
                 point_->setX(0);
@@ -303,28 +303,6 @@ const PointPtr& Buffer::setCursor(
     }
 
     return point_;
-}
-
-RangePtr Buffer::find(
-    std::regex& regex,
-    const PointPtr& point) const
-{
-    if (!point)
-        return nullptr;
-
-    std::smatch match;
-    const std::string& ln = txt_.at(point->y());
-
-    std::regex_search(ln.cbegin(), ln.cend(), match, regex);
-
-    if (!match.empty())
-        return Range::make(
-            Point::make(match.position(0), point->y()),
-            Point::make(
-                match.position(0) + match.length(0) - 1,
-                point->y()));
-    else
-        return nullptr;
 }
 
 RangePtr Buffer::find(

@@ -75,13 +75,6 @@ public:
     const PointPtr& setCursor(
         const PointPtr& newPos);
 
-    /// Returns position of first regex match in string. Nullptr if not found.
-    // SEURAAVAKS: joskus kato voiks tan toisen poistaa
-    // JA muuta toi seuraava palauttaa Range, toka on matchin loppu.
-    RangePtr find(
-        std::regex& regex,
-        const PointPtr& point) const;
-
     /// Returns position of first regex match. Nullptr if not found.
     RangePtr find(
         std::regex& regex,

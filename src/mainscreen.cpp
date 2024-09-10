@@ -199,11 +199,6 @@ void MainScreen::moveCursor(
         return;
     cursor_ = point;
     wmove(scr_, point->y(), point->x());
-
-    // SEURAAVAKS: tee tasta funktio ja suorita se vasta kun ollaan komento
-    // vuoron lopussa!!!! tota vikaa ei ehka tarvii. 
-    // kato kans jos se lagaa paljo ni mika kombo noita komenntoja toimii.
-    // wrefresh on doupdate ja wnoutrefresh ja doupdate
 }
 
 void MainScreen::scrollScr(

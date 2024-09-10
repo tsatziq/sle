@@ -180,8 +180,6 @@ void EditLoop::NormalMode::execute(
         break;
     case Motion::DOWN:
     {
-        // SEURAAVAKS: jos on just \n kohalla yla/alarivil ja menee ylos/alas
-        // ni se menee siihe kohtaan, sen pitas menna vikaan nakyvaan chariin.
         target = c_->buf->move(Direction::DOWN);
         auto& range = c_->visibleRange;
 
@@ -238,7 +236,9 @@ void EditLoop::NormalMode::execute(
 
         std::regex pattern(R"(\S)");
         auto endX = c_->buf->lineLen(cur) - 1;
-        auto ln = Range::make(cur, Point::make(endX, cur->y()));
+        auto ln = Range::make(
+            Point::make(0, cur->y()),
+            Point::make(endX, cur->y()));
         auto res = c_->buf->find(pattern, ln);
         if (!res)
             cur->setX(0);
@@ -252,7 +252,6 @@ void EditLoop::NormalMode::execute(
     case Motion::TO:
     case Motion::TOBCK:
     {
-        // SEURAAVAKS: ctrl u valilla ku menee iha alkuun kaataa.
         auto cur = c_->buf->cursor();
         if (cmd_.to.empty())
             break;
