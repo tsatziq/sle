@@ -362,8 +362,20 @@ void EditLoop::NormalMode::execute(
         c_->buf->setCursor(target);
         break;
     }
+    case Motion::WORDBCK:
     case Motion::WORDFWD:
     {
+        if (cmd_.motion == Motion::WORDFWD)
+            target = c_->buf->moveWord(Direction::RIGHT);
+        else if (cmd_.motion == Motion::WORDBCK)
+            target = c_->buf->moveWord(Direction::LEFT);
+        else
+            break;
+
+        if (target)
+            c_->scr->refreshScr(ScreenState::REDRAW,
+                c_->scr->toScrCoord(target));
+        /*
         std::regex pattern("\\s+\\S");
         auto cur = c_->buf->cursor();
         auto endX = c_->buf->lineLen(cur) - 1;
@@ -375,6 +387,7 @@ void EditLoop::NormalMode::execute(
             target = res->end();
             c_->buf->setCursor(res->end());
         }
+        */
         break;
     }
     default:
@@ -474,18 +487,6 @@ bool EditLoop::NormalMode::isPendingCmd(
     }
 }
 
-bool EditLoop::NormalMode::isMotion(
-    const char c) const
-{
-    switch (c)
-    {
-        case 'b': case 'e': case 'f': case 't': case 'w': 
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool EditLoop::NormalMode::isDoubleCmd(
     const Action action) const
 {
@@ -498,6 +499,7 @@ bool EditLoop::NormalMode::isDoubleCmd(
     }
 }
 
+// ehka pitaa vaa teha H,L,K, ja ctrl noi, komplete sit joku muu
 Motion EditLoop::NormalMode::toMotion(
     const char c)
 {
@@ -517,6 +519,7 @@ Motion EditLoop::NormalMode::toMotion(
     case 'l': return Motion::RIGHT;
     case 'L': return Motion::BOTTOM;
     case 'B': return Motion::MIDDLE;
+    case 'b': return Motion::WORDBCK;
     case 't': return Motion::TILL;
     case 'T': return Motion::TILLBCK;
     case 'w': return Motion::WORDFWD;

@@ -191,6 +191,84 @@ const PointPtr& Buffer::move(
     return point_;
 } 
 
+PointPtr Buffer::moveWord(
+    const Direction& dir,
+    const unsigned count)
+{
+    auto p = point_;
+    auto len = lineLen() - 2;
+    auto origY = p->y();
+
+    switch (dir)
+    {
+    case Direction::RIGHT:
+    {
+        // 1. If at file end, return.
+        if (p->y() == size() - 1 && p->x() == len)
+            return nullptr;
+
+        // 2. If at line end, start from next line.
+        if (p->x() == len)
+        {
+            p->set(0, p->y() + 1);
+            len = lineLen() - 2;
+        }
+        
+        auto pp = Point::make(p);
+        pp->setX(0);
+        auto str = getLine(pp);
+
+        // 3. Skip non-whitespace (if line was not changed).
+        if (p->y() == origY)
+            while (p->x() < len && !std::isspace(charAt(p)))
+                p->incX();
+
+        // 4. Skip whitespace.
+        while (p->x() < len && std::isspace(charAt(p)))
+            p->incX();
+
+        return p;
+        break;
+    }
+    case Direction::LEFT:
+    {
+        // 1. If at file start, return.
+        if (p->y() == 0 && p->x() == 0)
+            return nullptr;
+
+        // 2. Skip whitespace #1.
+        if (p->x() > 0)
+            p->decX();
+        while (p->x() > 0 && std::isspace(charAt(p)))
+            p->decX();
+        
+        // 3. If at line start, move to end of previous line.
+        if (p->x() == 0)
+        {
+            p->set(txt_.at(p->y() - 1).size() - 1, p->y() - 1);
+            len = lineLen() - 2;
+        }
+
+        // 3. Skip whitespace #2.
+        while (p->x() > 0 && std::isspace(charAt(p)))
+            p->decX();
+
+        // 4. Skip non-whitespace.
+        while (p->x() > 0 && !std::isspace(charAt(p)))
+            p->decX();
+
+        // 5. Move one step back if whitespace.
+        if (std::isspace(charAt(p)))
+            p->incX();
+
+        return p;
+        break;
+    }
+    default:
+        return nullptr;
+    }
+}
+
 std::size_t Buffer::size() const
 {
     return txt_.size();
@@ -305,6 +383,7 @@ const PointPtr& Buffer::setCursor(
     return point_;
 }
 
+//TODO: oke tee alkuu vaa reversefind oma funkkari.
 RangePtr Buffer::find(
     std::regex& regex,
     const RangePtr& range) const

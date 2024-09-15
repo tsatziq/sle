@@ -34,6 +34,7 @@ enum class Motion
     LINE, ///< Whole line commands, e.g. 'dd'.
     TOLINE,
     WORDFWD,
+    WORDBCK,
 };
 
 /*

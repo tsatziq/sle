@@ -45,6 +45,14 @@ public:
         const Direction& dir,
         const int count) = delete;
 
+    PointPtr moveWord(
+        const Direction& dir,
+        const unsigned count = 1);
+
+    PointPtr moveWord(
+        const Direction& dir,
+        const int count) = delete;
+
     std::size_t size() const;
 
     /// Returns length of the line.
@@ -84,9 +92,6 @@ public:
         const char ch,
         const Direction dir = Direction::RIGHT,
         const PointPtr& point = nullptr) const;
-
-    // TODO: muuta toi point ja ehk ranga smart ptr!!! tekee pahaa passata
-    // non const valuena. mut valil pakko.
 
 private:
     ContextPtr c_ = nullptr;

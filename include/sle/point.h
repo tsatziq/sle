@@ -195,6 +195,36 @@ public:
         return *this;
     }
 
+    bool operator==(
+        const PointPtr& rhs) const
+    {
+        return (x_ == rhs->x_) && (y_ == rhs->y_);
+    }
+
+    bool operator<(
+        const PointPtr& rhs) const
+    {
+        return (y_ < rhs->y_) || (y_ == rhs->y_ && x_ < rhs->x_);
+    }
+
+    bool operator>(
+        const PointPtr& rhs) const
+    {
+        return (y_ > rhs->y_) || (y_ == rhs->y_ && x_ > rhs->x_);
+    }
+
+    bool operator<=(
+        const PointPtr& rhs) const
+    {
+        return !(rhs->y_ < y_) || (rhs->y_ == y_ && rhs->x_ < x_);
+    }
+
+    bool operator>=(
+        const PointPtr& rhs) const
+    {
+        return !(y_ < rhs->y_) || (y_ == rhs->y_ && x_ < rhs->x_);
+    }
+
 private:
     int x_ = 0;
     int y_ = 0;
@@ -223,9 +253,7 @@ public:
         :
         start_(start),
         end_(end)
-    {
-        sortRange();
-    }
+    {}
 
     // Ensure start of range is lower than the end.
     void sortRange()
@@ -271,7 +299,6 @@ public:
     {
         start_ = start;
         end_ = end;
-        sortRange();
     }
 
     void setStart(
