@@ -124,8 +124,6 @@ void MainScreen::paint(
         return;
 
     PointPtr pTemp = Point::make(point); 
-    pTemp->setX(0);
-    pTemp->setY(0);
     wmove(scr_, pTemp->y(), pTemp->x());
 
     if (text.empty())
@@ -163,7 +161,8 @@ const PointPtr& MainScreen::cursor() const
 
 void MainScreen::refreshScr(
     const ScreenState state,
-    const PointPtr& point)
+    const PointPtr& point,
+    const int count)
 {
     switch (state)
     {
@@ -172,7 +171,7 @@ void MainScreen::refreshScr(
         break;
     case ScreenState::REDRAW:
         if (point)
-            wredrawln(scr_, point->y(), 1);
+            wredrawln(scr_, point->y(), count);
         else
             redrawwin(scr_);
         break;
@@ -295,6 +294,19 @@ void MainScreen::delCh(
     else
         for (int i = 0; i < count; ++i)
             mvwdelch(scr_, point->y(), point->x());
+}
+
+void MainScreen::clrToEol(
+    const PointPtr& point)
+{
+    if (point)
+    {
+        auto p = Point::make(toScrCoord(point));
+        wmove(scr_, p->y(), p->x());
+    }
+
+    wclrtoeol(scr_);
+    moveCursor(cursor_);
 }
 
 }

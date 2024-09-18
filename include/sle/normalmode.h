@@ -56,6 +56,8 @@ private:
 
     EditLoop* parent_ = nullptr;
     ContextPtr c_ = nullptr;
+    Buffer* b_ = nullptr;
+    MainScreen* s_ = nullptr;
 
     bool exitMode_ = false;
     std::string input_;

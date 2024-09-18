@@ -52,7 +52,8 @@ public:
 
     void refreshScr(
         const ScreenState state,
-        const PointPtr& point = nullptr);
+        const PointPtr& point = nullptr,
+        const int count = 1);
 
     void test();
 
@@ -90,6 +91,9 @@ public:
     void delCh(
         const PointPtr& point = nullptr,
         const int count = 1);
+
+    void clrToEol(
+        const PointPtr& point = nullptr);
 
 private:
     void addNewline();

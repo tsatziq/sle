@@ -77,11 +77,16 @@ std::vector<std::string> Buffer::getRange(
     if (txt_.empty())
         return {};
 
+
     // Make copy so that the original is not modified.
     Range r = *range;
-    r.fitToSize(txt_.size(), txt_.front().size(), txt_.back().size());
+    auto s = r.start();
+    auto e = r.end();
+    //r.fitToSize(txt_.size(), txt_.front().size(), txt_.back().size());
 
     std::vector<std::string> newVec;
+    s = r.start();
+    e = r.end();
     
     std::copy(
         txt_.begin() + (r.start()->y()),
@@ -195,7 +200,7 @@ PointPtr Buffer::moveWord(
     const Direction& dir,
     const unsigned count)
 {
-    auto p = point_;
+    auto p = Point::make(point_);
     auto len = lineLen() - 2;
     auto origY = p->y();
 
@@ -319,10 +324,10 @@ void Buffer::erase(
 {
     // pitasko olla tan sijaan vaa assert noista? ja range cosntructoris
     // varmistaa et pienempi arvo on start? tai joku isValid?
-    auto sX = range->start()->x();
-    auto sy = range->start()->y();
-    auto eX = range->end()->x();
-    auto eY = range->end()->y();
+    auto startX = range->start()->x();
+    auto startY = range->start()->y();
+    auto endX = range->end()->x();
+    auto endY = range->end()->y();
 
     //if (range->empty())
      //   return;
@@ -353,6 +358,14 @@ void Buffer::erase(
         txt_.erase(
             txt_.begin() + range->start()->y() + 1,
             txt_.begin() + range->end()->y());
+
+    // Join lines if '\n' was erased.
+    if (range->lines() > 1)
+        if (startX != 0)
+        {
+            txt_.at(startY).append(txt_.at(endY));
+            txt_.erase(txt_.begin() + endY);
+        }
 }
 
 const PointPtr& Buffer::cursor() const

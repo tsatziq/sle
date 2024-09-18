@@ -10,7 +10,9 @@ EditLoop::NormalMode::NormalMode(
     EditLoop* parent)
     :
     parent_(parent),
-    c_(parent->c_)
+    c_(parent->c_),
+    b_(c_->buf),
+    s_(c_->scr)
 {}
 
 bool EditLoop::NormalMode::handle()
@@ -118,7 +120,7 @@ CmdState EditLoop::NormalMode::parse(
         else if (toMotion(c) != Motion::NONE)
         {
             cmd_.motion = toMotion(c);
-            prevPart_ = CmdPart::MOTION;
+            ret = CmdState::FINISHED;
         }
         else if (std::isdigit(c))
         {
@@ -362,6 +364,9 @@ void EditLoop::NormalMode::execute(
         c_->buf->setCursor(target);
         break;
     }
+    // SEURAAVAKS HETI: laita B et se pysahtyy kans ekan sanan edes/rivin
+    // alus. sillee et saa helpost oikeen koordin delete wordia varten.
+    // KS etta del word paivittaa kursorin oikeesee paikkaan.!!!!
     case Motion::WORDBCK:
     case Motion::WORDFWD:
     {
@@ -375,25 +380,14 @@ void EditLoop::NormalMode::execute(
         if (target)
             c_->scr->refreshScr(ScreenState::REDRAW,
                 c_->scr->toScrCoord(target));
-        /*
-        std::regex pattern("\\s+\\S");
-        auto cur = c_->buf->cursor();
-        auto endX = c_->buf->lineLen(cur) - 1;
-
-        auto ln = Range::make(cur, Point::make(endX, cur->y()));
-        auto res = c_->buf->find(pattern, ln);
-        if (res)
-        {
-            target = res->end();
-            c_->buf->setCursor(res->end());
-        }
-        */
         break;
     }
     default:
         break;
     }
 
+    // SEURAAVAKS: DELETE & CHANGE liikkeen kanssa..
+    // SEURAAVAKS: laita ][ liikkuu esim scrHeihgt / 5.
     switch (cmd_.action)
     {
     case Action::APPEND:
@@ -427,11 +421,63 @@ void EditLoop::NormalMode::execute(
         c_->scr->delCh();
         break;
     }
+    // NOTE: jotenki ei ota sita commandia viel ekoil nappailyilla
+    case Action::DELETE:
+    {
+        if (!target)
+            break;
+
+        auto cur = c_->buf->cursor();
+
+        if (cur->y() > target->y())
+        {
+            PointPtr tmp = target;
+            target = cur;
+            cur = tmp;
+        }
+
+        int start = cur->y();
+        int end = target->y();
+
+        // If last word of line, need to advance over last line.
+        if (target->x() == b_->lineLen(target) - 2)
+            target->incX();
+
+        c_->buf->erase(Range::make(cur, target));
+        auto txt = c_->buf->getRange(Range::make(
+            Point::make(0, start),
+            Point::make(0, c_->visibleRange->end()->y() + 1)));
+
+        if (start != end)
+            c_->scr->paint(txt, Point::make(0, start));
+        else
+        {
+            s_->clrToEol(Point::make(0, cur->y()));
+            s_->paint({b_->getLine()}, Point::make(0, cur->y()));
+        }
+
+        if (b_->charAt(cur) == '\n')
+            cur->decX();
+        c_->scr->moveCursor(c_->scr->toScrCoord(cur));
+        c_->buf->setCursor(cur);
+
+        // HETI SEURAAVAKS:
+        /* 
+        tokavikal rivil lopust dw ei toimi, getRange pitaa kattoo et jos menee
+yli size() ni palauta vaa siihe asti ku riveja on.
+        2. dw vikan rivin vikal sanal ei toimi..
+        */
+        auto st = c_->visibleRange->start();
+        auto en = c_->visibleRange->end();
+        auto i = 1;
+        break;
+    }
     case Action::NONE:
     {
         if (!target || !target->isFullySet())
             break;
 
+        c_->buf->setCursor(target); // KOSKA dw kursor ei saa liikkua.
         auto p = scr->toScrCoord(target);
         c_->scr->moveCursor(scr->toScrCoord(target));
         break;
