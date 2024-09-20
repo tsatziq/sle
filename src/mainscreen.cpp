@@ -33,6 +33,8 @@ int MainScreen::getCh()
     return wgetch(scr_);
 }
 
+// SEURAAVAKS: laita et mainscreen ottaa kaikki bufcoordeina ja ite vaihtaa.
+// kuitenki suurin osa kayttaa niita..
 bool MainScreen::paintAt(
     const char c,
     const PointPtr& point)
@@ -100,6 +102,7 @@ void MainScreen::addNewline()
         auto moveLines = c_->buf->getRange(
             Range::make(toBufCoord(cursor_), c_->visibleRange->end()));
 
+        //paint(moveLines, cursor_, Point::Type::SCRCOORD); DBEUG
         paint(moveLines, cursor_);
         moveCursor(cursor_);
     }
@@ -120,6 +123,9 @@ void MainScreen::paint(
     const std::vector<std::string>& text,
     const PointPtr& point)
 {
+    //if (type != Point::Type::SCRCOORD)
+    //    pTemp = Point::make(toScrCoord(pTemp));
+
     if (!isInsideScr(point))
         return;
 

@@ -439,21 +439,27 @@ void EditLoop::NormalMode::execute(
         int start = cur->y();
         int end = target->y();
 
-        // If last word of line, need to advance over last line.
+        // If last word of line, need to advance over last char.
         if (target->x() == b_->lineLen(target) - 2)
             target->incX();
 
         c_->buf->erase(Range::make(cur, target));
+        auto w = c_->visibleRange->end()->y(); //DEBUG
+
+        // If deleted on one line, just print line again.
+        auto l = b_->lineLen(Point::make(0, start)) - 1; //DEBUG
         auto txt = c_->buf->getRange(Range::make(
             Point::make(0, start),
-            Point::make(0, c_->visibleRange->end()->y() + 1)));
+            Point::make(l, end)));
+
+        // If deleted over lines, print all lines below cursor.
 
         if (start != end)
             c_->scr->paint(txt, Point::make(0, start));
         else
         {
             s_->clrToEol(Point::make(0, cur->y()));
-            s_->paint({b_->getLine()}, Point::make(0, cur->y()));
+            s_->paint({b_->getLine()}, s_->toScrCoord(Point::make(0, cur->y())));
         }
 
         if (b_->charAt(cur) == '\n')
@@ -462,10 +468,9 @@ void EditLoop::NormalMode::execute(
         c_->buf->setCursor(cur);
 
         // HETI SEURAAVAKS:
-        /* 
-        tokavikal rivil lopust dw ei toimi, getRange pitaa kattoo et jos menee
-yli size() ni palauta vaa siihe asti ku riveja on.
-        2. dw vikan rivin vikal sanal ei toimi..
+        // viel toi jos deletoi riveja tee uusiks. 
+        /*
+        ks et paivittais ennen painttia visible rangen, sit maalais cur-end.
         */
         auto st = c_->visibleRange->start();
         auto en = c_->visibleRange->end();

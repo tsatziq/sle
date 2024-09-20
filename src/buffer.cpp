@@ -319,48 +319,52 @@ char Buffer::charAt(
         return txt_.at(point->y()).at(point->x());
 }
 
+// SEURAAVAKS: KUN MVP TEHTY: PERU RANGE/POINTR pointtereist reffiin takas!!
+// JA USEAMMIN OTA VAAN COPY! EI HALUTA EDITOIDA ALKUPERASTA
 void Buffer::erase(
     const RangePtr& range)
 {
-    // pitasko olla tan sijaan vaa assert noista? ja range cosntructoris
-    // varmistaa et pienempi arvo on start? tai joku isValid?
-    auto startX = range->start()->x();
-    auto startY = range->start()->y();
-    auto endX = range->end()->x();
-    auto endY = range->end()->y();
+    RangePtr rTmp = range; 
+    //if (rTmp->start() > rTmp->end())
+        //rTmp->sortRange();
 
-    //if (range->empty())
-     //   return;
+    auto startX = rTmp->start()->x();
+    auto startY = rTmp->start()->y();
+    auto endX = rTmp->end()->x();
+    auto endY = rTmp->end()->y();
 
-    if (range->lines() == 1)
+    if (rTmp->empty())
+        return;
+
+    if (rTmp->lines() == 1)
     {
-        auto startX = range->start()->x();
-        auto startY = range->start()->y();
-        auto endX = range->end()->x();
-        auto endY = range->end()->y();
+        auto startX = rTmp->start()->x();
+        auto startY = rTmp->start()->y();
+        auto endX = rTmp->end()->x();
+        auto endY = rTmp->end()->y();
 
         auto dif = endX - startX;
 
-        txt_.at(range->start()->y()).erase(
-            range->start()->x(),
+        txt_.at(rTmp->start()->y()).erase(
+            rTmp->start()->x(),
             dif);
     }
-    else if (range->lines() == 2)
+    else if (rTmp->lines() == 2)
     {
-        if (range->start()->x() < 
-            lineLen(range->start()) && range->start()->x() >= 0)
-                txt_.at(range->start()->y()).erase(range->start()->x());
+        if (rTmp->start()->x() < 
+            lineLen(rTmp->start()) && rTmp->start()->x() >= 0)
+                txt_.at(rTmp->start()->y()).erase(rTmp->start()->x());
 
-        if (range->end()->x() > 0 && range->end()->x() <= lineLen(range->end()))
-            txt_.at(range->end()->y()).erase(0, range->end()->x());
+        if (rTmp->end()->x() > 0 && rTmp->end()->x() <= lineLen(rTmp->end()))
+            txt_.at(rTmp->end()->y()).erase(0, rTmp->end()->x());
     }
-    else if (range->lines() > 2)
+    else if (rTmp->lines() > 2)
         txt_.erase(
-            txt_.begin() + range->start()->y() + 1,
-            txt_.begin() + range->end()->y());
+            txt_.begin() + rTmp->start()->y() + 1,
+            txt_.begin() + rTmp->end()->y());
 
     // Join lines if '\n' was erased.
-    if (range->lines() > 1)
+    if (rTmp->lines() > 1)
         if (startX != 0)
         {
             txt_.at(startY).append(txt_.at(endY));

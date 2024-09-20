@@ -19,6 +19,12 @@ using PointPtr = std::shared_ptr<Point>;
 class Point
 {
 public:
+    enum class Type
+    {
+        BUFCOORD,
+        SCRCOORD,
+    };
+
     Point()
     {}
 
@@ -255,31 +261,21 @@ public:
         end_(end)
     {}
 
+    Range(
+        const Range& r)
+    {
+        start_ = Point::make(r.start_);
+        end_ = Point::make(r.end_);
+    }
+
     // Ensure start of range is lower than the end.
     void sortRange()
     {
-        if (start_->y() < 0)
-            start_->setY(0);
-        if (start_->x() < 0)
-            start_->setX(0);
-        if (end_->y() < 0)
-            end_->setY(0);
-        if (end_->x() < 0)
-            end_->setX(0);
-
         if (start_->y() > end_->y())
         {
             auto tmp = Point::make(start_);
             start_ = end_;
             end_ = tmp;
-        }
-
-        if ((start_->y() == end_->y())
-            && (start_->x() > end_->x()))
-        {
-            int tmp = start_->x();
-            start_->setX(end_->x());
-            end_->setX(tmp);
         }
     }
 

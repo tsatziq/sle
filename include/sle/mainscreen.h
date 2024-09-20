@@ -43,7 +43,7 @@ public:
         const char c,
         const bool replace = false);
 
-    /// Paints supplied lines starting from specified point.
+    /// Paints supplied lines starting from specified point in buffer coords.
     void paint(
         const std::vector<std::string>& text,
         const PointPtr& point = Point::make(0, 0));
