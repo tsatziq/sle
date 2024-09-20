@@ -123,9 +123,6 @@ void MainScreen::paint(
     const std::vector<std::string>& text,
     const PointPtr& point)
 {
-    //if (type != Point::Type::SCRCOORD)
-    //    pTemp = Point::make(toScrCoord(pTemp));
-
     if (!isInsideScr(point))
         return;
 
@@ -134,25 +131,17 @@ void MainScreen::paint(
 
     if (text.empty())
         return;
-    
-    if (text.size() == 1)
+
+    for (const auto& str : text)
     {
         wclrtoeol(scr_);
-        wprintw(scr_, text.front().c_str());
-    }
-    else
-    {
-        for (const auto& str : text)
-        {
-            wclrtoeol(scr_);
-            mvwprintw(scr_, pTemp->y(), pTemp->x(), str.c_str());
-            pTemp->incY();
+        mvwprintw(scr_, pTemp->y(), pTemp->x(), str.c_str());
+        pTemp->incY();
 
-            if (!isInsideScr(pTemp))
-                break; 
+        if (!isInsideScr(pTemp))
+            break; 
 
-            wmove(scr_, pTemp->y(), pTemp->x());
-        }
+        wmove(scr_, pTemp->y(), pTemp->x());
     }
 
     doupdate();
@@ -250,6 +239,9 @@ void MainScreen::scrollScr(
     paint(c_->buf->getRange(c_->visibleRange));
     moveCursor(cursor_); 
     c_->visibleRange = r;
+    auto s = r->start(); // DEBUG
+    auto e = r->end(); // DEBUG
+    auto i = 1; // DEBUG;
 }
 
 PointPtr MainScreen::toScrCoord(
@@ -313,6 +305,19 @@ void MainScreen::clrToEol(
 
     wclrtoeol(scr_);
     moveCursor(cursor_);
+}
+
+void MainScreen::clrEmptyLines()
+{
+    if (c_->visibleRange->lines() < height_)
+    {
+        int ln = toScrCoord(c_->visibleRange->end())->y();
+        for (int i = ln + 1; i <= height_ - 1; ++i)
+        {
+            wmove(scr_, i, 0);
+            wclrtoeol(scr_);
+        }
+    }
 }
 
 }

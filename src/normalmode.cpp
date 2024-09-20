@@ -185,6 +185,7 @@ void EditLoop::NormalMode::execute(
         target = c_->buf->move(Direction::DOWN);
         auto& range = c_->visibleRange;
 
+        auto vs = c_->visibleRange->start(); // DEBUG
         if (!range->contains(target))
         {
             auto endY = range->end()->y();
@@ -199,6 +200,7 @@ void EditLoop::NormalMode::execute(
         }
 
         c_->buf->setCursor(target);
+        vs = c_->visibleRange->start(); // DEBUG
         // NOTE: tama ja monet muut tarvitaa ainaki et lldb debug onnistuu.
         // muuten se teksti liikkuessa jotenki menee sekasin
         c_->scr->refreshScr(ScreenState::REDRAW,
@@ -343,7 +345,7 @@ void EditLoop::NormalMode::execute(
             cur->setX(0);
 
         c_->buf->setCursor(res->end());
-        target = c_->scr->toScrCoord(res->end());
+        target = res->end();
         c_->buf->setCursor(target);
         break;
     }
@@ -424,38 +426,59 @@ void EditLoop::NormalMode::execute(
     // NOTE: jotenki ei ota sita commandia viel ekoil nappailyilla
     case Action::DELETE:
     {
+        auto vs =  c_->visibleRange->start(); // DEBUG
+        auto ve = c_->visibleRange->end(); // DEBUG
         if (!target)
             break;
 
         auto cur = c_->buf->cursor();
 
-        if (cur->y() > target->y())
-        {
-            PointPtr tmp = target;
-            target = cur;
-            cur = tmp;
-        }
-
         int start = cur->y();
         int end = target->y();
+
+        if (*cur > *target)
+        {
+            PointPtr tmp = Point::make(cur);
+            cur = target;
+            target = tmp;
+        }
+
+        int lines = target->y() - cur->y();
 
         // If last word of line, need to advance over last char.
         if (target->x() == b_->lineLen(target) - 2)
             target->incX();
 
-        c_->buf->erase(Range::make(cur, target));
         auto w = c_->visibleRange->end()->y(); //DEBUG
+        c_->buf->erase(Range::make(cur, target));
 
-        // If deleted on one line, just print line again.
-        auto l = b_->lineLen(Point::make(0, start)) - 1; //DEBUG
-        auto txt = c_->buf->getRange(Range::make(
-            Point::make(0, start),
-            Point::make(l, end)));
+        // Update visible range.
+        auto lin = c_->visibleRange->lines();
+        
+        lin = c_->visibleRange->lines(); // DEBUG
+
 
         // If deleted over lines, print all lines below cursor.
-
         if (start != end)
-            c_->scr->paint(txt, Point::make(0, start));
+        {
+            int lastLn = c_->visibleRange->end()->y();
+            int firstLn = c_->visibleRange->start()->y();
+
+            if (c_->visibleRange->lines() < s_->height() - 1)
+                c_->visibleRange->end()->setY(lastLn - lines);
+            if (target->y() - lines < firstLn)
+                c_->visibleRange->start()->setY(firstLn - lines);
+            if (lastLn + lines >= b_->size() - 1)
+                c_->visibleRange->end()->setY(lastLn - lines); 
+
+            auto txt = c_->buf->getRange(Range::make(
+                Point::make(0, cur->y()),
+                Point::make(0, c_->visibleRange->end()->y())));
+            c_->scr->paint(txt, s_->toScrCoord(Point::make(0, cur->y())));
+            lin = c_->visibleRange->lines(); // DEBUG
+            s_->clrEmptyLines();
+        }
+        // If deleted on one line, just print line again.
         else
         {
             s_->clrToEol(Point::make(0, cur->y()));
@@ -464,8 +487,11 @@ void EditLoop::NormalMode::execute(
 
         if (b_->charAt(cur) == '\n')
             cur->decX();
-        c_->scr->moveCursor(c_->scr->toScrCoord(cur));
-        c_->buf->setCursor(cur);
+
+        PointPtr curTo = Point::make(cur); // DEBUG
+
+        c_->scr->moveCursor(c_->scr->toScrCoord(curTo));
+        c_->buf->setCursor(curTo);
 
         // HETI SEURAAVAKS:
         // viel toi jos deletoi riveja tee uusiks. 

@@ -95,6 +95,11 @@ public:
     void clrToEol(
         const PointPtr& point = nullptr);
 
+    // Update visible range and clear now empty lines.
+    //
+    // \param cur Where cursor is now (if not updated yet).
+    void clrEmptyLines();
+
 private:
     void addNewline();
 

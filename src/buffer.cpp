@@ -77,13 +77,14 @@ std::vector<std::string> Buffer::getRange(
     if (txt_.empty())
         return {};
 
-
     // Make copy so that the original is not modified.
     Range r = *range;
     auto s = r.start();
     auto e = r.end();
-    //r.fitToSize(txt_.size(), txt_.front().size(), txt_.back().size());
 
+    if (*r.start() > *r.end())
+        r.sortRange();
+        
     std::vector<std::string> newVec;
     s = r.start();
     e = r.end();
@@ -242,7 +243,7 @@ PointPtr Buffer::moveWord(
             return nullptr;
 
         // 2. Skip whitespace #1.
-        if (p->x() > 0)
+        if (p->x() > 0 && p->x() != 1)
             p->decX();
         while (p->x() > 0 && std::isspace(charAt(p)))
             p->decX();
@@ -251,7 +252,7 @@ PointPtr Buffer::moveWord(
         if (p->x() == 0)
         {
             p->set(txt_.at(p->y() - 1).size() - 1, p->y() - 1);
-            len = lineLen() - 2;
+            len = lineLen(p) - 2;
         }
 
         // 3. Skip whitespace #2.
@@ -316,7 +317,12 @@ char Buffer::charAt(
     if (!point)
         return txt_.at(point_->y()).at(point_->x());
     else
-        return txt_.at(point->y()).at(point->x());
+    {
+        if (static_cast<int>(lineLen(point)) - 1 < point->x())
+            return 0;
+        else
+            return txt_.at(point->y()).at(point->x());
+    }
 }
 
 // SEURAAVAKS: KUN MVP TEHTY: PERU RANGE/POINTR pointtereist reffiin takas!!
@@ -324,13 +330,18 @@ char Buffer::charAt(
 void Buffer::erase(
     const RangePtr& range)
 {
-    RangePtr rTmp = range; 
-    //if (rTmp->start() > rTmp->end())
-        //rTmp->sortRange();
-
+    RangePtr rTmp = Range::make(range); 
     auto startX = rTmp->start()->x();
-    auto startY = rTmp->start()->y();
     auto endX = rTmp->end()->x();
+
+    bool is = *rTmp->start() > *rTmp->end();
+
+    if (is)
+        rTmp->sortRange();
+
+    startX = rTmp->start()->x();
+    auto startY = rTmp->start()->y();
+    endX = rTmp->end()->x();
     auto endY = rTmp->end()->y();
 
     if (rTmp->empty())
@@ -365,11 +376,11 @@ void Buffer::erase(
 
     // Join lines if '\n' was erased.
     if (rTmp->lines() > 1)
-        if (startX != 0)
-        {
-            txt_.at(startY).append(txt_.at(endY));
-            txt_.erase(txt_.begin() + endY);
-        }
+    {
+        txt_.at(startY).append(txt_.at(endY));
+        txt_.erase(txt_.begin() + endY);
+    }
+
 }
 
 const PointPtr& Buffer::cursor() const

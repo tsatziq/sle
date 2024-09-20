@@ -214,9 +214,9 @@ public:
     }
 
     bool operator>(
-        const PointPtr& rhs) const
+        const Point& rhs) const
     {
-        return (y_ > rhs->y_) || (y_ == rhs->y_ && x_ > rhs->x_);
+        return (y_ > rhs.y_) || (y_ == rhs.y_ && x_ > rhs.x_);
     }
 
     bool operator<=(
@@ -271,7 +271,7 @@ public:
     // Ensure start of range is lower than the end.
     void sortRange()
     {
-        if (start_->y() > end_->y())
+        if (*start_ > *end_)
         {
             auto tmp = Point::make(start_);
             start_ = end_;
@@ -380,6 +380,17 @@ public:
         return std::make_shared<Range>(
             start,
             std::make_shared<Point>(end.x(), end.y()));
+    }
+
+    static std::shared_ptr<Range> make(
+        const std::shared_ptr<Range>& r)
+    {
+        if (!r)
+            return nullptr;
+
+        return std::make_shared<Range>(
+            Point::make(r->start_),
+            Point::make(r->end_));
     }
         
 private:
