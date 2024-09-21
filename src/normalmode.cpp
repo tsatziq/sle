@@ -120,7 +120,9 @@ CmdState EditLoop::NormalMode::parse(
         else if (toMotion(c) != Motion::NONE)
         {
             cmd_.motion = toMotion(c);
-            ret = CmdState::FINISHED;
+            prevPart_ = CmdPart::MOTION;
+            if (!isPendingCmd(cmd_.motion))
+                ret = CmdState::FINISHED;
         }
         else if (std::isdigit(c))
         {
@@ -287,7 +289,6 @@ void EditLoop::NormalMode::execute(
             default:
                 break;
             }
-            c_->buf->setCursor(target);
 
             c_->scr->refreshScr(ScreenState::REDRAW,
                 c_->scr->toScrCoord(target));
@@ -403,6 +404,11 @@ void EditLoop::NormalMode::execute(
         exitMode_ = true;
         break;
     }
+    case Action::CHANGE:
+    {
+        // SEURAAVAKS: CHANGE TARGETTIN!!
+        break;
+    }
     case Action::CHANGEEOL:
     {
         auto eol = Point::make(c_->buf->cursor());
@@ -433,8 +439,24 @@ void EditLoop::NormalMode::execute(
 
         auto cur = c_->buf->cursor();
 
-        int start = cur->y();
-        int end = target->y();
+        // Increment/decrement x according to the motion.
+        switch (cmd_.motion)
+        {
+        case Motion::TO:
+        case Motion::TILL:
+            target->incX();
+            if (cur->x() == b_->lineLen(cur) - 2)
+                cur->incX();
+            break;
+        case Motion::WORDFWD:
+            if (cur->x() == b_->lineLen(cur) - 2)
+                cur->incX();
+            break;
+        default:
+            break;
+        }
+
+        auto curTo = Point::make(target); // Remember in case of reversing.
 
         if (*cur > *target)
         {
@@ -443,39 +465,31 @@ void EditLoop::NormalMode::execute(
             target = tmp;
         }
 
-        int lines = target->y() - cur->y();
-
         // If last word of line, need to advance over last char.
         if (target->x() == b_->lineLen(target) - 2)
-            target->incX();
+            if (cmd_.motion != Motion::WORDBCK && cmd_.motion != Motion::TOBCK)
+                target->incX();
 
+        // NOTE: esim rivil '34\n' pos 1, dw poistaa seuraavan rivin.
+        // mut antaa olla toistaiseksi.
         auto w = c_->visibleRange->end()->y(); //DEBUG
         c_->buf->erase(Range::make(cur, target));
 
         // Update visible range.
-        auto lin = c_->visibleRange->lines();
+        auto lin = c_->visibleRange->lines(); // DEBUG
         
         lin = c_->visibleRange->lines(); // DEBUG
 
-
         // If deleted over lines, print all lines below cursor.
-        if (start != end)
+        if (cur->y() != target->y())
         {
-            int lastLn = c_->visibleRange->end()->y();
-            int firstLn = c_->visibleRange->start()->y();
-
-            if (c_->visibleRange->lines() < s_->height() - 1)
-                c_->visibleRange->end()->setY(lastLn - lines);
-            if (target->y() - lines < firstLn)
-                c_->visibleRange->start()->setY(firstLn - lines);
-            if (lastLn + lines >= b_->size() - 1)
-                c_->visibleRange->end()->setY(lastLn - lines); 
+            s_->updateVisible(target->y() - cur->y(), curTo);
 
             auto txt = c_->buf->getRange(Range::make(
                 Point::make(0, cur->y()),
                 Point::make(0, c_->visibleRange->end()->y())));
+
             c_->scr->paint(txt, s_->toScrCoord(Point::make(0, cur->y())));
-            lin = c_->visibleRange->lines(); // DEBUG
             s_->clrEmptyLines();
         }
         // If deleted on one line, just print line again.
@@ -485,19 +499,12 @@ void EditLoop::NormalMode::execute(
             s_->paint({b_->getLine()}, s_->toScrCoord(Point::make(0, cur->y())));
         }
 
-        if (b_->charAt(cur) == '\n')
+        if (b_->charAt(cur) == '\n' && (cur->x() > 0))
             cur->decX();
 
-        PointPtr curTo = Point::make(cur); // DEBUG
+        c_->scr->moveCursor(c_->scr->toScrCoord(cur));
+        c_->buf->setCursor(cur);
 
-        c_->scr->moveCursor(c_->scr->toScrCoord(curTo));
-        c_->buf->setCursor(curTo);
-
-        // HETI SEURAAVAKS:
-        // viel toi jos deletoi riveja tee uusiks. 
-        /*
-        ks et paivittais ennen painttia visible rangen, sit maalais cur-end.
-        */
         auto st = c_->visibleRange->start();
         auto en = c_->visibleRange->end();
         auto i = 1;
@@ -508,7 +515,7 @@ void EditLoop::NormalMode::execute(
         if (!target || !target->isFullySet())
             break;
 
-        c_->buf->setCursor(target); // KOSKA dw kursor ei saa liikkua.
+        c_->buf->setCursor(target);
         auto p = scr->toScrCoord(target);
         c_->scr->moveCursor(scr->toScrCoord(target));
         break;

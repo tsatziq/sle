@@ -95,6 +95,14 @@ public:
     void clrToEol(
         const PointPtr& point = nullptr);
 
+    /// Updates visible range if it has changed.
+    ///
+    /// \param lines Number of lines changed.
+    /// \param bufCur Where buffer cursor will be after operation.
+    void updateVisible(
+        const int lines,
+        const PointPtr& bufCur = nullptr);
+
     // Update visible range and clear now empty lines.
     //
     // \param cur Where cursor is now (if not updated yet).

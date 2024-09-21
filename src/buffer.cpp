@@ -194,6 +194,9 @@ const PointPtr& Buffer::move(
         break;
     }
 
+    if (point_->x() < 0)
+        point_->setX(0);
+
     return point_;
 } 
 
@@ -217,17 +220,18 @@ PointPtr Buffer::moveWord(
         if (p->x() == len)
         {
             p->set(0, p->y() + 1);
-            len = lineLen() - 2;
+            len = lineLen(p) - 2;
         }
         
+/*
         auto pp = Point::make(p);
         pp->setX(0);
         auto str = getLine(pp);
+DEBUG */
 
-        // 3. Skip non-whitespace (if line was not changed).
-        if (p->y() == origY)
-            while (p->x() < len && !std::isspace(charAt(p)))
-                p->incX();
+        // 3. Skip non-whitespace.
+        while (p->x() < len && !std::isspace(charAt(p)))
+            p->incX();
 
         // 4. Skip whitespace.
         while (p->x() < len && std::isspace(charAt(p)))
@@ -331,56 +335,53 @@ void Buffer::erase(
     const RangePtr& range)
 {
     RangePtr rTmp = Range::make(range); 
-    auto startX = rTmp->start()->x();
-    auto endX = rTmp->end()->x();
 
-    bool is = *rTmp->start() > *rTmp->end();
-
-    if (is)
+    if (*rTmp->start() > *rTmp->end())
         rTmp->sortRange();
 
-    startX = rTmp->start()->x();
+    auto startX = rTmp->start()->x();
     auto startY = rTmp->start()->y();
-    endX = rTmp->end()->x();
+    auto endX = rTmp->end()->x();
     auto endY = rTmp->end()->y();
 
     if (rTmp->empty())
         return;
 
-    if (rTmp->lines() == 1)
+    for (int ln = startY; ln < endY + 1; ++ln)
     {
-        auto startX = rTmp->start()->x();
-        auto startY = rTmp->start()->y();
-        auto endX = rTmp->end()->x();
-        auto endY = rTmp->end()->y();
+        auto& str = txt_.at(ln);
+        int from = 0;
+        int to = str.size();
+        
+        if (ln == startY)
+            from = startX;
+        if (ln == endY)
+            to = endX;
 
-        auto dif = endX - startX;
-
-        txt_.at(rTmp->start()->y()).erase(
-            rTmp->start()->x(),
-            dif);
-    }
-    else if (rTmp->lines() == 2)
-    {
-        if (rTmp->start()->x() < 
-            lineLen(rTmp->start()) && rTmp->start()->x() >= 0)
-                txt_.at(rTmp->start()->y()).erase(rTmp->start()->x());
-
-        if (rTmp->end()->x() > 0 && rTmp->end()->x() <= lineLen(rTmp->end()))
-            txt_.at(rTmp->end()->y()).erase(0, rTmp->end()->x());
-    }
-    else if (rTmp->lines() > 2)
-        txt_.erase(
-            txt_.begin() + rTmp->start()->y() + 1,
-            txt_.begin() + rTmp->end()->y());
+        str.erase(str.begin() + from, str.begin() + to);
+    } 
 
     // Join lines if '\n' was erased.
-    if (rTmp->lines() > 1)
-    {
+    if (txt_.at(startY).back() != '\n' || txt_.at(startY).empty())
         txt_.at(startY).append(txt_.at(endY));
-        txt_.erase(txt_.begin() + endY);
+
+    // Delete empty lines.
+    auto it = txt_.begin() + startY;
+
+    while (it != txt_.begin() + endY)
+    {
+        if ((*it).empty())
+        {
+            it = txt_.erase(it);
+            --endY;
+        }
+        else
+            ++it; 
     }
 
+    // Delete last line that was appended.
+    if (rTmp->lines() > 1)
+        txt_.erase(txt_.begin() + startY + 1);
 }
 
 const PointPtr& Buffer::cursor() const

@@ -307,6 +307,31 @@ void MainScreen::clrToEol(
     moveCursor(cursor_);
 }
 
+void MainScreen::updateVisible(
+    const int lines,
+    const PointPtr& bufCur)
+{
+    PointPtr tmpCur = Point::make(bufCur);
+    if (!bufCur)
+        tmpCur = Point::make(c_->buf->cursor());
+
+    int lastLn = c_->visibleRange->end()->y();
+    int firstLn = c_->visibleRange->start()->y();
+
+    if (c_->visibleRange->lines() < height() - 1)
+        c_->visibleRange->end()->setY(lastLn - lines);
+
+    if (tmpCur->y() < firstLn)
+    {
+        c_->visibleRange->start()->setY(tmpCur->y());
+        c_->visibleRange->end()->setY(tmpCur->y() + height() - 1);
+    }
+    
+    // Check buf has enough lines.
+    if (c_->visibleRange->end()->y() > c_->buf->size() - 1)
+        c_->visibleRange->end()->setY(c_->buf->size() - 1);
+}
+
 void MainScreen::clrEmptyLines()
 {
     if (c_->visibleRange->lines() < height_)
