@@ -413,11 +413,9 @@ void EditLoop::NormalMode::execute(
     {
         auto eol = Point::make(c_->buf->cursor());
         eol->setX(c_->buf->lineLen() - 1);
-        if (eol->y() != c_->buf->size() - 1)
-            eol->decX();
         parent_->changeMode(
             Mode::INSERT,
-            new InsertModeData(InsertType::CHANGE, eol));
+            new InsertModeData(Action::CHANGEEOL, eol));
 
         exitMode_ = true;
         break;
@@ -507,7 +505,7 @@ void EditLoop::NormalMode::execute(
 
         auto st = c_->visibleRange->start();
         auto en = c_->visibleRange->end();
-        auto i = 1;
+        auto i = 1; // debug
         break;
     }
     case Action::NONE:

@@ -119,6 +119,7 @@ void MainScreen::addNewline()
     };
 }
 
+// NOTE: kato saisko refreshScr siirrettyy tanne mainscreenin sisalle..
 void MainScreen::paint(
     const std::vector<std::string>& text,
     const PointPtr& point)

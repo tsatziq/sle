@@ -23,16 +23,22 @@ public:
     InsertModeData() = default;
 
     InsertModeData(
-        InsertType type,
+        Action type,
         PointPtr end)
         :
         type_(type),
         end_(end)
     {}
 
-    InsertType type() const
+    Action type() const
     {
         return type_;
+    }
+
+    void setType(
+        const Action newType)
+    {
+        type_ = newType;
     }
 
     const PointPtr& end() const
@@ -41,7 +47,7 @@ public:
     }
 
 private:
-    InsertType type_ = InsertType::BASIC;
+    Action type_ = Action::INSERT;
     PointPtr end_ = nullptr;
 };
 

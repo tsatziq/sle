@@ -18,7 +18,7 @@ bool EditLoop::InsertMode::handle()
 {
     switch (data_.type())
     {
-    case InsertType::BASIC:
+    case Action::INSERT:
     {
         while (true)
         {
@@ -41,7 +41,49 @@ bool EditLoop::InsertMode::handle()
         }
         break;
     }
-    case InsertType::CHANGE:
+    case Action::CHANGEEOL:
+    {
+        scr_->paintAt('$', data_.end());
+        auto cur = scr_->cursor();
+        buf_->erase(Range::make(cur, data_.end()));
+        auto l = buf_->getText().at(0); // DEBUG
+
+        while (true)
+        {
+            char ch = scr_->getCh();
+            
+            switch (ch)
+            {
+            case 'q':
+            {
+                if (cur->x() <= data_.end()->x())
+                    scr_->clrToEol();
+                auto ln = buf_->getText().at(0); // DEBUG
+                quitMode();
+                return false;
+            }
+            case '\n':
+            {
+                auto cur = scr_->cursor();
+                if (cur->x() <= data_.end()->x())
+                    scr_->clrToEol();
+                buf_->addCh(ch);
+                scr_->paintCh(ch);
+                scr_->refreshScr(ScreenState::REDRAW, Point::make(0,0));
+                data_.setType(Action::INSERT);
+                return false;
+            }
+            default:
+                if (scr_->paintCh(ch))
+                    buf_->addCh(ch);
+                break;
+            }
+        }
+        
+        return false;
+        break;
+    }
+    case Action::CHANGE:
     {
         scr_->paintAt('$', data_.end());
         while (true)
