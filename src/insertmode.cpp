@@ -41,6 +41,61 @@ bool EditLoop::InsertMode::handle()
         }
         break;
     }
+    case Action::CHANGE:
+    {
+        auto cur = scr_->cursor();
+        auto r = Range::make(cur, data_.end());
+        scr_->paintAt('$', data_.end());
+
+        while (true)
+        {
+            char ch = scr_->getCh();
+            
+            switch (ch)
+            {
+            case 'q':
+            {
+                if (*cur <= *(data_.end()))
+                {
+                    data_.end()->incX();
+                    delBufScr(Range::make(cur, data_.end()));
+                }
+                quitMode();
+                return false;
+            }
+            case '\n':
+            {
+                auto cur = scr_->cursor();
+                if (*cur <= *(data_.end()))
+                {
+                    data_.end()->incX();
+                    delBufScr(Range::make(cur, data_.end()));
+                }
+                buf_->addCh(ch);
+                scr_->paintCh(ch);
+                break;
+            }
+            default:
+                auto ln = buf_->getText().at(cur->y()); // DEBUG
+                if (*(buf_->cursor()) <= *(data_.end()))
+                {
+                    if (scr_->paintCh(ch, true))
+                       buf_->addCh(ch, true); 
+                }
+                else
+                {
+                    if (scr_->paintCh(ch))
+                        buf_->addCh(ch);
+                }
+                ln = buf_->getText().at(cur->y()); // DEBUG
+                auto i = 2; // DEBUG
+                break;
+            }
+        }
+        
+        return false;
+        break;
+    }
     case Action::CHANGEEOL:
     {
         scr_->paintAt('$', data_.end());
@@ -83,50 +138,6 @@ bool EditLoop::InsertMode::handle()
         return false;
         break;
     }
-    case Action::CHANGE:
-    {
-        scr_->paintAt('$', data_.end());
-        while (true)
-        {
-            char ch = scr_->getCh();
-            
-            switch (ch)
-            {
-            case 'q':
-            {
-                auto cur = scr_->cursor();
-                if (cur->x() <= data_.end()->x())
-                    delBufScr(Range::make(cur, data_.end()));
-                quitMode();
-                return false;
-            }
-            case '\n':
-            {
-                auto cur = scr_->cursor();
-                if (cur->x() <= data_.end()->x())
-                    delBufScr(Range::make(cur, data_.end()));
-                buf_->addCh(ch);
-                scr_->paintCh(ch);
-                break;
-            }
-            default:
-                if (buf_->cursor()->x() <= data_.end()->x())
-                {
-                    if (scr_->paintCh(ch, true))
-                       buf_->addCh(ch, true); 
-                }
-                else
-                {
-                    if (scr_->paintCh(ch))
-                        buf_->addCh(ch);
-                }
-                break;
-            }
-        }
-        
-        return false;
-        break;
-    }
     default:
         return false;
     }
@@ -153,7 +164,7 @@ void EditLoop::InsertMode::delBufScr(
     const RangePtr& range)
 {
     buf_->erase(range);
-    scr_->delCh(nullptr, range->end()->x() - range->start()->x() + 1);
+    scr_->delCh(nullptr, range->end()->x() - range->start()->x());
 }
 
 }

@@ -38,20 +38,26 @@ public:
         const RangePtr& range);
 
     const PointPtr& move(
-        const Direction& dir,
+        const Direction dir,
         const unsigned count = 1);
 
     const PointPtr& move(
-        const Direction& dir,
+        const Direction dir,
         const int count) = delete;
 
     PointPtr moveWord(
-        const Direction& dir,
+        const Direction dir,
+        const PointPtr& point = nullptr,
         const unsigned count = 1);
 
     PointPtr moveWord(
-        const Direction& dir,
-        const int count) = delete;
+        const Direction dir,
+        const int count,
+        const PointPtr& point) = delete;
+
+    PointPtr moveWordEnd(
+        const Direction dir,
+        const PointPtr& point = nullptr); 
 
     std::size_t size() const;
 

@@ -202,15 +202,15 @@ public:
     }
 
     bool operator==(
-        const PointPtr& rhs) const
+        const Point& rhs) const
     {
-        return (x_ == rhs->x_) && (y_ == rhs->y_);
+        return (x_ == rhs.x_) && (y_ == rhs.y_);
     }
 
     bool operator<(
-        const PointPtr& rhs) const
+        const Point& rhs) const
     {
-        return (y_ < rhs->y_) || (y_ == rhs->y_ && x_ < rhs->x_);
+        return (y_ < rhs.y_) || (y_ == rhs.y_ && x_ < rhs.x_);
     }
 
     bool operator>(
@@ -220,15 +220,15 @@ public:
     }
 
     bool operator<=(
-        const PointPtr& rhs) const
+        const Point& rhs) const
     {
-        return !(rhs->y_ < y_) || (rhs->y_ == y_ && rhs->x_ < x_);
+        return !(rhs < *this);
     }
 
     bool operator>=(
-        const PointPtr& rhs) const
+        const Point& rhs) const
     {
-        return !(y_ < rhs->y_) || (y_ == rhs->y_ && x_ < rhs->x_);
+        return !(*this < rhs);
     }
 
 private:

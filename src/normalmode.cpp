@@ -367,9 +367,8 @@ void EditLoop::NormalMode::execute(
         c_->buf->setCursor(target);
         break;
     }
-    // SEURAAVAKS HETI: laita B et se pysahtyy kans ekan sanan edes/rivin
-    // alus. sillee et saa helpost oikeen koordin delete wordia varten.
-    // KS etta del word paivittaa kursorin oikeesee paikkaan.!!!!
+    // SEURAAVAKS: huoh 'cw' menee sanan vikaan kirjaimeen, 'dw' ja 'w' seuraava
+    // sanan loppuun! vaiha joskus jos jaksaa        
     case Motion::WORDBCK:
     case Motion::WORDFWD:
     {
@@ -404,9 +403,20 @@ void EditLoop::NormalMode::execute(
         exitMode_ = true;
         break;
     }
+    // SEURAAVAKS: esim 'dC-l' liikuttaa cursorin jo loppuun, se pitas changea
+    // ja deleta jne varte pitaa paikoillaa.
+    // SEURAAVAKS: jos esim 'c-l' niin se $ ois kursorin alla, ala maalaa.
+    // SEURAAVAKS HETI: tee se change f/F/t/T kanssa, ja SITTE 'cb'
     case Action::CHANGE:
     {
-        // SEURAAVAKS: CHANGE TARGETTIN!!
+        // Back up to end of the word if 'w' command was used.
+        if (cmd_.motion == Motion::WORDFWD)
+            target = b_->moveWordEnd(Direction::LEFT, Point::make(target));
+
+        parent_->changeMode(
+            Mode::INSERT,
+            new InsertModeData(Action::CHANGE, Point::make(target)));
+        exitMode_ = true;
         break;
     }
     case Action::CHANGEEOL:

@@ -117,7 +117,7 @@ std::vector<std::string> Buffer::getRange(
 }
 
 const PointPtr& Buffer::move(
-    const Direction& dir,
+    const Direction dir,
     const unsigned count)
 {
     switch (dir)
@@ -201,10 +201,14 @@ const PointPtr& Buffer::move(
 } 
 
 PointPtr Buffer::moveWord(
-    const Direction& dir,
+    const Direction dir,
+    const PointPtr& point,
     const unsigned count)
 {
     auto p = Point::make(point_);
+    if (point)
+        p = Point::make(point);
+
     auto len = lineLen() - 2;
     auto origY = p->y();
 
@@ -216,18 +220,17 @@ PointPtr Buffer::moveWord(
         if (p->y() == size() - 1 && p->x() == len)
             return nullptr;
 
-        // 2. If at line end, start from next line.
+        // 2. If at line end, move to start of first word on next line.
         if (p->x() == len)
         {
             p->set(0, p->y() + 1);
             len = lineLen(p) - 2;
+
+            while (p->x() < len && std::isspace(charAt(p)))
+                p->incX();
+
+            return p;
         }
-        
-/*
-        auto pp = Point::make(p);
-        pp->setX(0);
-        auto str = getLine(pp);
-DEBUG */
 
         // 3. Skip non-whitespace.
         while (p->x() < len && !std::isspace(charAt(p)))
@@ -277,6 +280,37 @@ DEBUG */
     default:
         return nullptr;
     }
+}
+
+PointPtr Buffer::moveWordEnd(
+    const Direction dir,
+    const PointPtr& point) 
+{
+    auto p = Point::make(point);
+    if (!point)
+        p = Point::make(point_);
+
+    auto orig = Point::make(p);
+
+    switch (dir)
+    {
+    case Direction::LEFT:
+        if (p->x() == lineLen(p) - 2)
+            return p;
+
+        if (p->x() > 0)
+            p->decX();
+        
+        while (std::isspace(charAt(p)))
+            p->decX();
+
+        if (!std::isspace(charAt(p)))
+            return p;
+        break;    
+    default:
+        break;
+    }
+    return orig;
 }
 
 std::size_t Buffer::size() const
@@ -524,7 +558,7 @@ PointPtr Buffer::findCh(
 
     if (pos == std::string::npos)
         return nullptr;
-   else
+    else
         return p; 
 }
 
