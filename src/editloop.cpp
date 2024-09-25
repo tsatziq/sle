@@ -25,8 +25,14 @@ void EditLoop::run()
     modePool_[Mode::NORMAL] = std::make_shared<NormalMode>(this);
     modePool_[Mode::INSERT] = std::make_shared<InsertMode>(this);
     changeMode(Mode::NORMAL);
-    while (!mode_->handle())
-        mode_->handle();
+    //while (!mode_->handle())
+        //mode_->handle();
+    while (true)
+    {
+        bool quit = mode_->handle();
+        if (quit)
+            break;
+    }
 }
 
 void EditLoop::changeMode(

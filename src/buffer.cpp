@@ -109,6 +109,8 @@ std::vector<std::string> Buffer::getRange(
     {
         std::string& lastLn = newVec.back();
 
+        // SEURAAVAKS: toimii nyt vaarin! pitas palauttaa str alusta x asti.
+        // muuta joskus jos jaksaa.
         if (lastLn.length() >= r.end()->x()) 
             lastLn = lastLn.substr(r.end()->x());
     }

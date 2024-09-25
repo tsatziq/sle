@@ -322,7 +322,6 @@ void EditLoop::NormalMode::execute(
         else if (cmd_.motion == Motion::ENDLN)
             target = c_->scr->toScrCoord(res->end());
 
-        c_->buf->setCursor(target);
         break;
     }
     case Motion::BOTTOM:
@@ -345,9 +344,7 @@ void EditLoop::NormalMode::execute(
         if (!res)
             cur->setX(0);
 
-        c_->buf->setCursor(res->end());
         target = res->end();
-        c_->buf->setCursor(target);
         break;
     }
     case Motion::UP:
@@ -498,7 +495,6 @@ void EditLoop::NormalMode::execute(
                 Point::make(0, c_->visibleRange->end()->y())));
 
             c_->scr->paint(txt, s_->toScrCoord(Point::make(0, cur->y())));
-            s_->clrEmptyLines();
         }
         // If deleted on one line, just print line again.
         else

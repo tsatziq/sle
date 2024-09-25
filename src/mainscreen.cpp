@@ -308,6 +308,7 @@ void MainScreen::clrToEol(
     moveCursor(cursor_);
 }
 
+// saisko noi parametrit korvattua rangella?
 void MainScreen::updateVisible(
     const int lines,
     const PointPtr& bufCur)
@@ -331,6 +332,8 @@ void MainScreen::updateVisible(
     // Check buf has enough lines.
     if (c_->visibleRange->end()->y() > c_->buf->size() - 1)
         c_->visibleRange->end()->setY(c_->buf->size() - 1);
+
+    clrEmptyLines(); // alussa kutsuin tata normalmodessa
 }
 
 void MainScreen::clrEmptyLines()
