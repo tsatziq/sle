@@ -42,7 +42,7 @@ void FileHandler::readFile(
     
     file.close();
 
-    buf->addText(txt);
+    buf->appendTxt(txt);
 }
 
 }

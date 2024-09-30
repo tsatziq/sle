@@ -501,7 +501,7 @@ void EditLoop::NormalMode::execute(
         // If deleted over lines, print all lines below cursor.
         if (cur->y() != target->y())
         {
-            s_->updateVisible(target->y() - cur->y(), curTo);
+            s_->updateVisible(cur->y() - target->y(), curTo);
 
             auto txt = c_->buf->getRange(Range::make(
                 Point::make(0, cur->y()),
@@ -527,6 +527,10 @@ void EditLoop::NormalMode::execute(
         auto i = 1; // debug
         break;
     }
+    case Action::INSERT:
+        parent_->changeMode(Mode::INSERT);
+        exitMode_ = true;
+        break;
     case Action::NONE:
     {
         if (!target || !target->isFullySet())
@@ -537,10 +541,60 @@ void EditLoop::NormalMode::execute(
         c_->scr->moveCursor(scr->toScrCoord(target));
         break;
     }
-    case Action::INSERT:
+    case Action::OPENLN:
+    case Action::OPENLNUP:
+    {
+        auto cur = b_->cursor();
+        if (cmd_.action == Action::OPENLNUP && (cur->y() > 0))
+            cur->decY();
+        if (cmd_.action == Action::OPENLN && (cur->y() < b_->size() - 1))
+            cur->incY();
+
+        auto vs = c_->visibleRange->start();
+        auto ve = c_->visibleRange->end();
+
+        b_->insertTxt(cur->y(), {"\n"});
+
+        // Went over visible range, need to paint whole screen again.
+        if (!c_->visibleRange->contains(cur))
+        {
+            if (cmd_.action == Action::OPENLN)
+            {
+                c_->visibleRange->start()->incY();
+                c_->visibleRange->end()->incY();
+            }
+            if (cmd_.action == Action::OPENLNUP)
+            {
+                c_->visibleRange->start()->decY();
+                c_->visibleRange->end()->decY();
+            }
+
+            auto txt = b_->getRange(c_->visibleRange);
+            s_->paint(txt);
+        }
+        else
+        {
+            if (c_->visibleRange->lines() < s_->height() - 1)
+                s_->updateVisible(1, cur);
+
+            auto txt = b_->getRange(Range::make(
+                Point::make(0, cur->y()),
+                Point::make(0, c_->visibleRange->end()->y())));
+
+            s_->paint(txt, s_->toScrCoord(Point::make(0, cur->y())));
+            s_->refreshScr(ScreenState::REDRAW,
+                s_->toScrCoord(cur));
+        }
+
+        PointPtr newPos = Point::make(0, cur->y());
+        b_->setCursor(newPos);
+        s_->moveCursor(s_->toScrCoord(newPos));
+        
+        cur = b_->cursor(); // DEBUG
         parent_->changeMode(Mode::INSERT);
         exitMode_ = true;
         break;
+    }
     case Action::TEST:
         c_->scr->test();
         break;
@@ -564,6 +618,8 @@ bool EditLoop::NormalMode::isPrimaryAct(
         case Action::APPEND:
         case Action::CHANGEEOL:
         case Action::INSERT:
+        case Action::OPENLN:
+        case Action::OPENLNUP:
         case Action::DELCHAR:
         case Action::TEST:
         case Action::QUIT:
@@ -638,6 +694,8 @@ Action EditLoop::NormalMode::toAction(
     case 'C': return Action::CHANGEEOL;
     case 'd': return Action::DELETE;
     case 'i': return Action::INSERT;
+    case 'o': return Action::OPENLN;
+    case 'O': return Action::OPENLNUP;
     case 'x': return Action::DELCHAR;
     case 'z': return Action::QUIT;
     case '[': return Action::TEST;

@@ -53,6 +53,8 @@ enum class Action
     DELCHAR,
     DELETE,
     INSERT,
+    OPENLN,
+    OPENLNUP,
     TEST,
     WRITE,
     WRITEQUIT,

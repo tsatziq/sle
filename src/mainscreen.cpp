@@ -321,7 +321,7 @@ void MainScreen::updateVisible(
     int firstLn = c_->visibleRange->start()->y();
 
     if (c_->visibleRange->lines() < height() - 1)
-        c_->visibleRange->end()->setY(lastLn - lines);
+        c_->visibleRange->end()->setY(lastLn + lines);
 
     if (tmpCur->y() < firstLn)
     {

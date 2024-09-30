@@ -50,16 +50,27 @@ void Buffer::addCh(
 }
 
 void Buffer::addText(
-    const std::string& txt)
+    const std::string& txt,
+    const PointPtr& point)
 {
+    PointPtr to;
+    if (point->isUnset())
+        to = Point::make(point_);
 }
 
-void Buffer::addText(
+void Buffer::appendTxt(
     const std::vector<std::string>& txt)
 {
-    if ((txt_.size() == 1) && txt_.front().empty())
+    if ((txt_.size() == 1) && txt_.front() == "\n")
         txt_.clear();
     txt_.insert(txt_.end(), txt.begin(), txt.end());
+}
+
+void Buffer::insertTxt(
+    const int index,
+    const std::vector<std::string>& txt)
+{
+    txt_.insert(txt_.begin() + (index < 0 ? 0 : index), txt.begin(), txt.end());
 }
 
 const std::vector<std::string>& Buffer::getText()
@@ -71,6 +82,8 @@ const std::vector<std::string>& Buffer::getText()
 // vois antaa const RangePtr& parametrin. kai sen voi nyt antaa olla.
 // kylha taa voi sit ottaa fitToSize tyyppisesti oikeat rivit vektoriin, mut
 // ei sen tarttis tota rangea muokata, se on rumaa.
+// JOSKUS: tee overload talle joka ottaa 2 inttia ja palauttaa koko rivit niide
+// valissa.
 std::vector<std::string> Buffer::getRange(
     const RangePtr& range)
 {

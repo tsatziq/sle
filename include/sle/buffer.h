@@ -26,10 +26,20 @@ public:
         const char ch,
         const bool replace = false);
 
+    /// Insert string to the buffer, to position indicated by point.
+    ///
+    /// \param point Where to insert string, if null, use cursor position.
     void addText(
-        const std::string& txt);
+        const std::string& txt,
+        const PointPtr& point = nullptr);
 
-    void addText(
+    /// Appends vector of strings to the buffer.
+    // JOSKUS: muuta nimi append ?
+    void appendTxt(
+        const std::vector<std::string>& txt);
+
+    void insertTxt(
+        const int index,
         const std::vector<std::string>& txt);
 
     const std::vector<std::string>& getText();
@@ -101,7 +111,7 @@ public:
 
 private:
     ContextPtr c_ = nullptr;
-    std::vector<std::string> txt_ = { std::string() };
+    std::vector<std::string> txt_ = { "\n" };
     PointPtr point_ = Point::make(0, 0);
 };
 
