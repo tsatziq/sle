@@ -46,8 +46,7 @@ void EditLoop::changeMode(
     case Mode::INSERT:
     {
         auto im = static_cast<EditLoop::InsertMode*>(mode_.get());
-        auto d = static_cast<InsertModeData*>(data);
-        im->setData(d);
+        im->setData(static_cast<InsertModeData*>(data));
         break;
     }
     case Mode::NORMAL:

@@ -24,10 +24,12 @@ public:
 
     InsertModeData(
         Action type,
-        PointPtr end)
+        PointPtr from,
+        PointPtr to)
         :
         type_(type),
-        end_(end)
+        from_(from),
+        to_(to)
     {}
 
     Action type() const
@@ -41,14 +43,20 @@ public:
         type_ = newType;
     }
 
-    const PointPtr& end() const
+    const PointPtr& from() const
     {
-        return end_;
+        return from_;
+    }
+
+    const PointPtr& to() const
+    {
+        return to_;
     }
 
 private:
     Action type_ = Action::INSERT;
-    PointPtr end_ = nullptr;
+    PointPtr from_ = nullptr;
+    PointPtr to_ = nullptr;
 };
 
 class InsertModeData;

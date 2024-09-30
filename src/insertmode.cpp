@@ -45,9 +45,10 @@ bool EditLoop::InsertMode::handle()
     }
     case Action::CHANGE:
     {
+        buf_->setCursor(data_.from());
         auto cur = buf_->cursor();
-        auto r = Range::make(cur, data_.end());
-        scr_->paintAt('$', data_.end());
+        auto r = Range::make(cur, data_.to());
+        scr_->paintAt('$', scr_->toScrCoord(data_.to()));
 
         while (true)
         {
@@ -58,10 +59,10 @@ bool EditLoop::InsertMode::handle()
             case 'q':
             {
                 auto s = buf_->getText().at(0); // DEBUG
-                if (*cur <= *(data_.end()))
+                if (*cur <= *(data_.to()))
                 {
-                    data_.end()->incX();
-                    delBufScr(Range::make(cur, data_.end()));
+                    data_.to()->incX();
+                    delBufScr(Range::make(cur, data_.to()));
                 }
                 s = buf_->getText().at(0); // DEBUG
                 quitMode();
@@ -71,7 +72,7 @@ bool EditLoop::InsertMode::handle()
             case '\n':
             {
                 auto cur = buf_->cursor();
-                if (cur->y() < data_.end()->y())
+                if (cur->y() < data_.to()->y())
                 {
                     auto lnEnd = Point::make(buf_->lineLen() - 1, cur->y());
                     delBufScr(Range::make(cur, lnEnd));
@@ -80,10 +81,10 @@ bool EditLoop::InsertMode::handle()
                     scr_->moveCursor(scr_->toScrCoord(cur)); // toScrCoord?
                     auto i = 1; // DEBUG
                 }
-                else if (*cur < *(data_.end()))
+                else if (*cur < *(data_.to()))
                 {
-                    data_.end()->incX();
-                    delBufScr(Range::make(cur, data_.end()));
+                    data_.to()->incX();
+                    delBufScr(Range::make(cur, data_.to()));
                     buf_->addCh(ch);
                     scr_->paintCh(ch);
                 }
@@ -100,7 +101,7 @@ bool EditLoop::InsertMode::handle()
             default:
             {
                 auto ln = buf_->getText().at(cur->y()); // DEBUG
-                if (*(buf_->cursor()) <= *(data_.end()))
+                if (*(buf_->cursor()) <= *(data_.to()))
                 {
                     if (scr_->paintCh(ch, true))
                        buf_->addCh(ch, true); 
@@ -120,11 +121,13 @@ bool EditLoop::InsertMode::handle()
         return false;
         break;
     }
+    // JOSKUS: tata ei kayteta nyt! kato voiko poistaa.
     case Action::CHANGEEOL:
     {
-        scr_->paintAt('$', data_.end());
+        scr_->paintAt('$', scr_->toScrCoord(data_.to()));
+        buf_->setCursor(data_.from());
         auto cur = buf_->cursor();
-        buf_->erase(Range::make(cur, data_.end()));
+        buf_->erase(Range::make(cur, data_.to()));
         auto l = buf_->getText().at(0); // DEBUG
 
         while (true)
@@ -135,7 +138,7 @@ bool EditLoop::InsertMode::handle()
             {
             case 'q':
             {
-                if (cur->x() <= data_.end()->x())
+                if (cur->x() <= data_.to()->x())
                     scr_->clrToEol();
                 auto ln = buf_->getText().at(0); // DEBUG
                 quitMode();
@@ -143,8 +146,7 @@ bool EditLoop::InsertMode::handle()
             }
             case '\n':
             {
-                auto cur = buf_->cursor();
-                if (cur->x() <= data_.end()->x())
+                if (cur->x() <= data_.to()->x())
                     scr_->clrToEol();
                 buf_->addCh(ch);
                 scr_->paintCh(ch);
@@ -173,7 +175,10 @@ void EditLoop::InsertMode::setData(
     InsertModeData* data)
 {
     if (!data)
+    {
+        data_ = InsertModeData();
         return;
+    }
 
     data_ = *data;
     delete data;

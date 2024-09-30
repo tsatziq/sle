@@ -364,7 +364,7 @@ void EditLoop::NormalMode::execute(
         c_->buf->setCursor(target);
         break;
     }
-    // SEURAAVAKS: huoh 'cw' menee sanan vikaan kirjaimeen, 'dw' ja 'w' seuraava
+    // JOSKUS: huoh 'cw' menee sanan vikaan kirjaimeen, 'dw' ja 'w' seuraava
     // sanan loppuun! vaiha joskus jos jaksaa        
     case Motion::WORDBCK:
     case Motion::WORDFWD:
@@ -385,8 +385,7 @@ void EditLoop::NormalMode::execute(
         break;
     }
 
-    // SEURAAVAKS: DELETE & CHANGE liikkeen kanssa..
-    // SEURAAVAKS: laita ][ liikkuu esim scrHeihgt / 5.
+    // JOSKUS: laita ][ liikkuu esim scrHeihgt / 5.
     switch (cmd_.action)
     {
     case Action::APPEND:
@@ -400,9 +399,6 @@ void EditLoop::NormalMode::execute(
         exitMode_ = true;
         break;
     }
-    // SEURAAVAKS: esim 'dC-l' liikuttaa cursorin jo loppuun, se pitas changea
-    // ja deleta jne varte pitaa paikoillaa.
-    // SEURAAVAKS: jos esim 'c-l' niin se $ ois kursorin alla, ala maalaa.
     // SEURAAVAKS HETI: tee se change f/F/t/T kanssa, ja SITTE 'cb'
     case Action::CHANGE:
     {
@@ -410,19 +406,36 @@ void EditLoop::NormalMode::execute(
         if (cmd_.motion == Motion::WORDFWD)
             target = b_->moveWordEnd(Direction::LEFT, Point::make(target));
 
+        auto cur = Point::make(b_->cursor());
+
+        auto curTo = Point::make(target); // Remember in case of reversing.
+
+        if (*cur > *target)
+        {
+            PointPtr tmp = Point::make(cur);
+            cur = target;
+            target = tmp;
+            target->decX();
+            s_->moveCursor(s_->toScrCoord(cur));
+        }
+
         parent_->changeMode(
             Mode::INSERT,
-            new InsertModeData(Action::CHANGE, Point::make(target)));
+            new InsertModeData(
+                Action::CHANGE,
+                Point::make(cur),
+                Point::make(target)));
         exitMode_ = true;
         break;
     }
     case Action::CHANGEEOL:
     {
         auto eol = Point::make(c_->buf->cursor());
-        eol->setX(c_->buf->lineLen() - 1);
+        auto from = Point::make(c_->buf->cursor());
+        eol->setX(c_->buf->lineLen() - 2);
         parent_->changeMode(
             Mode::INSERT,
-            new InsertModeData(Action::CHANGEEOL, eol));
+            new InsertModeData(Action::CHANGE, from, eol));
 
         exitMode_ = true;
         break;
