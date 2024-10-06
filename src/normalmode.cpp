@@ -440,6 +440,12 @@ void EditLoop::NormalMode::execute(
         exitMode_ = true;
         break;
     }
+    case Action::CMDMODE:
+    {
+        parent_->changeMode(Mode::CMD);
+        exitMode_ = true;
+        break;
+    }
     case Action::DELCHAR:
     {
         auto cur = c_->buf->cursor();
@@ -616,6 +622,7 @@ bool EditLoop::NormalMode::isPrimaryAct(
     switch (a)
     {
         case Action::APPEND:
+        case Action::CMDMODE:
         case Action::CHANGEEOL:
         case Action::INSERT:
         case Action::OPENLN:
@@ -689,6 +696,7 @@ Action EditLoop::NormalMode::toAction(
 {
     switch (c)
     {
+    case ':': return Action::CMDMODE;
     case 'a': return Action::APPEND;
     case 'c': return Action::CHANGE;
     case 'C': return Action::CHANGEEOL;

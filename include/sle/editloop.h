@@ -33,8 +33,9 @@ private:
         const Mode& mode,
         ModeDataBase* data = nullptr); 
 
-    class NormalMode;
+    class CmdMode;
     class InsertMode;
+    class NormalMode;
 
     ContextPtr c_ = nullptr;
     ModePtr mode_ = nullptr;

@@ -1,9 +1,9 @@
-%option c++ prefix="nm" yyclass="sle::NormalModeLexer"
+%option c++ prefix="cm" yyclass="sle::CmdModeLexer"
 %option stack noyywrap yylineno 8bit
 
 %{
 
-#include "sle/normalmodelexer.h"
+#include "sle/cmdmodelexer.h"
 #include <iostream>
 
 using namespace sle;
@@ -15,12 +15,12 @@ INT        {DIGIT}+
 
 %%
 
-i { return CmdType::INSERT; }
+^e\h.*$ { return CmdType::EDIT; }
 q { return CmdType::QUIT; }
 <<EOF>> { return CmdType::ATEOF; }
 
 .                  {
-                       NormalModeLexer::LexerError("Invalid command");
+                       CmdModeLexer::LexerError("Invalid command");
                        return 0;
                    }
 

@@ -8,8 +8,8 @@ find_package(Curses REQUIRED)
 find_package(FLEX REQUIRED)
 
 FLEX_TARGET(normalModeLexer
-    src/normalmodelex.l
-    "${CMAKE_CURRENT_BINARY_DIR}/normalmodelexer.cpp")
+    src/cmdmodelex.l
+    "${CMAKE_CURRENT_BINARY_DIR}/cmdmodelexer.cpp")
 
 # create targets
 add_executable(sle src/main.cpp)
@@ -22,6 +22,6 @@ target_include_directories(common PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}"
     ${CURSES_INCLUDE_DIRS})
 
-target_link_libraries(sle PUBLIC common ${CURSES_LIBRARIES})
+target_link_libraries(sle PUBLIC common ${CURSES_LIBRARIES} panel)
 target_compile_features(common PRIVATE cxx_std_17)
 target_compile_features(sle PRIVATE cxx_std_17)

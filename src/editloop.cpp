@@ -1,4 +1,5 @@
 #include "sle/editloop.h"
+#include "sle/cmdmode.h"
 #include "sle/customtypes.h"
 #include "sle/insertmode.h"
 #include "sle/normalmode.h"
@@ -24,6 +25,7 @@ void EditLoop::run()
 {
     modePool_[Mode::NORMAL] = std::make_shared<NormalMode>(this);
     modePool_[Mode::INSERT] = std::make_shared<InsertMode>(this);
+    modePool_[Mode::CMD] = std::make_shared<CmdMode>(this);
     changeMode(Mode::NORMAL);
     //while (!mode_->handle())
         //mode_->handle();

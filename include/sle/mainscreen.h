@@ -17,6 +17,7 @@ enum class ScreenState
 };
 
 class MainScreen
+    : public Screen
 {
 public:
 	MainScreen(
@@ -112,7 +113,7 @@ private:
     void addNewline();
 
     ContextPtr c_ = nullptr;
-    CursePtr scr_ = nullptr;
+    //CursePtr scr_ = nullptr; // ei tarvi enaa, screenista tulee nyt.
     int width_, height_;
     PointPtr cursor_ = Point::make(0, 0);
 };

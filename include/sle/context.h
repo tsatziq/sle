@@ -14,6 +14,7 @@ class Buffer;
 class EditLoop;
 class FileHandler;
 class MainScreen;
+class CmdLine;
 struct Point;
 
 struct Context
@@ -23,6 +24,7 @@ struct Context
     EditLoop* loop = nullptr;
     FileHandler* file = nullptr;
     MainScreen* scr = nullptr;
+    CmdLine* cln = nullptr;
 
     RangePtr visibleRange = Range::make(Point::make(0,0), Point::make(0,0));
 };

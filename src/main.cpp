@@ -3,6 +3,7 @@
 #include "sle/editloop.h"
 #include "sle/filehandler.h"
 #include "sle/mainscreen.h"
+#include "sle/cmdline.h"
 #include <memory>
 
 using namespace sle;
@@ -16,14 +17,17 @@ int main(int argc, char* argv[])
     EditLoop loop(context);
     FileHandler file(context);
     MainScreen scr(context);
+    CmdLine cln(context);
 
     context->buf = &buf;
     context->prev = &prev;
     context->loop = &loop;
     context->file = &file;
     context->scr = &scr;
+    context->cln = &cln;
 
     scr.init();
+    cln.init();
 
     if (argc > 1)
     {

@@ -1,8 +1,8 @@
-#ifndef SLE_NORMALMODELEXER_H
-#define SLE_NORMALMODELEXER_H
+#ifndef SLE_CMDMODELEXER_H
+#define SLE_CMDMODELEXER_H
 
 #if !defined(yyFlexLexerOnce)
-#define yyFlexLexer nmFlexLexer
+#define yyFlexLexer cmFlexLexer
 #include <FlexLexer.h>
 #undef yyFlexLexer
 #endif
@@ -13,27 +13,20 @@ namespace sle
 enum CmdType
 {
     ATEOF,
-    INSERT,
     APPEND,
-    DELCHAR,
-    WORDFWD,
-    WORDBCK,
-    TILLFWD,
-    TILLBCK,
-    TOFWD,
-    TOBCK,
+    EDIT,
     QUIT,
 };
 
-class NormalModeLexer
-    : public nmFlexLexer
+class CmdModeLexer
+    : public cmFlexLexer
 {
 public:
-    NormalModeLexer(
+    CmdModeLexer(
         std::istream* arg_yyin = nullptr,
         std::ostream* arg_yyout = nullptr)
         :
-        nmFlexLexer(arg_yyin, arg_yyout)
+        cmFlexLexer(arg_yyin, arg_yyout)
     {}
 
     int yylex() override;
@@ -55,4 +48,4 @@ private:
 
 } // namespace sle
 
-#endif // SLE_NORMALMODELEXER_H
+#endif // SLE_CMDMODELEXER_H

@@ -9,12 +9,13 @@ namespace sle
 MainScreen::MainScreen(
     const ContextPtr& context)
     :
+    Screen(),
     c_(context)
 {}
 
 MainScreen::~MainScreen()
 {
-    delwin(scr_);
+    del_panel(panel_);
     endwin();
 }
 
@@ -23,9 +24,10 @@ void MainScreen::init()
     initscr();
     noecho();
     getmaxyx(stdscr, height_, width_); 
-    height_ = 23; // LLDB DEBUG!
+    height_ = 22; // LLDB DEBUG!
     width_ = 80; // LLDB DEBUG!
     scr_ = newwin(height_, width_, 0, 0);
+    panel_ = new_panel(scr_);
 }
 
 int MainScreen::getCh()
@@ -145,9 +147,10 @@ void MainScreen::paint(
         wmove(scr_, pTemp->y(), pTemp->x());
     }
 
+    update_panels();
     doupdate();
-    redrawwin(scr_);
-    wnoutrefresh(scr_);
+    //redrawwin(scr_);
+    //wnoutrefresh(scr_);
 }
 
 const PointPtr& MainScreen::cursor() const
@@ -163,13 +166,19 @@ void MainScreen::refreshScr(
     switch (state)
     {
     case ScreenState::REFRESH:
-        wrefresh(scr_);
+        //wrefresh(scr_);
+        update_panels();
+        doupdate();
         break;
     case ScreenState::REDRAW:
         if (point)
             wredrawln(scr_, point->y(), count);
         else
-            redrawwin(scr_);
+        {
+            //redrawwin(scr_);
+            update_panels();
+            doupdate();
+        }
         break;
     default:
         break;

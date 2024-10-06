@@ -8,8 +8,9 @@ namespace sle
 
 enum class Mode
 {
-    NORMAL,
+    CMD,
     INSERT,
+    NORMAL,
 };
 
 enum class Motion
@@ -50,6 +51,7 @@ enum class Action
     CHANGEEOL,
     CHANGELN,
     CHANGE,
+    CMDMODE,
     DELCHAR,
     DELETE,
     INSERT,
