@@ -12,11 +12,13 @@ int main(int argc, char* argv[])
     ContextPtr context = std::make_shared<Context>();
 
     Buffer buf(context);
+    Buffer prev(context);
     EditLoop loop(context);
     FileHandler file(context);
     MainScreen scr(context);
 
     context->buf = &buf;
+    context->prev = &prev;
     context->loop = &loop;
     context->file = &file;
     context->scr = &scr;

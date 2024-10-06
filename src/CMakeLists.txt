@@ -5,6 +5,7 @@ target_sources(common
         buffer.cpp
         ${CMAKE_SOURCE_DIR}/include/sle/context.h
         ${CMAKE_SOURCE_DIR}/include/sle/normalmodelexer.h
+        ${CMAKE_SOURCE_DIR}/include/sle/debugger.h
         editloop.cpp
         filehandler.cpp
         insertmode.cpp

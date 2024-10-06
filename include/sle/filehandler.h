@@ -22,8 +22,15 @@ public:
         const std::string& path,
         Buffer* buf);
 
+    // vai string view?
+    /// Returns header/source file for the current file.
+    ///
+    /// \return Empty if file not found, hdr if current file is source, etc.
+    const std::string getFilePair();
+
 private:
     ContextPtr c_ = nullptr;
+    std::string path_;
 };
 
 } // namespace sle

@@ -19,6 +19,7 @@ struct Point;
 struct Context
 {
     Buffer* buf = nullptr;
+    Buffer* prev = nullptr;
     EditLoop* loop = nullptr;
     FileHandler* file = nullptr;
     MainScreen* scr = nullptr;
