@@ -26,7 +26,9 @@ struct Context
     MainScreen* scr = nullptr;
     CmdLine* cln = nullptr;
 
-    RangePtr visibleRange = Range::make(Point::make(0,0), Point::make(0,0));
+    RangePtr visibleRange = Range::make(
+        Point::make(0, 0, false, true),
+        Point::make(0, 0, false, true));
 };
 
 } // namespace sle

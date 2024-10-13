@@ -5,8 +5,6 @@
 namespace sle
 {
 
-// NOTE: kato myohemmi pitasko change laittaa omaks modeks, tai ainaki
-// refactoroi tama.
 EditLoop::InsertMode::InsertMode(
     EditLoop* parent)
     :
@@ -31,13 +29,9 @@ bool EditLoop::InsertMode::handle()
             case 'q':
                 quitMode();
                 return false;
-            case '\n':
+            default:
                 buf_->addCh(ch);
                 scr_->paintCh(ch);
-                break;
-            default:
-                if (scr_->paintCh(ch))
-                    buf_->addCh(ch);
                 break;
             }
         }

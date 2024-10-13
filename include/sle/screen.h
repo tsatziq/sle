@@ -21,6 +21,10 @@ public:
 
     virtual ~Screen() = default;
 
+    //virtual void init() = 0;
+
+    //int getCh();
+
 protected:
     PanelPtr panel_ = nullptr;
     CursePtr scr_ = nullptr;

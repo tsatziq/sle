@@ -2,6 +2,7 @@
 #include "sle/insertmode.h"
 #include "sle/mainscreen.h"
 #include <cmath>
+#include <cctype>
 
 namespace sle
 {
@@ -240,6 +241,9 @@ void EditLoop::NormalMode::execute(
                 cur->setY(c_->buf->size() - 1);
         }
 
+        // tee taalki if != "\n" ja korvaa issapcella
+        // itteasias laita se buffiin funkkariks skipSpace
+        // ja tee toinen skipWSpace?
         std::regex pattern(R"(\S)");
         auto endX = c_->buf->lineLen(cur) - 1;
         auto ln = Range::make(
@@ -251,6 +255,8 @@ void EditLoop::NormalMode::execute(
 
         target->set(res->start());
         c_->buf->setCursor(res->start());
+        s_->moveCursor(s_->toScrCoord(res->start()));
+
         break;
     }
     case Motion::TILL:
@@ -302,6 +308,7 @@ void EditLoop::NormalMode::execute(
         std::regex pattern(R"(\S+.*\S|\S)");
         auto cur = Point::make(c_->buf->cursor());
 
+        // JATKA: korvaa taaki simppelilla skipWs(Dir::LEFT)?
         auto res = c_->buf->find(
             pattern,
             Range::make(
@@ -316,11 +323,11 @@ void EditLoop::NormalMode::execute(
         int mid = start + ((end - start) / 2);
 
         if (cmd_.motion == Motion::BEGINLN)
-            target = c_->scr->toScrCoord(res->start());
+            target = res->start();
         else if (cmd_.motion == Motion::MIDDLELN)
-            target = c_->scr->toScrCoord(Point::make(mid + 1, cur->y()));
+            target = Point::make(mid + 1, cur->y());
         else if (cmd_.motion == Motion::ENDLN)
-            target = c_->scr->toScrCoord(res->end());
+            target = res->end();
 
         break;
     }
@@ -337,14 +344,12 @@ void EditLoop::NormalMode::execute(
         else if (cmd_.motion == Motion::MIDDLE)
             cur = c_->scr->toBufCoord(Point::make(0, c_->scr->height() / 2));
 
-        std::regex pattern(R"(\S)");
-        auto endX = c_->buf->lineLen(cur) - 1;
-        auto ln = Range::make(cur, Point::make(endX, cur->y()));
-        auto res = c_->buf->find(pattern, ln);
-        if (!res)
-            cur->setX(0);
-
-        target = res->end();
+        auto ln = b_->getLine(cur);
+        if (ln != "\n")
+            while (std::isspace(ln.at(cur->x())))
+                cur->incX();
+ 
+        target = cur;
         break;
     }
     case Motion::UP:

@@ -92,36 +92,28 @@ bool MainScreen::paintCh(
 
 void MainScreen::addNewline()
 {
-    if (cursor_->y() < height_ - 1)
+    auto prevCur = Point::make(c_->buf->cursor());
+    prevCur->decY();
+
+    if (toScrCoord(prevCur)->y() < height_ - 1)
     {
-        // Screen was not full.
-        if (c_->buf->size() - 1 < height_)
+        if (c_->buf->size() - 2 < height_)
             c_->visibleRange->end()->incY();
 
-        wclrtoeol(scr_);
-        cursor_->set(0, cursor_->y() + 1);
+        auto txt = c_->buf->getRange(Range::make(
+            prevCur,
+            c_->visibleRange->end()));
 
-        auto moveLines = c_->buf->getRange(
-            Range::make(toBufCoord(cursor_), c_->visibleRange->end()));
-
-        //paint(moveLines, cursor_, Point::Type::SCRCOORD); DBEUG
-        paint(moveLines, cursor_);
-        moveCursor(cursor_);
+        paint(txt, Point::make(0, 0));
+        cursor_->setY(cursor_->y() + 1);
     }
     else
-    {
-        c_->visibleRange->start()->incY();
-        c_->visibleRange->end()->incY();
+        scrollScr(1, Direction::DOWN);
 
-        auto moveLines = c_->buf->getRange(c_->visibleRange);
-
-        paint(moveLines);
-        auto p = Point::make(0, cursor_->y()); // debug
-        moveCursor(Point::make(0, cursor_->y()));
-    };
+    cursor_->setX(0);
+    moveCursor(cursor_);
 }
 
-// NOTE: kato saisko refreshScr siirrettyy tanne mainscreenin sisalle..
 void MainScreen::paint(
     const std::vector<std::string>& text,
     const PointPtr& point)
@@ -149,8 +141,6 @@ void MainScreen::paint(
 
     update_panels();
     doupdate();
-    //redrawwin(scr_);
-    //wnoutrefresh(scr_);
 }
 
 const PointPtr& MainScreen::cursor() const
@@ -166,7 +156,6 @@ void MainScreen::refreshScr(
     switch (state)
     {
     case ScreenState::REFRESH:
-        //wrefresh(scr_);
         update_panels();
         doupdate();
         break;
@@ -175,7 +164,6 @@ void MainScreen::refreshScr(
             wredrawln(scr_, point->y(), count);
         else
         {
-            //redrawwin(scr_);
             update_panels();
             doupdate();
         }
@@ -196,7 +184,6 @@ void MainScreen::test()
 void MainScreen::moveCursor(
     const PointPtr& point)
 {
-    //laita tahan if point == cursor, nyt vaa se valitti jotai.
     if (point->x() < 0 || point->y() < 0)
         return;
     if (point->x() > width_ || point->y() > height_)
@@ -247,7 +234,7 @@ void MainScreen::scrollScr(
     }
 
     paint(c_->buf->getRange(c_->visibleRange));
-    moveCursor(cursor_); 
+    //moveCursor(cursor_); // JATKA: kato voiko poistaa lopusk, re:addNewline
     c_->visibleRange = r;
     auto s = r->start(); // DEBUG
     auto e = r->end(); // DEBUG
