@@ -1,8 +1,9 @@
 #include "sle/buffer.h"
+#include "sle/customtypes.h"
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <memory>
-#include <string_view>
 #include <regex>
 
 namespace sle
@@ -575,6 +576,43 @@ PointPtr Buffer::findCh(
         return nullptr;
     else
         return p; 
+}
+
+// NOTE: korvaa try blokilla mis pystyy kaikki out of range tarkastelu.
+PointPtr Buffer::skip(
+    int(*f)(int),
+    const Direction dir,
+    const PointPtr& point)
+{
+    PointPtr cur = Point::make(point_);
+    if (point)
+        cur = point;
+
+    auto orig = Point::make(cur);
+
+    try
+    {
+        while (f(txt_.at(cur->y()).at(cur->x())))
+        {
+            switch (dir)
+            {
+            case Direction::RIGHT:
+                cur->incX();
+                break;
+            case Direction::LEFT:
+                cur->decX();
+                break;
+            default:
+                return orig;
+            }
+        }
+    }
+    catch (const std::out_of_range& e)
+    {
+        return orig;
+    }
+
+    return cur;
 }
 
 }

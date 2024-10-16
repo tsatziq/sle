@@ -241,22 +241,18 @@ void EditLoop::NormalMode::execute(
                 cur->setY(c_->buf->size() - 1);
         }
 
-        // tee taalki if != "\n" ja korvaa issapcella
-        // itteasias laita se buffiin funkkariks skipSpace
-        // ja tee toinen skipWSpace?
-        std::regex pattern(R"(\S)");
-        auto endX = c_->buf->lineLen(cur) - 1;
-        auto ln = Range::make(
-            Point::make(0, cur->y()),
-            Point::make(endX, cur->y()));
-        auto res = c_->buf->find(pattern, ln);
-        if (!res)
-            cur->setX(0);
-
-        target->set(res->start());
-        c_->buf->setCursor(res->start());
-        s_->moveCursor(s_->toScrCoord(res->start()));
-
+        // JATKA NYT:
+        // 1. tarkista toimiiko taa.
+        // 2. addNewLine, kato tarviiks siel sita if != "\n", catch pitas olla ok
+        // 3. muuta bufferin moveWord kayttaa skippia.
+        // 4. muuta muut find() kayttavat mitka pystyy ja muut skippiin.
+        // 5. kato muut mita tarvii jatkaa.
+        // 6. MUUTA SE POINTTERI STRUCTIKS
+        cur->setX(0);
+        cur = Point::make(b_->skip(isWSpace, Direction::RIGHT, cur));
+        target->set(cur);
+        c_->buf->setCursor(cur);
+        s_->moveCursor(cur);
         break;
     }
     case Motion::TILL:

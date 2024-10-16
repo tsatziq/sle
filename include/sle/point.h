@@ -16,6 +16,7 @@ enum class Axis
 class Point;
 using PointPtr = std::shared_ptr<Point>;
 
+// NOTE: CHANGE BACK TO STRUCT THIS & RANGE!!!
 class Point
 {
 public:
