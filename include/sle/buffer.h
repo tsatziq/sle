@@ -4,11 +4,11 @@
 #include "sle/customtypes.h"
 #include "sle/point.h"
 #include "sle/context.h"
+#include <functional>
 #include <map>
 #include <memory>
 #include <regex>
 #include <string>
-#include <string_view>
 #include <vector>
 
 namespace sle
@@ -108,6 +108,17 @@ public:
         const char ch,
         const Direction dir = Direction::RIGHT,
         const PointPtr& point = nullptr) const;
+
+    /// Skips whitespace, if point not specified, uses current cursor position.
+    ///
+    /// \param f Function that returns bool type int.
+    /// \param dir Direction to skip (left/right).
+    /// \param point Point where to start. If not defined, use buffer cursor.
+    /// \return Point where the cursor was left.
+    PointPtr skip(
+        int(*f)(int),
+        const Direction dir,
+        const PointPtr& point = nullptr);
 
 private:
     ContextPtr c_ = nullptr;

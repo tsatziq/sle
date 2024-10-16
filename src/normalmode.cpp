@@ -241,22 +241,18 @@ void EditLoop::NormalMode::execute(
                 cur->setY(c_->buf->size() - 1);
         }
 
-        // tee taalki if != "\n" ja korvaa issapcella
-        // itteasias laita se buffiin funkkariks skipSpace
-        // ja tee toinen skipWSpace?
-        std::regex pattern(R"(\S)");
-        auto endX = c_->buf->lineLen(cur) - 1;
-        auto ln = Range::make(
-            Point::make(0, cur->y()),
-            Point::make(endX, cur->y()));
-        auto res = c_->buf->find(pattern, ln);
-        if (!res)
-            cur->setX(0);
-
-        target->set(res->start());
-        c_->buf->setCursor(res->start());
-        s_->moveCursor(s_->toScrCoord(res->start()));
-
+        // JATKA NYT:
+        // 1. tarkista toimiiko taa.
+        // 2. addNewLine, kato tarviiks siel sita if != "\n", catch pitas olla ok
+        // 3. muuta bufferin moveWord kayttaa skippia.
+        // 4. muuta muut find() kayttavat mitka pystyy ja muut skippiin.
+        // 5. kato muut mita tarvii jatkaa.
+        // 6. MUUTA SE POINTTERI STRUCTIKS
+        cur->setX(0);
+        cur = Point::make(b_->skip(isWSpace, Direction::RIGHT, cur));
+        target->set(cur);
+        c_->buf->setCursor(cur);
+        s_->moveCursor(cur);
         break;
     }
     case Motion::TILL:
@@ -305,29 +301,21 @@ void EditLoop::NormalMode::execute(
     case Motion::ENDLN:
     case Motion::MIDDLELN:
     {
-        std::regex pattern(R"(\S+.*\S|\S)");
-        auto cur = Point::make(c_->buf->cursor());
+        auto start = Point::make(b_->cursor());
+        start->setX(0);
+        b_->skip(isWSpace, Direction::RIGHT, start);
 
-        // JATKA: korvaa taaki simppelilla skipWs(Dir::LEFT)?
-        auto res = c_->buf->find(
-            pattern,
-            Range::make(
-                Point::make(0, cur->y()),
-                Point::make(c_->buf->lineLen(cur) - 1, cur->y())));
-
-        if (!res)
-            break;
-
-        int start = res->start()->x();
-        int end = res->end()->x();
-        int mid = start + ((end - start) / 2);
+        PointPtr end = Point::make(b_->cursor());
 
         if (cmd_.motion == Motion::BEGINLN)
-            target = res->start();
+            target = start;
         else if (cmd_.motion == Motion::MIDDLELN)
-            target = Point::make(mid + 1, cur->y());
+        {
+            int mid = start->x() + ((end->x() - start->x()) / 2);
+            target = Point::make(mid, start->y());
+        }
         else if (cmd_.motion == Motion::ENDLN)
-            target = res->end();
+            target = end;
 
         break;
     }
@@ -340,16 +328,21 @@ void EditLoop::NormalMode::execute(
         if (cmd_.motion == Motion::TOP)
             cur = c_->scr->toBufCoord(Point::make(0, 0));
         else if (cmd_.motion == Motion::BOTTOM)
-            cur = c_->scr->toBufCoord(Point::make(0, c_->scr->height() - 1));
+        {
+            if (b_->size() > s_->height())
+                cur = s_->toBufCoord(Point::make(0, s_->height() - 1));
+            else
+                cur = Point::make(0, b_->size() - 1);
+        }
         else if (cmd_.motion == Motion::MIDDLE)
-            cur = c_->scr->toBufCoord(Point::make(0, c_->scr->height() / 2));
+        {
+            if (b_->size() > s_->height())
+                cur = s_->toBufCoord(Point::make(0, s_->height() / 2));
+            else
+                cur = Point::make(0, b_->size() / 2);
+        }
 
-        auto ln = b_->getLine(cur);
-        if (ln != "\n")
-            while (std::isspace(ln.at(cur->x())))
-                cur->incX();
- 
-        target = cur;
+        target = Point::make(b_->skip(isWSpace, Direction::RIGHT, cur));
         break;
     }
     case Motion::UP:

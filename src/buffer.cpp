@@ -1,8 +1,9 @@
 #include "sle/buffer.h"
+#include "sle/customtypes.h"
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <memory>
-#include <string_view>
 #include <regex>
 
 namespace sle
@@ -224,7 +225,7 @@ PointPtr Buffer::moveWord(
     if (point)
         p = Point::make(point);
 
-    auto len = lineLen() - 2;
+    auto len = lineLen() - 1;
     auto origY = p->y();
 
     switch (dir)
@@ -232,28 +233,25 @@ PointPtr Buffer::moveWord(
     case Direction::RIGHT:
     {
         // 1. If at file end, return.
-        if (p->y() == size() - 1 && p->x() == len)
+        if (p->y() == size() - 1 && p->x() == len - 1)
             return nullptr;
 
         // 2. If at line end, move to start of first word on next line.
-        if (p->x() == len)
+        if (p->x() == len - 1)
         {
             p->set(0, p->y() + 1);
-            len = lineLen(p) - 2;
-
-            while (p->x() < len && std::isspace(charAt(p)))
-                p->incX();
-
-            return p;
+            return skip(isWSpace, dir, p);
         }
 
         // 3. Skip non-whitespace.
-        while (p->x() < len && !std::isspace(charAt(p)))
-            p->incX();
+        p = skip(isChar, dir, p);
 
         // 4. Skip whitespace.
-        while (p->x() < len && std::isspace(charAt(p)))
-            p->incX();
+        p = skip(isWSpace, dir, p);
+
+        // 5. If at line end, move to last char.
+        if (p->x() == len)
+            p->decX();
 
         return p;
         break;
@@ -264,29 +262,29 @@ PointPtr Buffer::moveWord(
         if (p->y() == 0 && p->x() == 0)
             return nullptr;
 
-        // 2. Skip whitespace #1.
-        if (p->x() > 0 && p->x() != 1)
+        // 2. Skip whitespace.
+        if (p->x() > 0)
             p->decX();
-        while (p->x() > 0 && std::isspace(charAt(p)))
-            p->decX();
-        
-        // 3. If at line start, move to end of previous line.
+        p = skip(isWSpace, dir, p);
+
+        // 3. If at line start, move to end of previous line and skip.
         if (p->x() == 0)
         {
             p->set(txt_.at(p->y() - 1).size() - 1, p->y() - 1);
             len = lineLen(p) - 2;
-        }
+            p = skip(isWSpace, dir, p);
+        } 
 
-        // 3. Skip whitespace #2.
-        while (p->x() > 0 && std::isspace(charAt(p)))
-            p->decX();
+        // 4. Save reference point.
+        auto orig = Point::make(p);
 
-        // 4. Skip non-whitespace.
-        while (p->x() > 0 && !std::isspace(charAt(p)))
-            p->decX();
+        // 5. Skip non-whitespace.
+        p = skip(isChar, dir, p);
 
-        // 5. Move one step back if whitespace.
-        if (std::isspace(charAt(p)))
+        // 6. If at original, return 0. Else return first char.
+        if (*p == *orig)
+            p->setX(0);
+        else if (std::isspace(charAt(p)))
             p->incX();
 
         return p;
@@ -305,27 +303,27 @@ PointPtr Buffer::moveWordEnd(
     if (!point)
         p = Point::make(point_);
 
-    auto orig = Point::make(p);
-
     switch (dir)
     {
     case Direction::LEFT:
+    {
         if (p->x() == lineLen(p) - 2)
             return p;
 
         if (p->x() > 0)
             p->decX();
-        
-        while (std::isspace(charAt(p)))
-            p->decX();
 
-        if (!std::isspace(charAt(p)))
+        auto orig = Point::make(p);
+
+        p = skip(isWSpace, dir, p);
+        if (*p == *orig)
             return p;
         break;    
+    }
     default:
         break;
     }
-    return orig;
+    return p;
 }
 
 std::size_t Buffer::size() const
@@ -350,7 +348,10 @@ std::size_t Buffer::lineLen(
     const PointPtr& point) const
 {
     if (!point)
+    {
+        auto i = 2;
         return txt_.at(point_->y()).size();
+    }
     else
         return txt_.at(point->y()).size();
 }
@@ -364,6 +365,9 @@ std::string Buffer::getLine(
         return txt_.at(start->y()).substr(start->x());
 }
 
+// NOTE: pitaa teha joku oma error jarjestelma. esim tassa out of range,
+// ei voi palauttaa mitaan charia. pitas antaa tieto et operaatio failas,
+// ala tee mitaa.
 char Buffer::charAt(
     const PointPtr& point) const
 {
@@ -575,6 +579,43 @@ PointPtr Buffer::findCh(
         return nullptr;
     else
         return p; 
+}
+
+// NOTE: korvaa try blokilla mis pystyy kaikki out of range tarkastelu.
+PointPtr Buffer::skip(
+    int(*f)(int),
+    const Direction dir,
+    const PointPtr& point)
+{
+    PointPtr cur = Point::make(point_);
+    if (point)
+        cur = point;
+
+    auto orig = Point::make(cur);
+
+    try
+    {
+        while (f(txt_.at(cur->y()).at(cur->x())))
+        {
+            switch (dir)
+            {
+            case Direction::RIGHT:
+                cur->incX();
+                break;
+            case Direction::LEFT:
+                cur->decX();
+                break;
+            default:
+                return orig;
+            }
+        }
+    }
+    catch (const std::out_of_range& e)
+    {
+        return orig;
+    }
+
+    return cur;
 }
 
 }

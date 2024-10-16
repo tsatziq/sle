@@ -90,6 +90,7 @@ bool MainScreen::paintCh(
     }
 }
 
+// NOTE: palauta decX jne ref siihen, et voi antaa suoraa funkkarille.
 void MainScreen::addNewline()
 {
     auto prevCur = Point::make(c_->buf->cursor());
@@ -104,7 +105,8 @@ void MainScreen::addNewline()
             prevCur,
             c_->visibleRange->end()));
 
-        paint(txt, Point::make(0, 0));
+        cursor_->setX(0);
+        paint(txt, cursor_);
         cursor_->setY(cursor_->y() + 1);
     }
     else
@@ -234,7 +236,6 @@ void MainScreen::scrollScr(
     }
 
     paint(c_->buf->getRange(c_->visibleRange));
-    //moveCursor(cursor_); // JATKA: kato voiko poistaa lopusk, re:addNewline
     c_->visibleRange = r;
     auto s = r->start(); // DEBUG
     auto e = r->end(); // DEBUG
